@@ -1,0 +1,12 @@
+# Feature Branch Workflow Test
+
+This demonstrates the proper way to contribute code:
+
+1. Create feature branch from develop ✅
+2. Make changes ✅  
+3. Push feature branch ✅
+4. Create Pull Request (manual via GitHub UI)
+5. Get approval (if required)
+6. Merge via PR
+
+This workflow should work properly even with branch protection active.
