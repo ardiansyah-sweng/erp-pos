@@ -1,0 +1,6 @@
+# Main Branch Protection Test
+
+Created at: 2025-07-11
+Purpose: Test if main branch protection is active
+
+This file tests direct push to main branch.
