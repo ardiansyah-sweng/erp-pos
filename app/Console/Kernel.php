@@ -12,9 +12,9 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('sync:data-to-server')->everyMinute();
-        
+
         // $schedule->call(function () {
         //     \Log::info('Scheduler test executed at ' . now());
-        // })->everyMinute();    
+        // })->everyMinute();
     }
 }

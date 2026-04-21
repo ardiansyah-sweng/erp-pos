@@ -4,14 +4,14 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Transaction;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
-
-use App\Models\Transaction;
 
 class SyncData extends Command
 {
     protected $signature = 'sync:data';
+
     protected $description = 'Sinkronisasi data ke server';
 
     public function __construct()

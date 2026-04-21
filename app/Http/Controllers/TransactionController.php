@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Transaction;
-use App\Models\TransactionDetail;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransactionController extends Controller
@@ -12,8 +10,8 @@ class TransactionController extends Controller
     public function getTransaction()
     {
         $purchaseOrders = Transaction::join('transaction_detail as td', 'transaction.id', '=', 'td.transaction_id')
-        ->select('transaction.*', 'td.*')
-        ->get();
+            ->select('transaction.*', 'td.*')
+            ->get();
 
         return response()->json($purchaseOrders);
     }
@@ -38,6 +36,7 @@ class TransactionController extends Controller
     public function show($id)
     {
         $transaction = Transaction::with('details')->findOrFail($id);
+
         return view('transactions.show', ['transaction' => $transaction]);
     }
 
@@ -55,7 +54,7 @@ class TransactionController extends Controller
             ->setPaper('a4', 'portrait');
 
         // Unduh file PDF
-        return $pdf->download('struk_' . $transaction->id . '.pdf');
+        return $pdf->download('struk_'.$transaction->id.'.pdf');
     }
 
     /**
@@ -65,6 +64,7 @@ class TransactionController extends Controller
     public function stukPreview($id)
     {
         $transaction = Transaction::with('details')->findOrFail($id);
+
         return view('struk', ['transaction' => $transaction]);
     }
 }

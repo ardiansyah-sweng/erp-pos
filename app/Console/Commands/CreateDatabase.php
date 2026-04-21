@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 
 class CreateDatabase extends Command
 {
@@ -33,6 +33,7 @@ class CreateDatabase extends Command
         // Validasi nama database
         if (empty($dbName)) {
             $this->error('Database name is not defined in .env file!');
+
             return;
         }
 
@@ -44,12 +45,12 @@ class CreateDatabase extends Command
             $this->info("Checking if database '$dbName' exists...");
             DB::statement("DROP DATABASE IF EXISTS `$dbName`");
             $this->info("Database '$dbName' has been dropped.");
-                        
+
             // Buat database
             DB::statement("CREATE DATABASE IF NOT EXISTS `$dbName`");
             $this->info("Database '$dbName' created successfully!");
         } catch (\Exception $e) {
-            $this->error("Failed to create database '$dbName': " . $e->getMessage());
+            $this->error("Failed to create database '$dbName': ".$e->getMessage());
         } finally {
             // Kembalikan konfigurasi koneksi database ke nilai awal
             Config::set('database.connections.mysql.database', $dbName);
