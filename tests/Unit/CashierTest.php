@@ -26,8 +26,8 @@ class CashierTest extends TestCase
         $this->assertTrue(Schema::hasColumns('cashiers', [
             'id',
             'name',
-            'email',
-            'phone',
+            'username',
+            'password',
             'created_at',
             'updated_at',
         ]));
