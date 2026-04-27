@@ -9,6 +9,11 @@ class Transaction extends Model
     protected $table = 'transaction';
     protected $fillable = ['total'];
 
+    public function details()
+    {
+        return $this->hasMany(TransactionDetail::class, 'transaction_id');
+    }
+
     /**
      * Ambil nama kolom tertentu dari $fillable
      */
