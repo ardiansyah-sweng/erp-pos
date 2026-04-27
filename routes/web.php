@@ -12,4 +12,5 @@ Route::get('/', function () {
 Route::get('/jalankan-schedule', [ScheduleController::class, 'index'])->name('jalankan-schedule-index');
 Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])->name('jalankan-schedule');
 Route::get('/products', [ProductController::class, 'getProducts']);
+Route::get('/products/sku/{sku}', [ProductController::class, 'getItemBySKU']);
 Route::get('/transactions', [TransactionController::class, 'getTransaction']);
