@@ -9,6 +9,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/pos', function () {
+    return view('pos.index');
+});
+
 Route::get('/jalankan-schedule', [ScheduleController::class, 'index'])->name('jalankan-schedule-index');
 Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])->name('jalankan-schedule');
 Route::get('/products', [ProductController::class, 'getProducts']);
