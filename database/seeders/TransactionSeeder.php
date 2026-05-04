@@ -2,20 +2,20 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-
-use Illuminate\Support\Facades\Http;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
-
 use Carbon\Carbon;
 use Faker\Factory as Faker;
+use Illuminate\Support\Facades\DB;
 
 class TransactionSeeder extends Seeder
 {
+    protected $faker;
+
     public function __construct()
     {
+        // Menggunakan locale Indonesia agar data faker lebih relevan
         $this->faker = Faker::create('id_ID');
     }
 
@@ -25,16 +25,24 @@ class TransactionSeeder extends Seeder
     public function run(): void
     {
         $products = $this->getProduct();
+        
+        // Pastikan ada produk sebelum lanjut, biar gak error foreach
+        if (empty($products)) {
+            $this->command->warn("Tidak ada data di tabel products! Isi dulu lewat Tinker.");
+            return;
+        }
+
         $tableTransactionDetail = new TransactionDetail();
 
-        # Iterasi jumlah transaksi
+        # Iterasi jumlah transaksi (membuat 1 sampai 10 transaksi)
         for ($i = 1; $i <= $this->faker->numberBetween(1, 10); $i++) {
             $total = 0;
+            $transactionDate = now()->toDateTimeString(); // Default waktu sekarang
+
             foreach ($products as $product) {
-                # Dapatkan avg_base_price berdasarkan product_id
+                # Dapatkan harga produk (tanpa HTTP request)
                 $data = $this->getProductPrices($product['product_id']);
     
-                // Pastikan $data tidak null
                 if ($data) {
                     $quantity = $this->faker->numberBetween(1, 10);
                     $amount = $data['now_avg_base_price'] * $quantity;
@@ -53,13 +61,10 @@ class TransactionSeeder extends Seeder
                     ]);
     
                     $total += $amount;
-                } else {
-                    // Jika $data null, log error atau beri pesan sesuai kebutuhan
-                    echo "Harga produk dengan ID {$product['product_id']} tidak ditemukan.\n";
                 }
             }
             
-            
+            # Buat header transaksi setelah detailnya masuk
             Transaction::create([
                 (new Transaction())->getColumn(0) => $total,
                 'created_at' => $transactionDate,
@@ -68,46 +73,39 @@ class TransactionSeeder extends Seeder
         }
     }
     
+    /**
+     * Pengganti Http::get('.../prices')
+     */
     function getProductPrices($productID)
     {
-        $prices = Http::get('http://127.0.0.1:8000/prices')->json();
-    
-        $ids = [];
-        foreach ($prices as $price) {
-            if ($price['product_id'] == $productID) {
-                $ids[] = $price['id'];
-            }
-        }
-    
-        // Pastikan $ids tidak kosong sebelum mencoba mengaksesnya
-        if ($ids) {
-            shuffle($ids);
-            $selectedID = $ids[0];
-    
-            foreach ($prices as $price) {
-                if ($price['id'] == $selectedID) {
-                    print_r($price['now_avg_base_price']);
-                    echo "\n";
-                    return $price;
-                }
-            }
-        }
-    
-        // Jika tidak ada yang ditemukan, kembalikan null
-        return null;
+        // Langsung generate harga acak agar tidak timeout
+        return [
+            'now_avg_base_price' => $this->faker->numberBetween(1000, 50000),
+            'created_at' => now()->subDays(10)->toDateTimeString()
+        ];
     }
             
+    /**
+     * Pengganti Http::get('.../products')
+     */
     function getProduct()
     {
-        $products = Http::get('http://127.0.0.1:8000/products')->json();
-        $keys = array_keys($products);
-        shuffle($keys);
+        // Mengambil data dari tabel products yang sudah kamu isi lewat Tinker
+        $products = DB::table('products')->get()->map(function($item) {
+            return [
+                'product_id' => $item->id, // Penting: Menyelamatkan baris 39 & 43
+                'name' => $item->name,
+                'price' => $item->price
+            ];
+        })->toArray();
 
-        $shuffled = [];
-        foreach ($keys as $key) {
-            $shuffled[$key] = $products[$key];
+        if (empty($products)) {
+            return [];
         }
+
+        shuffle($products);
         
-        return array_slice($shuffled, 0, $this->faker->numberBetween(1, count($shuffled)));
+        // Ambil jumlah produk secara acak (minimal 1)
+        return array_slice($products, 0, $this->faker->numberBetween(1, count($products)));
     }
 }
