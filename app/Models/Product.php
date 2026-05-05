@@ -9,25 +9,30 @@ class Product extends Model
     protected $table = 'products';
 
     protected $primaryKey = 'id';
-    public $incrementing = false;       // karena id bukan auto-increment
-    protected $keyType = 'string';      // karena id bertipe char/string
+    public $incrementing = true;        // id sekarang auto-increment
+    protected $keyType = 'int';
 
     protected $fillable = [
-        'id',
+        'product_id',
+        'barcode',
         'name',
-        'category',
-        'price',
-        'stock',
         'description',
+        'category_id',
+        'category_name',
+        'unit',
+        'cost_price',
+        'selling_price',
+        'stock_quantity',
+        'min_stock',
+        'is_active',
     ];
 
-    // Relasi ke TransactionDetail
+    // Relasi ke TransactionDetail (via product_id char, bukan id)
     public function transactionDetails()
     {
-        return $this->hasMany(TransactionDetail::class, 'product_id', 'id');
+        return $this->hasMany(TransactionDetail::class, 'product_id', 'product_id');
     }
 
-    // Helper getColumn() seperti yang dipakai di TransactionSeeder
     public function getColumn(int $index): string
     {
         return $this->fillable[$index];
