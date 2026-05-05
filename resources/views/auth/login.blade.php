@@ -22,6 +22,7 @@
             <div class="mb-4">
                 <label class="block text-sm mb-1">Email</label>
                 <input type="email" name="email"
+                    value="{{ old('email') }}"
                     class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
                     required>
             </div>
