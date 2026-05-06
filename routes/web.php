@@ -13,3 +13,6 @@ Route::get('/jalankan-schedule', [ScheduleController::class, 'index'])->name('ja
 Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])->name('jalankan-schedule');
 Route::get('/products', [ProductController::class, 'getProducts']);
 Route::get('/transactions', [TransactionController::class, 'getTransaction']);
+Route::get('/pos', function () {
+    return view('pos.index');
+});
