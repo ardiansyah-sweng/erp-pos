@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Transaction;
-use App\Models\TransactionDetail;
 
 class TransactionController extends Controller
 {
@@ -15,5 +13,157 @@ class TransactionController extends Controller
         ->get();
 
         return response()->json($purchaseOrders);
+    }
+
+    // FITUR LAPORAN PENJUALAN: Menampilkan halaman laporan penjualan.
+    public function salesNotes()
+    {
+        return view('transactions.sales-notes', [
+            'transactions' => $this->getSalesTransactions(),
+        ]);
+    }
+
+    // FITUR LAPORAN PENJUALAN: Download laporan dalam format PDF.
+    public function downloadSalesReportPdf()
+    {
+        $transactions = $this->getSalesTransactions();
+        $pdf = $this->buildSalesReportPdf($transactions);
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="laporan-penjualan.pdf"',
+        ]);
+    }
+
+    // FITUR LAPORAN PENJUALAN: Mengambil data transaksi dan detail barang.
+    private function getSalesTransactions()
+    {
+        return Transaction::query()
+            ->leftJoin('transaction_detail as td', 'transaction.id', '=', 'td.transaction_id')
+            ->select([
+                'transaction.id',
+                'transaction.total',
+                'transaction.created_at',
+                'td.product_id',
+                'td.quantity',
+                'td.price',
+                'td.amount',
+            ])
+            ->orderByDesc('transaction.created_at')
+            ->orderByDesc('transaction.id')
+            ->get()
+            ->groupBy('id')
+            ->map(function ($items) {
+                $first = $items->first();
+
+                return [
+                    'id' => $first->id,
+                    'transaction_code' => 'TRX-' . str_pad($first->id, 6, '0', STR_PAD_LEFT),
+                    'date' => $first->created_at,
+                    'total' => $first->total,
+                    'item_count' => $items->whereNotNull('product_id')->sum('quantity'),
+                    'details' => $items->whereNotNull('product_id')->values(),
+                ];
+            })
+            ->values();
+    }
+
+    // FITUR LAPORAN PENJUALAN: Menyusun isi teks untuk file PDF.
+    private function buildSalesReportPdf($transactions)
+    {
+        $lines = [
+            'LAPORAN PENJUALAN',
+            'Tanggal export: ' . now()->format('Y-m-d H:i'),
+            '',
+            'Jumlah Transaksi: ' . $transactions->count(),
+            'Total Penjualan: Rp' . number_format($transactions->sum('total'), 0, ',', '.'),
+            'Total Item Terjual: ' . $transactions->sum('item_count'),
+            '',
+        ];
+
+        if ($transactions->isEmpty()) {
+            $lines[] = 'Belum ada data penjualan.';
+        }
+
+        foreach ($transactions as $transaction) {
+            $lines[] = $transaction['transaction_code'] . ' | ' . ($transaction['date'] ? $transaction['date']->format('Y-m-d H:i') : 'Tanggal belum tersedia');
+            $lines[] = 'Total Transaksi: Rp' . number_format($transaction['total'], 0, ',', '.') . ' | Item: ' . $transaction['item_count'];
+
+            if ($transaction['details']->isEmpty()) {
+                $lines[] = '- Belum ada detail barang untuk transaksi ini.';
+            }
+
+            foreach ($transaction['details'] as $detail) {
+                $lines[] = '- Produk ' . $detail->product_id
+                    . ' | Qty ' . $detail->quantity
+                    . ' | Harga Rp' . number_format($detail->price, 0, ',', '.')
+                    . ' | Subtotal Rp' . number_format($detail->amount, 0, ',', '.');
+            }
+
+            $lines[] = '';
+        }
+
+        return $this->makeSimplePdf($lines);
+    }
+
+    // FITUR LAPORAN PENJUALAN: Membuat PDF sederhana tanpa package tambahan.
+    private function makeSimplePdf(array $lines)
+    {
+        $pages = array_chunk($lines, 42);
+        $objects = [];
+        $pageIds = [];
+        $fontId = 3 + (count($pages) * 2);
+
+        $objects[1] = '<< /Type /Catalog /Pages 2 0 R >>';
+
+        foreach ($pages as $index => $pageLines) {
+            $pageId = 3 + ($index * 2);
+            $contentId = $pageId + 1;
+            $pageIds[] = $pageId;
+
+            $objects[$pageId] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ' . $fontId . ' 0 R >> >> /Contents ' . $contentId . ' 0 R >>';
+
+            $stream = "BT\n/F1 10 Tf\n50 800 Td\n";
+            foreach ($pageLines as $lineIndex => $line) {
+                if ($lineIndex > 0) {
+                    $stream .= "0 -17 Td\n";
+                }
+                $stream .= '(' . $this->escapePdfText(substr($line, 0, 100)) . ") Tj\n";
+            }
+            $stream .= "ET\n";
+
+            $objects[$contentId] = "<< /Length " . strlen($stream) . " >>\nstream\n" . $stream . "endstream";
+        }
+
+        $objects[2] = '<< /Type /Pages /Kids [' . implode(' ', array_map(fn ($id) => $id . ' 0 R', $pageIds)) . '] /Count ' . count($pageIds) . ' >>';
+        $objects[$fontId] = '<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>';
+        ksort($objects);
+
+        $pdf = "%PDF-1.4\n";
+        $offsets = [0];
+
+        foreach ($objects as $id => $object) {
+            $offsets[$id] = strlen($pdf);
+            $pdf .= $id . " 0 obj\n" . $object . "\nendobj\n";
+        }
+
+        $xrefOffset = strlen($pdf);
+        $pdf .= "xref\n0 " . (count($objects) + 1) . "\n";
+        $pdf .= "0000000000 65535 f \n";
+
+        for ($id = 1; $id <= count($objects); $id++) {
+            $pdf .= str_pad($offsets[$id], 10, '0', STR_PAD_LEFT) . " 00000 n \n";
+        }
+
+        $pdf .= "trailer\n<< /Size " . (count($objects) + 1) . " /Root 1 0 R >>\n";
+        $pdf .= "startxref\n" . $xrefOffset . "\n%%EOF";
+
+        return $pdf;
+    }
+
+    // FITUR LAPORAN PENJUALAN: Escape teks agar aman dimasukkan ke PDF.
+    private function escapePdfText($text)
+    {
+        return str_replace(['\\', '(', ')'], ['\\\\', '\\(', '\\)'], $text);
     }
 }
