@@ -13,10 +13,17 @@ class Product extends Model
         'sku',
         'name',
         'description',
-        'category_id',
-        'price',
-        'cost',
-        'stock',
-        'sync_status',
+        'unit',
+        'selling_price',
+        'stock_quantity',
+        'min_stock',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active'      => 'boolean',
+        'selling_price'  => 'integer',
+        'stock_quantity' => 'integer',
+        'min_stock'      => 'integer',
     ];
 }
