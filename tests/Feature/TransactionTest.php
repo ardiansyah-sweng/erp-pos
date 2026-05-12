@@ -17,14 +17,14 @@ class TransactionTest extends TestCase
                 [
                     'product_id' => 1,
                     'quantity' => 2,
-                    'price' => 10000
+                    'price' => 10000,
                 ],
                 [
                     'product_id' => 2,
                     'quantity' => 1,
-                    'price' => 30000
-                ]
-            ]
+                    'price' => 30000,
+                ],
+            ],
         ]);
 
         $response->assertStatus(201);

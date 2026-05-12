@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
@@ -90,7 +90,7 @@ class TransactionController extends Controller
             'message' => 'Transaction created successfully',
             'data' => [
                 'id' => $transaction->id,
-                'transaction_number' => 'TRX-' . now()->format('YmdHis') . '-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
+                'transaction_number' => 'TRX-'.now()->format('YmdHis').'-'.str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
                 'subtotal' => $subtotal,
                 'discount_amount' => $discountAmount,
                 'total_amount' => $totalAmount,
@@ -102,16 +102,16 @@ class TransactionController extends Controller
             ],
         ], 201);
     }
-    
+
     public function store(Request $request)
     {
         $request->validate([
             'total' => 'required|numeric',
-            'details' => 'required|array'
+            'details' => 'required|array',
         ]);
 
         $transaction = Transaction::create([
-            'total' => $request->total
+            'total' => $request->total,
         ]);
 
         foreach ($request->details as $detail) {
@@ -121,13 +121,13 @@ class TransactionController extends Controller
                 'product_id' => $detail['product_id'],
                 'quantity' => $detail['quantity'],
                 'price' => $detail['price'],
-                'amount' => $detail['quantity'] * $detail['price']
+                'amount' => $detail['quantity'] * $detail['price'],
             ]);
         }
 
         return response()->json([
             'message' => 'Transaction berhasil ditambahkan',
-            'data' => $transaction
+            'data' => $transaction,
         ], 201);
     }
 }
