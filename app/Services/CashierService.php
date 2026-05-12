@@ -10,4 +10,9 @@ class CashierService
     {
         return Cashier::search($keyword)->get();
     }
+use App\Models\Cashiers;
+
+class CashierService
+{
+    //
 }
