@@ -10,7 +10,6 @@ Route::get('/', function () {
     return redirect()->route('pos.index');
 });
 
-
 Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
 Route::get('/jalankan-schedule', [ScheduleController::class, 'index'])->name('jalankan-schedule-index');
 Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])->name('jalankan-schedule');
