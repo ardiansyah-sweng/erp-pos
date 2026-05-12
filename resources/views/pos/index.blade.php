@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
-
+<!-- triger -->
 <head>
     <meta charset="UTF-8">
     <title>POS - Point of Sale</title>
