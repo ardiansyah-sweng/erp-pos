@@ -1,4 +1,3 @@
-gini kan
 <?php
 
 use Illuminate\Support\Facades\Route;
