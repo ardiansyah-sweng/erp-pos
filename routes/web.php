@@ -1,22 +1,26 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ScheduleController;
 
 Route::get('/', function () {
-    return view('erp-dashboard');
+    return redirect()->route('pos.index');
 });
 
 Route::get('/dashboard', function () {
-    return view('erp-dashboard');
+    return redirect()->route('pos.index');
 })->name('dashboard');
+
+Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
 
 Route::get('/jalankan-schedule', [ScheduleController::class, 'index'])->name('jalankan-schedule-index');
 Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])->name('jalankan-schedule');
-Route::get('/products', [ProductController::class, 'getProducts']);
-Route::get('/transactions', [TransactionController::class, 'getTransaction']);
+Route::get('/products', [ProductController::class, 'getProducts'])->name('products.index');
+Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
+Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
 
 // FITUR LAPORAN PENJUALAN
 Route::get('/sales-notes', [TransactionController::class, 'salesNotes'])->name('sales-notes');
