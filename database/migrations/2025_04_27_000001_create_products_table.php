@@ -8,19 +8,21 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
-            $table->id();
-            $table->string('barcode')->nullable();
-            $table->string('sku')->unique();
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->unsignedBigInteger('category_id')->nullable();
-            $table->decimal('price', 15, 2)->default(0);
-            $table->decimal('cost', 15, 2)->default(0);
-            $table->integer('stock')->default(0);
-            $table->enum('sync_status', ['synced', 'pending', 'failed'])->default('pending');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('products')) {
+            Schema::create('products', function (Blueprint $table) {
+                $table->id();
+                $table->string('barcode')->nullable();
+                $table->string('sku')->unique();
+                $table->string('name');
+                $table->text('description')->nullable();
+                $table->string('unit')->default('pcs');
+                $table->integer('selling_price')->default(0);
+                $table->integer('stock_quantity')->default(0);
+                $table->integer('min_stock')->default(0);
+                $table->boolean('is_active')->default(true);
+                $table->timestamps();
+            });
+        }
     }
 
     public function down(): void
