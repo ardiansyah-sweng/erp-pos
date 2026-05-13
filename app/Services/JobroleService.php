@@ -19,7 +19,7 @@ class JobroleService
             if (!$cashier) {
                 return null;
             }
-
+// triger
             DB::table($this->table)
                 ->where('id', $id)
                 ->update($data);
