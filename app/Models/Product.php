@@ -6,11 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    protected $table = 'products';
-
+    protected $table      = 'products';
     protected $primaryKey = 'id';
-    public $incrementing = true;        // id sekarang auto-increment
-    protected $keyType = 'int';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
 
     protected $fillable = [
         'product_id',
@@ -27,7 +26,6 @@ class Product extends Model
         'is_active',
     ];
 
-    // Relasi ke TransactionDetail (via product_id char, bukan id)
     public function transactionDetails()
     {
         return $this->hasMany(TransactionDetail::class, 'product_id', 'product_id');
