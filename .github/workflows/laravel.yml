@@ -65,14 +65,21 @@ jobs:
 
     - name: Create Database
       run: |
-        mkdir -p database
-        touch database/database.sqlite
+    mkdir -p database
+    rm -f database/database.sqlite
+    touch database/database.sqlite
+
+    - name: Run migrations
+  env:
+    DB_CONNECTION: sqlite
+    DB_DATABASE: database/database.sqlite
+  run: php artisan migrate --force
 
     - name: Execute tests (Unit and Feature tests) via PHPUnit
-      env:
-        DB_CONNECTION: sqlite
-        DB_DATABASE: database/database.sqlite
-      run: vendor/bin/phpunit --coverage-text
+  env:
+    DB_CONNECTION: sqlite
+    DB_DATABASE: database/database.sqlite
+  run: vendor/bin/phpunit --coverage-text
 
     - name: Code Style Check with Pint
       run: ./vendor/bin/pint --test
