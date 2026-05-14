@@ -166,7 +166,8 @@ Aplikasi Point of Sales (POS) adalah sistem terintegrasi yang mengelola transaks
   - Customer data sync
   - Inventory adjustments
 
-- **HRIS Integration**
+- **ERP Integration**
+  - Store/Cabang data synchronization
   - Employee data synchronization
   - Employee cache refresh
   - Authentication fallback
@@ -185,8 +186,8 @@ Aplikasi Point of Sales (POS) adalah sistem terintegrasi yang mengelola transaks
   - Bank transfer
   - QRIS/QR code payments
 
-- **HRIS Integration**
-  - Employee data synchronization
+- **ERP System Integration**
+  - Store/Cabang data synchronization
   - Authentication with HRIS (future)
   - Employee cache management
   - Organizational structure sync
@@ -281,14 +282,16 @@ hris_sync_logs (id, sync_type, status, records_count, error_message, synced_at)
 
 #### Core Tables:
 ```sql
--- Stores
-stores (id, code, name, address, city, manager_id, status, created_at, updated_at)
+-- Stores/Cabang (synchronized from ERP main system)
+-- Note: This references existing 'cabang' table in ERP system
+stores (id, code, name, address, city, manager_id, status, erp_cabang_id, created_at, updated_at)
+-- Alternative: Use existing 'cabang' table directly if structure compatible
 
 -- POS Users (centralized authentication)
 pos_users (id, employee_id, username, password_hash, role, store_id, permissions, is_active, last_login, created_at, updated_at)
 
--- Employee Master (synchronized from HRIS or temporary)
-employees (employee_id, employee_code, full_name, email, phone, department, position, hire_date, is_active, hris_synced, created_at, updated_at)
+-- Cashier's Employee (synchronized from HRIS or temporary)
+cashiers (id, name-string, username-string, password-string)
 
 -- Products Master
 products (id, barcode, name, description, category_id, cost, created_at, updated_at)
@@ -365,6 +368,46 @@ Employee File (CSV/JSON) → Backend Service → Database Sync → Frontend Sync
     Version Control →      Validation &     →  Employee     →  POS Access
                           Processing            Cache
 ```
+
+### 7.5 ERP Integration Strategy
+
+#### 7.5.1 Store/Cabang Integration
+```
+ERP Cabang Table → API Sync → POS Stores Table → Frontend Sync
+       ↓               ↓             ↓              ↓
+Master Data →   Scheduled Job →  Cache Layer →  POS Access
+```
+
+**Integration Options:**
+- **Option A (Recommended)**: Use existing `cabang` table directly
+- **Option B**: Create `stores` table with `erp_cabang_id` foreign key
+- **Option C**: Sync data from `cabang` to `stores` periodically
+
+#### 7.5.2 Data Mapping Strategy
+```sql
+-- If using separate stores table
+CREATE TABLE stores (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    erp_cabang_id INT NOT NULL, -- Foreign key to ERP cabang table
+    code VARCHAR(50) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    address TEXT,
+    city VARCHAR(100),
+    manager_id INT,
+    status ENUM('active', 'inactive') DEFAULT 'active',
+    last_synced TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (erp_cabang_id) REFERENCES cabang(id)
+);
+```
+
+#### 7.5.3 Sync Process for Store Data
+1. **ERP Cabang Changes**: Any update in ERP cabang table
+2. **Trigger Sync**: Automatic trigger or scheduled job
+3. **Validation**: Validate cabang data for POS requirements
+4. **Database Update**: Update POS stores table or use direct reference
+5. **Frontend Notification**: Notify all POS terminals of store changes
 
 **Implementation Details:**
 - **File Location**: `storage/app/employees/employees.csv`
@@ -457,6 +500,16 @@ POST   /api/file/employees/upload
 GET    /api/file/employees/download
 GET    /api/file/employees/history
 POST   /api/file/employees/rollback/{version}
+```
+
+### 8.7 ERP Integration
+```
+GET    /api/erp/cabang
+GET    /api/erp/cabang/{id}
+POST   /api/erp/sync/cabang
+GET    /api/erp/sync/status
+GET    /api/stores/from-cabang/{cabang_id}
+POST   /api/stores/sync-from-erp
 ```
 
 ---

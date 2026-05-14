@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-use Illuminate\Support\Facades\Http;
+use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 
@@ -24,49 +23,41 @@ class TransactionSeeder extends Seeder
      */
     public function run(): void
     {
-        $products = $this->getProduct();
-        $tableTransactionDetail = new TransactionDetail();
+        $products = Product::all();
 
-        # Iterasi jumlah transaksi
-        for ($i = 1; $i <= $this->faker->numberBetween(1, 10); $i++) {
+        if ($products->isEmpty()) {
+            return;
+        }
+
+        for ($index = 0; $index < $this->faker->numberBetween(3, 8); $index++) {
+            $selectedProducts = $products->random($this->faker->numberBetween(1, min(4, $products->count())));
+            $transaction = Transaction::create(['total' => 0]);
             $total = 0;
-            foreach ($products as $product) {
-                # Dapatkan avg_base_price berdasarkan product_id
-                $data = $this->getProductPrices($product['product_id']);
-    
-                // Pastikan $data tidak null
-                if ($data) {
-                    $quantity = $this->faker->numberBetween(1, 10);
-                    $amount = $data['now_avg_base_price'] * $quantity;
-    
-                    $created_at = Carbon::parse($data['created_at'])->format('Y-m-d H:i:s');
-                    $transactionDate = $this->faker->dateTimeBetween($created_at, 'now')->format('Y-m-d H:i:s');
-    
-                    TransactionDetail::create([
-                        $tableTransactionDetail->getColumn(0) => $i,
-                        $tableTransactionDetail->getColumn(1) => $product['product_id'],
-                        $tableTransactionDetail->getColumn(2) => $quantity,
-                        $tableTransactionDetail->getColumn(3) => $data['now_avg_base_price'],
-                        $tableTransactionDetail->getColumn(4) => $amount,
-                        $tableTransactionDetail->getColumn(5) => $transactionDate,
-                        $tableTransactionDetail->getColumn(6) => $transactionDate
-                    ]);
-    
-                    $total += $amount;
-                } else {
-                    // Jika $data null, log error atau beri pesan sesuai kebutuhan
-                    echo "Harga produk dengan ID {$product['product_id']} tidak ditemukan.\n";
-                }
+
+            foreach ($selectedProducts as $product) {
+                $quantity = $this->faker->numberBetween(1, 5);
+                $amount = $product->selling_price * $quantity;
+                $timestamp = Carbon::now()->subDays($this->faker->numberBetween(0, 14));
+
+                TransactionDetail::create([
+                    'transaction_id' => $transaction->id,
+                    'product_id' => (string) $product->id,
+                    'quantity' => $quantity,
+                    'price' => $product->selling_price,
+                    'amount' => $amount,
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
+                ]);
+
+                $total += $amount;
             }
-            
-            
-            Transaction::create([
-                (new Transaction())->getColumn(0) => $total,
-                'created_at' => $transactionDate,
-                'updated_at' => $transactionDate
+
+            $transaction->update([
+                'total' => $total,
             ]);
         }
     }
+<<<<<<< HEAD
     
     function getProductPrices($productID)
     {
@@ -111,3 +102,6 @@ class TransactionSeeder extends Seeder
         return array_slice($shuffled, 0, $this->faker->numberBetween(1, count($shuffled)));
     }
 }
+=======
+}
+>>>>>>> origin/develop

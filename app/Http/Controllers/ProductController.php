@@ -83,12 +83,12 @@ class ProductController extends Controller
     {
         return collect($this->baseProducts())
             ->map(fn (array $product) => [
-                'id'          => $product['id'],
-                'barcode'     => $product['barcode'],
-                'sku'         => $product['product_id'],
-                'name'        => $product['name'],
-                'description' => $product['description'],
-                'category'    => [
+                'id'             => $product['id'],
+                'barcode'        => $product['barcode'],
+                'sku'            => $product['product_id'],
+                'name'           => $product['name'],
+                'description'    => $product['description'],
+                'category'       => [
                     'id'   => $product['category_id'],
                     'name' => $product['category_name'],
                 ],

@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductCrudController;
@@ -8,7 +9,6 @@ use App\Http\Controllers\ScheduleController;
 Route::get('/jalankan-schedule', [ScheduleController::class, 'index'])->name('jalankan-schedule-index');
 Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])->name('jalankan-schedule');
 
-// CRUD pakai resource (GET /products sudah tercakup di sini)
 Route::resource('products', ProductCrudController::class);
 
 Route::get('/prices', [ProductController::class, 'getPrices']);

@@ -9,6 +9,11 @@ class TransactionDetail extends Model
     protected $table = 'transaction_detail';
     protected $fillable = ['transaction_id','product_id','quantity','price','amount', 'created_at', 'updated_at'];
 
+    public function transaction()
+    {
+        return $this->belongsTo(Transaction::class, 'transaction_id');
+    }
+
     /**
      * Ambil nama kolom tertentu dari $fillable
      */
