@@ -16,4 +16,9 @@ Route::get('/transactions', [TransactionController::class, 'getTransaction']);
 
 Route::prefix('api')->group(function () {
     Route::get('/products', [ProductController::class, 'getApiProducts']);
+    
+});
+
+Route::get('/pos', function () {
+    return view('pos.index');
 });
