@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransactionController extends Controller
 {
@@ -102,4 +103,24 @@ class TransactionController extends Controller
             ],
         ], 201);
     }
+
+
+           public function downloadPdf($id)
+    {
+        $transaction = Transaction::with('details.product')->findOrFail($id);
+
+        $data = [
+            'transaction' => $transaction,
+            'transaction_number' => 'TRX-' . $transaction->created_at->format('YmdHis') . '-' . str_pad($transaction->id, 4, '0', STR_PAD_LEFT),
+            'created_at' => $transaction->created_at,
+            'details' => $transaction->details, 
+        ];
+
+        $pdf = Pdf::loadView('pdf.invoice', $data);
+
+      return $pdf->stream('invoice-'.$transaction->id.'.pdf');
+      
+    }
+
+      
 }

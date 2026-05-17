@@ -407,9 +407,23 @@
                         <div>Diskon: <span class="font-semibold text-white">${formatMoney(receipt.discount_amount)}</span></div>
                         <div>Kembalian: <span class="font-semibold text-white">${formatMoney(receipt.change_amount)}</span></div>
                     </div>
+                    <button
+                    id="viewInvoiceBtn"
+                    class="mt-4 w-full rounded-xl border border-cyan-400/40 bg-cyan-400/10 px-4 py-2 text-sm text-cyan-200 hover:bg-cyan-400/20">
+                    Lihat Invoice (PDF)
+                </button>
+
                 </div>
             `;
         };
+
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('#viewInvoiceBtn');
+            if (!btn || !state.receipt) return;
+
+            const url = `/transactions/${state.receipt.id}/pdf`;
+            window.location.href = url;
+        });
 
         const checkout = async () => {
             if (state.cart.length === 0) {

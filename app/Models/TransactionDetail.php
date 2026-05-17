@@ -23,4 +23,9 @@ class TransactionDetail extends Model
         return $fillable[$index] ?? null;
     }
 
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
 }
