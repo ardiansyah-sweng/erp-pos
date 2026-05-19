@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\CashierService; // Mengarah ke app/Services
+use App\Services\CashierService; 
 use Illuminate\Http\Request;
 
 class CashierSearchController extends Controller
@@ -13,7 +13,6 @@ class CashierSearchController extends Controller
     {
         $this->cashierService = $cashierService;
     }
-
    public function search(Request $request)
 {
     $keyword = $request->query('q');
