@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LoginRequest;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class LoginController extends Controller
@@ -28,6 +29,6 @@ class LoginController extends Controller
 
     public function showLogin(): View
     {
-    return view('auth.login');
+        return view('auth.login');
     }
 }
