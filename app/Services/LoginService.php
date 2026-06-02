@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Session;
 
 class LoginService
 {
-    // METHOD LOGIN SERVICE (JOBDESC KAMU)
     public function loginService(string $username, string $password): array
     {
         $cashier = Cashiers::where('username', $username)->first();
