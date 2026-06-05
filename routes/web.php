@@ -5,9 +5,10 @@ use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\LoginController;
 
 Route::get('/', function () {
-    return redirect()->route('pos.index');
+    return redirect()->route('sales-notes');
 });
 
 Route::get('/dashboard', function () {
@@ -21,6 +22,7 @@ Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])->name('jal
 Route::get('/products', [ProductController::class, 'getProducts'])->name('products.index');
 Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 
 // FITUR LAPORAN PENJUALAN
 Route::get('/sales-notes', [TransactionController::class, 'salesNotes'])->name('sales-notes');
