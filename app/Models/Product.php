@@ -24,4 +24,9 @@ class Product extends Model
         'stock_quantity' => 'integer',
         'min_stock' => 'integer',
     ];
+
+    public static function getItemBySKU(string $sku): ?self
+    {
+        return self::where('sku', $sku)->first();
+    }
 }
