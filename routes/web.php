@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\CashierController;
 
 Route::get('/', function () {
     return redirect()->route('pos.index');
@@ -18,3 +19,4 @@ Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])->name('jal
 Route::get('/products', [ProductController::class, 'getProducts'])->name('products.index');
 Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::resource('cashier', CashierController::class);
