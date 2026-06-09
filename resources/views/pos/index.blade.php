@@ -5,7 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>ERP POS</title>
+    <script>
+        try {
+            document.documentElement.dataset.theme = localStorage.getItem('erp-pos-theme') || 'dark';
+        } catch (error) {
+            document.documentElement.dataset.theme = 'dark';
+        }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html[data-theme="light"] body {
+            background: #f6f8fb !important;
+            color: #0f172a !important;
+        }
+
+        html[data-theme="light"] body > .absolute {
+            opacity: 0.45;
+        }
+
+        html[data-theme="light"] .bg-white\/5 {
+            background-color: rgba(255, 255, 255, 0.94) !important;
+        }
+
+        html[data-theme="light"] .bg-white\/10 {
+            background-color: #f1f5f9 !important;
+        }
+
+        html[data-theme="light"] .bg-slate-950\/70,
+        html[data-theme="light"] .bg-slate-950\/60,
+        html[data-theme="light"] .bg-slate-950\/50 {
+            background-color: #ffffff !important;
+        }
+
+        html[data-theme="light"] .bg-slate-900\/80,
+        html[data-theme="light"] .bg-slate-900\/90 {
+            background-color: #f8fafc !important;
+        }
+
+        html[data-theme="light"] .border-white\/10 {
+            border-color: #dbe3ea !important;
+        }
+
+        html[data-theme="light"] .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
+            border-color: #e2e8f0 !important;
+        }
+
+        html[data-theme="light"] .text-white {
+            color: #0f172a !important;
+        }
+
+        html[data-theme="light"] .text-slate-200,
+        html[data-theme="light"] .text-slate-300,
+        html[data-theme="light"] .text-slate-400,
+        html[data-theme="light"] .text-slate-500 {
+            color: #64748b !important;
+        }
+
+        html[data-theme="light"] .text-slate-200 {
+            color: #334155 !important;
+        }
+
+        html[data-theme="light"] .text-rose-300 {
+            color: #e11d48 !important;
+        }
+
+        html[data-theme="light"] .text-cyan-300\/80,
+        html[data-theme="light"] .text-cyan-300\/70,
+        html[data-theme="light"] .text-cyan-200 {
+            color: #0e7490 !important;
+        }
+
+        html[data-theme="light"] .text-emerald-300 {
+            color: #047857 !important;
+        }
+
+        html[data-theme="light"] input,
+        html[data-theme="light"] select,
+        html[data-theme="light"] textarea {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+
+        html[data-theme="light"] input::placeholder,
+        html[data-theme="light"] textarea::placeholder {
+            color: #94a3b8 !important;
+        }
+    </style>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100">
     <div class="absolute inset-x-0 top-0 h-72 bg-gradient-to-r from-emerald-500/30 via-cyan-500/20 to-transparent blur-3xl"></div>
@@ -14,8 +99,12 @@
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/80">Point of Sales</p>
-                    <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat, pencarian produk, dan checkout AJAX.</h1>
-                    <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari produk, masukkan ke keranjang, hitung total otomatis, lalu simpan transaksi tanpa reload halaman.</p>
+                    <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat untuk transaksi harian.</h1>
+                    <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari atau scan produk, cek isi keranjang, lalu selesaikan pembayaran tanpa reload halaman.</p>
+                    <button id="themeToggle" type="button" class="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white" aria-pressed="false">
+                        <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
+                        <span id="themeLabel">Mode terang</span>
+                    </button>
                 </div>
                 <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                     <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
@@ -66,13 +155,15 @@
                 </div>
             </div>
 
-            <aside class="space-y-6">
+            <aside class="space-y-6 lg:sticky lg:top-6 lg:self-start">
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
                     <div class="mb-4 flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-white">Keranjang</h2>
                         <button id="clearCart" class="text-sm text-rose-300 transition hover:text-rose-200">Kosongkan</button>
                     </div>
-                    <div id="cartEmptyState" class="rounded-2xl border border-dashed border-white/10 bg-slate-950/50 px-4 py-8 text-center text-sm text-slate-400">Keranjang masih kosong.</div>
+                    <div id="cartEmptyState" class="rounded-2xl border border-dashed border-white/10 bg-slate-950/50 px-4 py-8 text-center text-sm text-slate-400">
+                        Keranjang masih kosong. Pilih produk atau scan barcode untuk mulai transaksi.
+                    </div>
                     <div class="overflow-hidden rounded-2xl border border-white/10">
                         <table class="min-w-full text-left text-sm text-slate-200">
                             <thead class="bg-slate-900/90 text-slate-400">
@@ -121,7 +212,7 @@
                         <div class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
                     </div>
 
-                    <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">Checkout</button>
+                    <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50" disabled>Checkout</button>
                     <p id="checkoutStatus" class="mt-3 text-sm text-slate-400"></p>
                 </div>
 
@@ -151,7 +242,10 @@
         };
 
         const refs = {
+            themeToggle: document.getElementById('themeToggle'),
             productSearch: document.getElementById('productSearch'),
+            themeIcon: document.getElementById('themeIcon'),
+            themeLabel: document.getElementById('themeLabel'),
             barcodeSearch: document.getElementById('barcodeSearch'),
             refreshProducts: document.getElementById('refreshProducts'),
             productsStatus: document.getElementById('productsStatus'),
@@ -182,6 +276,40 @@
         const getCashTendered = () => Math.max(0, Number(refs.cashTendered.value || 0));
         const calculateSubtotal = () => state.cart.reduce((total, item) => total + (item.quantity * item.selling_price), 0);
         const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getDiscount());
+        const themeStorageKey = 'erp-pos-theme';
+        const themeIcons = {
+            sun: `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2"></path>
+                    <path d="M12 20v2"></path>
+                    <path d="m4.93 4.93 1.41 1.41"></path>
+                    <path d="m17.66 17.66 1.41 1.41"></path>
+                    <path d="M2 12h2"></path>
+                    <path d="M20 12h2"></path>
+                    <path d="m6.34 17.66-1.41 1.41"></path>
+                    <path d="m19.07 4.93-1.41 1.41"></path>
+                </svg>
+            `,
+            moon: `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <path d="M12 3a6 6 0 0 0 9 7.5A9 9 0 1 1 12 3Z"></path>
+                </svg>
+            `,
+        };
+
+        const applyTheme = (theme) => {
+            document.documentElement.dataset.theme = theme;
+            refs.themeIcon.innerHTML = theme === 'light' ? themeIcons.moon : themeIcons.sun;
+            refs.themeLabel.textContent = theme === 'light' ? 'Mode gelap' : 'Mode terang';
+            refs.themeToggle.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
+
+            try {
+                localStorage.setItem(themeStorageKey, theme);
+            } catch (error) {
+                console.error(error);
+            }
+        };
 
         const calculateChange = () => {
             if (refs.paymentMethod.value !== 'cash') {
@@ -215,20 +343,30 @@
 
         const updateSummary = () => {
             const subtotal = calculateSubtotal();
-            const discount = getDiscount();
-            const grandTotal = calculateGrandTotal();
+            const discount = Math.min(getDiscount(), subtotal);
+            const grandTotal = Math.max(0, subtotal - discount);
             const change = calculateChange();
+            const isCashPayment = refs.paymentMethod.value === 'cash';
+            const isCashInsufficient = isCashPayment && state.cart.length > 0 && getCashTendered() < grandTotal;
+
+            if (getDiscount() > subtotal) {
+                refs.discountAmount.value = String(subtotal);
+            }
 
             refs.productCount.textContent = String(state.products.length);
-            refs.cartCount.textContent = String(state.cart.length);
+            refs.cartCount.textContent = String(state.cart.reduce((total, item) => total + item.quantity, 0));
             refs.subtotalLabel.textContent = formatMoney(subtotal);
             refs.totalLabel.textContent = formatMoney(grandTotal);
             refs.subtotalValue.textContent = formatMoney(subtotal);
             refs.discountValue.textContent = formatMoney(discount);
             refs.grandTotalValue.textContent = formatMoney(grandTotal);
             refs.changeValue.textContent = formatMoney(change);
-            refs.checkoutButton.disabled = state.cart.length === 0;
-            refs.checkoutStatus.textContent = state.cart.length === 0 ? 'Tambahkan produk ke keranjang terlebih dahulu.' : '';
+            refs.checkoutButton.disabled = state.cart.length === 0 || isCashInsufficient;
+            refs.checkoutStatus.textContent = state.cart.length === 0
+                ? 'Tambahkan produk ke keranjang terlebih dahulu.'
+                : isCashInsufficient
+                    ? 'Uang dibayar belum cukup.'
+                    : '';
         };
 
         const findCartItem = (productId) => state.cart.find((item) => item.id === productId);
@@ -245,6 +383,7 @@
                 });
             }
 
+            refs.productsStatus.textContent = `${product.name} ditambahkan ke keranjang.`;
             renderCart();
         };
 
@@ -276,7 +415,7 @@
             if (state.products.length === 0) {
                 refs.productGrid.innerHTML = `
                     <div class="rounded-2xl border border-dashed border-white/10 bg-slate-950/60 px-4 py-10 text-center text-sm text-slate-400 md:col-span-2 xl:col-span-3">
-                        Produk tidak ditemukan.
+                        Produk tidak ditemukan. Coba kata kunci lain atau muat ulang daftar produk.
                     </div>
                 `;
                 refs.productsMeta.textContent = '0 item';
@@ -286,18 +425,18 @@
             refs.productsMeta.textContent = `${state.products.length} item`;
 
             refs.productGrid.innerHTML = state.products.map((product) => `
-                <button type="button" data-product-id="${product.id}" class="group rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-slate-900/90">
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <div class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">${product.sku || '-'}</div>
-                            <h3 class="mt-2 text-base font-semibold text-white">${product.name}</h3>
-                            <p class="mt-1 line-clamp-2 text-sm text-slate-400">${product.description || 'Tanpa deskripsi'}</p>
+                <button type="button" data-product-id="${product.id}" class="group flex min-h-44 flex-col justify-between rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-slate-900/90 hover:shadow-xl hover:shadow-cyan-950/30">
+                    <div>
+                        <div class="flex items-start justify-between gap-3">
+                            <span class="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">${product.sku || '-'}</span>
+                            <span class="shrink-0 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">Stok ${product.stock_quantity}</span>
                         </div>
-                        <span class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">Stok ${product.stock_quantity}</span>
+                        <h3 class="mt-4 line-clamp-2 text-lg font-semibold leading-snug text-white">${product.name}</h3>
+                        <p class="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-400">${product.description || 'Tanpa deskripsi'}</p>
                     </div>
-                    <div class="mt-4 flex items-center justify-between text-sm">
-                        <span class="font-semibold text-emerald-300">${formatMoney(product.selling_price)}</span>
-                        <span class="text-slate-500 group-hover:text-slate-300">Klik untuk tambah</span>
+                    <div class="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4 text-sm">
+                        <span class="text-lg font-semibold text-emerald-300">${formatMoney(product.selling_price)}</span>
+                        <span class="rounded-full bg-white/10 px-3 py-1.5 font-medium text-slate-300 transition group-hover:bg-cyan-400/20 group-hover:text-cyan-100">Tambah</span>
                     </div>
                 </button>
             `).join('');
@@ -366,7 +505,10 @@
                 const response = await fetchJson(`/products${queryString}`);
                 state.products = response.data ?? [];
                 renderProducts();
-                refs.productsStatus.textContent = 'Pilih produk untuk dimasukkan ke keranjang.';
+                updateSummary();
+                refs.productsStatus.textContent = search
+                    ? `Menampilkan hasil untuk "${search}".`
+                    : 'Pilih produk untuk dimasukkan ke keranjang.';
             } catch (error) {
                 refs.productsStatus.textContent = error.message || 'Gagal memuat produk.';
                 refs.productGrid.innerHTML = `
@@ -414,6 +556,10 @@
         const checkout = async () => {
             if (state.cart.length === 0) {
                 refs.checkoutStatus.textContent = 'Keranjang masih kosong.';
+                return;
+            }
+            if (refs.paymentMethod.value === 'cash' && getCashTendered() < calculateGrandTotal()) {
+                refs.checkoutStatus.textContent = 'Uang dibayar belum cukup.';
                 return;
             }
 
@@ -526,7 +672,12 @@
         refs.cashTendered.addEventListener('input', updateSummary);
         refs.paymentMethod.addEventListener('change', updateSummary);
         refs.checkoutButton.addEventListener('click', checkout);
+        refs.themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+        });
 
+        applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
         loadProducts();
         loadTransactions();
     </script>

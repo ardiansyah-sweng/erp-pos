@@ -28,3 +28,6 @@ Route::get('/products', [ProductController::class, 'getProducts'])->name('produc
 Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+
+Route::post('/transaction/store', [TransactionController::class, 'store']);
