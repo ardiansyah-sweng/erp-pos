@@ -13,7 +13,7 @@ class CashierSearchController extends Controller
     {
         $this->cashierService = $cashierService;
     }
-   public function search(Request $request)
+    public function search(Request $request)
 {
     $keyword = $request->query('q');
     $results = $this->cashierService->findCashier($keyword);
