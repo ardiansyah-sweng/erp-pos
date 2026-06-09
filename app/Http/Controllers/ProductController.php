@@ -28,4 +28,12 @@ class ProductController extends Controller
             'data' => $products,
         ]);
     }
+
+        public function index()
+    {
+        $products = Product::orderBy('name')->get();
+
+        return view('products.index', compact('products'));
+    }
+
 }

@@ -122,5 +122,25 @@ class TransactionController extends Controller
       
     }
 
+
+        public function index()
+    {
+        $transactions = Transaction::with('details')
+            ->latest()
+            ->get();
+
+        $totalTransactions = Transaction::count();
+
+        $totalRevenue = Transaction::sum('total');
+
+        $totalItemsSold = TransactionDetail::sum('quantity');
+
+        return view('transactions.index', compact(
+            'transactions',
+            'totalTransactions',
+            'totalRevenue',
+            'totalItemsSold'
+        ));
+    }
       
 }
