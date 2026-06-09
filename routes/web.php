@@ -14,11 +14,12 @@ Route::resource('products', ProductCrudController::class);
 Route::get('/prices', [ProductController::class, 'getPrices']);
 Route::get('/transactions', [TransactionController::class, 'getTransaction']);
 
+Route::get('/', function () {
+    return view('pos.index');
+});
+
 Route::prefix('api')->group(function () {
     Route::get('/products', [ProductController::class, 'getApiProducts']);
     
 });
 
-Route::get('/pos', function () {
-    return view('pos.index');
-});

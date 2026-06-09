@@ -363,7 +363,7 @@
 
             try {
                 const queryString = search ? `?search=${encodeURIComponent(search)}` : '';
-                const response = await fetchJson(`/products${queryString}`);
+                const response = await fetchJson(`/api/products${queryString}`);
                 state.products = response.data ?? [];
                 renderProducts();
                 refs.productsStatus.textContent = 'Pilih produk untuk dimasukkan ke keranjang.';
@@ -501,7 +501,7 @@
             }
 
             try {
-                const response = await fetchJson(`/products?search=${encodeURIComponent(keyword)}`);
+                const response = await fetchJson(`/api/products?search=${encodeURIComponent(keyword)}`);
                 const [product] = response.data ?? [];
 
                 if (!product) {
