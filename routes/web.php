@@ -17,4 +17,5 @@ Route::get('/jalankan-schedule', [ScheduleController::class, 'index'])->name('ja
 Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])->name('jalankan-schedule');
 Route::get('/products', [ProductController::class, 'getProducts'])->name('products.index');
 Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
