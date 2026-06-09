@@ -12,14 +12,11 @@ class Product extends Model
     protected $keyType    = 'int';
 
     protected $fillable = [
-        'product_id',
+        'sku',
         'barcode',
         'name',
         'description',
-        'category_id',
-        'category_name',
         'unit',
-        'cost_price',
         'selling_price',
         'stock_quantity',
         'min_stock',
@@ -35,12 +32,7 @@ class Product extends Model
 
     public function transactionDetails()
     {
-        return $this->hasMany(TransactionDetail::class, 'product_id', 'product_id');
-    }
-
-    public function getColumn(int $index): string
-    {
-        return $this->fillable[$index];
+        return $this->hasMany(TransactionDetail::class, 'product_id', 'sku');
     }
 
     public static function getItemBySKU(string $sku): ?self
