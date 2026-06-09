@@ -14,8 +14,8 @@
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/80">Point of Sales</p>
-                    <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat, pencarian produk, dan checkout AJAX.</h1>
-                    <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari produk, masukkan ke keranjang, hitung total otomatis, lalu simpan transaksi tanpa reload halaman.</p>
+                    <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat untuk transaksi harian.</h1>
+                    <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari atau scan produk, cek isi keranjang, lalu selesaikan pembayaran tanpa reload halaman.</p>
                 </div>
                 <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                     <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
@@ -66,13 +66,15 @@
                 </div>
             </div>
 
-            <aside class="space-y-6">
+            <aside class="space-y-6 lg:sticky lg:top-6 lg:self-start">
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
                     <div class="mb-4 flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-white">Keranjang</h2>
                         <button id="clearCart" class="text-sm text-rose-300 transition hover:text-rose-200">Kosongkan</button>
                     </div>
-                    <div id="cartEmptyState" class="rounded-2xl border border-dashed border-white/10 bg-slate-950/50 px-4 py-8 text-center text-sm text-slate-400">Keranjang masih kosong.</div>
+                    <div id="cartEmptyState" class="rounded-2xl border border-dashed border-white/10 bg-slate-950/50 px-4 py-8 text-center text-sm text-slate-400">
+                        Keranjang masih kosong. Pilih produk atau scan barcode untuk mulai transaksi.
+                    </div>
                     <div class="overflow-hidden rounded-2xl border border-white/10">
                         <table class="min-w-full text-left text-sm text-slate-200">
                             <thead class="bg-slate-900/90 text-slate-400">
@@ -121,7 +123,7 @@
                         <div class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
                     </div>
 
-                    <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">Checkout</button>
+                    <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50" disabled>Checkout</button>
                     <p id="checkoutStatus" class="mt-3 text-sm text-slate-400"></p>
                 </div>
 
@@ -215,20 +217,30 @@
 
         const updateSummary = () => {
             const subtotal = calculateSubtotal();
-            const discount = getDiscount();
-            const grandTotal = calculateGrandTotal();
+            const discount = Math.min(getDiscount(), subtotal);
+            const grandTotal = Math.max(0, subtotal - discount);
             const change = calculateChange();
+            const isCashPayment = refs.paymentMethod.value === 'cash';
+            const isCashInsufficient = isCashPayment && state.cart.length > 0 && getCashTendered() < grandTotal;
+
+            if (getDiscount() > subtotal) {
+                refs.discountAmount.value = String(subtotal);
+            }
 
             refs.productCount.textContent = String(state.products.length);
-            refs.cartCount.textContent = String(state.cart.length);
+            refs.cartCount.textContent = String(state.cart.reduce((total, item) => total + item.quantity, 0));
             refs.subtotalLabel.textContent = formatMoney(subtotal);
             refs.totalLabel.textContent = formatMoney(grandTotal);
             refs.subtotalValue.textContent = formatMoney(subtotal);
             refs.discountValue.textContent = formatMoney(discount);
             refs.grandTotalValue.textContent = formatMoney(grandTotal);
             refs.changeValue.textContent = formatMoney(change);
-            refs.checkoutButton.disabled = state.cart.length === 0;
-            refs.checkoutStatus.textContent = state.cart.length === 0 ? 'Tambahkan produk ke keranjang terlebih dahulu.' : '';
+            refs.checkoutButton.disabled = state.cart.length === 0 || isCashInsufficient;
+            refs.checkoutStatus.textContent = state.cart.length === 0
+                ? 'Tambahkan produk ke keranjang terlebih dahulu.'
+                : isCashInsufficient
+                    ? 'Uang dibayar belum cukup.'
+                    : '';
         };
 
         const findCartItem = (productId) => state.cart.find((item) => item.id === productId);
@@ -245,6 +257,7 @@
                 });
             }
 
+            refs.productsStatus.textContent = `${product.name} ditambahkan ke keranjang.`;
             renderCart();
         };
 
@@ -276,7 +289,7 @@
             if (state.products.length === 0) {
                 refs.productGrid.innerHTML = `
                     <div class="rounded-2xl border border-dashed border-white/10 bg-slate-950/60 px-4 py-10 text-center text-sm text-slate-400 md:col-span-2 xl:col-span-3">
-                        Produk tidak ditemukan.
+                        Produk tidak ditemukan. Coba kata kunci lain atau muat ulang daftar produk.
                     </div>
                 `;
                 refs.productsMeta.textContent = '0 item';
@@ -286,18 +299,18 @@
             refs.productsMeta.textContent = `${state.products.length} item`;
 
             refs.productGrid.innerHTML = state.products.map((product) => `
-                <button type="button" data-product-id="${product.id}" class="group rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-slate-900/90">
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <div class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">${product.sku || '-'}</div>
-                            <h3 class="mt-2 text-base font-semibold text-white">${product.name}</h3>
-                            <p class="mt-1 line-clamp-2 text-sm text-slate-400">${product.description || 'Tanpa deskripsi'}</p>
+                <button type="button" data-product-id="${product.id}" class="group flex min-h-44 flex-col justify-between rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-slate-900/90 hover:shadow-xl hover:shadow-cyan-950/30">
+                    <div>
+                        <div class="flex items-start justify-between gap-3">
+                            <span class="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">${product.sku || '-'}</span>
+                            <span class="shrink-0 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">Stok ${product.stock_quantity}</span>
                         </div>
-                        <span class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">Stok ${product.stock_quantity}</span>
+                        <h3 class="mt-4 line-clamp-2 text-lg font-semibold leading-snug text-white">${product.name}</h3>
+                        <p class="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-400">${product.description || 'Tanpa deskripsi'}</p>
                     </div>
-                    <div class="mt-4 flex items-center justify-between text-sm">
-                        <span class="font-semibold text-emerald-300">${formatMoney(product.selling_price)}</span>
-                        <span class="text-slate-500 group-hover:text-slate-300">Klik untuk tambah</span>
+                    <div class="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4 text-sm">
+                        <span class="text-lg font-semibold text-emerald-300">${formatMoney(product.selling_price)}</span>
+                        <span class="rounded-full bg-white/10 px-3 py-1.5 font-medium text-slate-300 transition group-hover:bg-cyan-400/20 group-hover:text-cyan-100">Tambah</span>
                     </div>
                 </button>
             `).join('');
@@ -366,7 +379,10 @@
                 const response = await fetchJson(`/products${queryString}`);
                 state.products = response.data ?? [];
                 renderProducts();
-                refs.productsStatus.textContent = 'Pilih produk untuk dimasukkan ke keranjang.';
+                updateSummary();
+                refs.productsStatus.textContent = search
+                    ? `Menampilkan hasil untuk "${search}".`
+                    : 'Pilih produk untuk dimasukkan ke keranjang.';
             } catch (error) {
                 refs.productsStatus.textContent = error.message || 'Gagal memuat produk.';
                 refs.productGrid.innerHTML = `
@@ -414,6 +430,10 @@
         const checkout = async () => {
             if (state.cart.length === 0) {
                 refs.checkoutStatus.textContent = 'Keranjang masih kosong.';
+                return;
+            }
+            if (refs.paymentMethod.value === 'cash' && getCashTendered() < calculateGrandTotal()) {
+                refs.checkoutStatus.textContent = 'Uang dibayar belum cukup.';
                 return;
             }
 
