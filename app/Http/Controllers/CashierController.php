@@ -10,6 +10,7 @@ class CashierController extends Controller
     public function index()
     {
         $cashiers = Cashiers::all();
-        return view('cashiers.index', compact('cashiers'));
+
+        return view('cashier.index', compact('cashiers'));
     }
 }
