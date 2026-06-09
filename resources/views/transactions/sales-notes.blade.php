@@ -323,7 +323,6 @@
     </style>
 </head>
 <body>
-    {{-- FITUR LAPORAN PENJUALAN: Tampilan utama halaman laporan. --}}
     <main class="page">
         <section class="hero">
             <div class="topbar">
@@ -334,13 +333,11 @@
                 </div>
             </div>
             <div class="actions">
-                {{-- FITUR LAPORAN PENJUALAN: Tombol download PDF. --}}
                 <a class="download" href="{{ route('sales-notes.pdf') }}">Download PDF</a>
                 <a class="back" href="{{ route('dashboard') }}">Kembali Dashboard</a>
             </div>
         </section>
 
-        {{-- FITUR LAPORAN PENJUALAN: Ringkasan total transaksi, penjualan, dan item. --}}
         <section class="summary" aria-label="Ringkasan penjualan">
             <div class="summary-card">
                 <div class="summary-label">Jumlah Transaksi</div>
@@ -365,7 +362,6 @@
                 <div class="empty-text">Data transaksi masih kosong. Setelah transaksi dan detail transaksi tersimpan, daftar penjualan akan muncul di halaman ini.</div>
             </section>
         @else
-            {{-- FITUR LAPORAN PENJUALAN: Daftar transaksi beserta detail barang. --}}
             <div class="section-heading">
                 <h2>Daftar Transaksi</h2>
                 <div class="section-meta">{{ $transactions->count() }} transaksi</div>

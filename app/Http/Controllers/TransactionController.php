@@ -103,7 +103,6 @@ class TransactionController extends Controller
         ], 201);
     }
 
-    // FITUR LAPORAN PENJUALAN: Menampilkan halaman laporan penjualan.
     public function salesNotes()
     {
         return view('transactions.sales-notes', [
@@ -111,7 +110,6 @@ class TransactionController extends Controller
         ]);
     }
 
-    // FITUR LAPORAN PENJUALAN: Download laporan dalam format PDF.
     public function downloadSalesReportPdf()
     {
         $transactions = $this->getSalesTransactions();
@@ -123,7 +121,6 @@ class TransactionController extends Controller
         ]);
     }
 
-    // FITUR LAPORAN PENJUALAN: Mengambil data transaksi dan detail barang.
     private function getSalesTransactions()
     {
         return Transaction::query()
@@ -156,7 +153,6 @@ class TransactionController extends Controller
             ->values();
     }
 
-    // FITUR LAPORAN PENJUALAN: Menyusun isi teks untuk file PDF.
     private function buildSalesReportPdf($transactions)
     {
         $lines = [
@@ -194,7 +190,6 @@ class TransactionController extends Controller
         return $this->makeSimplePdf($lines);
     }
 
-    // FITUR LAPORAN PENJUALAN: Membuat PDF sederhana tanpa package tambahan.
     private function makeSimplePdf(array $lines)
     {
         $pages = array_chunk($lines, 42);
@@ -249,7 +244,6 @@ class TransactionController extends Controller
         return $pdf;
     }
 
-    // FITUR LAPORAN PENJUALAN: Escape teks agar aman dimasukkan ke PDF.
     private function escapePdfText($text)
     {
         return str_replace(['\\', '(', ')'], ['\\\\', '\\(', '\\)'], $text);

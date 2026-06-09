@@ -8,11 +8,11 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\LoginController;
 
 Route::get('/', function () {
-    return redirect()->route('sales-notes');
+    return redirect()->route('pos.index');
 });
 
 Route::get('/dashboard', function () {
-    return redirect()->route('pos.index');
+    return view('erp-dashboard');
 })->name('dashboard');
 
 Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
@@ -24,6 +24,5 @@ Route::get('/transactions', [TransactionController::class, 'getTransaction'])->n
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 
-// FITUR LAPORAN PENJUALAN
 Route::get('/sales-notes', [TransactionController::class, 'salesNotes'])->name('sales-notes');
 Route::get('/sales-notes/pdf', [TransactionController::class, 'downloadSalesReportPdf'])->name('sales-notes.pdf');
