@@ -42,6 +42,10 @@
             background-color: #f8fafc !important;
         }
 
+        html[data-theme="light"] .bg-slate-950 {
+            background-color: #ffffff !important;
+        }
+
         html[data-theme="light"] .border-white\/10 {
             border-color: #dbe3ea !important;
         }
@@ -164,7 +168,7 @@
                     <div id="cartEmptyState" class="rounded-2xl border border-dashed border-white/10 bg-slate-950/50 px-4 py-8 text-center text-sm text-slate-400">
                         Keranjang masih kosong. Pilih produk atau scan barcode untuk mulai transaksi.
                     </div>
-                    <div class="overflow-hidden rounded-2xl border border-white/10">
+                    <div id="cartTableWrapper" class="hidden overflow-hidden rounded-2xl border border-white/10">
                         <table class="min-w-full text-left text-sm text-slate-200">
                             <thead class="bg-slate-900/90 text-slate-400">
                                 <tr>
@@ -222,9 +226,41 @@
                         Belum ada transaksi.
                     </div>
                 </div>
+
+                <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                        <h2 class="text-lg font-semibold text-white">Riwayat Transaksi</h2>
+                        <span id="transactionsMeta" class="text-sm text-slate-400">0 transaksi</span>
+                    </div>
+                    <div id="transactionHistory" class="space-y-3">
+                        <div class="rounded-2xl border border-dashed border-white/10 bg-slate-950/60 p-4 text-sm text-slate-400">
+                            Belum ada transaksi.
+                        </div>
+                    </div>
+                </div>
             </aside>
         </section>
     </main>
+
+    <div id="transactionModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm">
+        <div class="w-full max-w-md rounded-3xl border border-white/10 bg-slate-950 p-5 text-slate-100 shadow-2xl shadow-black/40">
+            <div class="mb-4 flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">Detail Transaksi</p>
+                    <h2 id="transactionModalTitle" class="mt-1 text-xl font-semibold text-white">TRX-0000</h2>
+                    <p id="transactionModalDate" class="mt-1 text-sm text-slate-400">-</p>
+                </div>
+                <button id="closeTransactionModal" type="button" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300 transition hover:text-white">Tutup</button>
+            </div>
+            <div id="transactionModalItems" class="divide-y divide-white/5 rounded-2xl border border-white/10 bg-slate-950/60"></div>
+            <div class="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div class="flex items-center justify-between text-sm text-slate-300">
+                    <span>Total Belanja</span>
+                    <span id="transactionModalTotal" class="text-lg font-semibold text-emerald-300">Rp0</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
@@ -256,6 +292,7 @@
             subtotalLabel: document.getElementById('subtotalLabel'),
             totalLabel: document.getElementById('totalLabel'),
             cartEmptyState: document.getElementById('cartEmptyState'),
+            cartTableWrapper: document.getElementById('cartTableWrapper'),
             cartTable: document.getElementById('cartTable'),
             clearCart: document.getElementById('clearCart'),
             discountAmount: document.getElementById('discountAmount'),
@@ -269,9 +306,30 @@
             checkoutButton: document.getElementById('checkoutButton'),
             checkoutStatus: document.getElementById('checkoutStatus'),
             receiptBox: document.getElementById('receiptBox'),
+            transactionsMeta: document.getElementById('transactionsMeta'),
+            transactionHistory: document.getElementById('transactionHistory'),
+            transactionModal: document.getElementById('transactionModal'),
+            transactionModalTitle: document.getElementById('transactionModalTitle'),
+            transactionModalDate: document.getElementById('transactionModalDate'),
+            transactionModalItems: document.getElementById('transactionModalItems'),
+            transactionModalTotal: document.getElementById('transactionModalTotal'),
+            closeTransactionModal: document.getElementById('closeTransactionModal'),
         };
 
         const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
+        const formatDateTime = (value) => {
+            if (!value) {
+                return '-';
+            }
+
+            return new Intl.DateTimeFormat('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            }).format(new Date(value));
+        };
         const getDiscount = () => Math.max(0, Number(refs.discountAmount.value || 0));
         const getCashTendered = () => Math.max(0, Number(refs.cashTendered.value || 0));
         const calculateSubtotal = () => state.cart.reduce((total, item) => total + (item.quantity * item.selling_price), 0);
@@ -457,11 +515,13 @@
 
             if (state.cart.length === 0) {
                 refs.cartEmptyState.classList.remove('hidden');
+                refs.cartTableWrapper.classList.add('hidden');
                 updateSummary();
                 return;
             }
 
             refs.cartEmptyState.classList.add('hidden');
+            refs.cartTableWrapper.classList.remove('hidden');
             refs.cartTable.innerHTML = state.cart.map((item) => `
                 <tr>
                     <td class="px-3 py-3 align-top">
@@ -553,6 +613,78 @@
             `;
         };
 
+        const openTransactionModal = (transaction) => {
+            const details = transaction.details ?? [];
+            const transactionCode = `TRX-${String(transaction.id).padStart(4, '0')}`;
+
+            refs.transactionModalTitle.textContent = transactionCode;
+            refs.transactionModalDate.textContent = formatDateTime(transaction.created_at);
+            refs.transactionModalTotal.textContent = formatMoney(transaction.total);
+            refs.transactionModalItems.innerHTML = details.length ? details.map((item) => `
+                <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm text-slate-300">
+                    <div>
+                        <div class="font-medium text-white">${item.product?.name || `Produk #${item.product_id}`}</div>
+                        <div class="text-xs text-slate-400">${item.quantity} x ${formatMoney(item.price)}</div>
+                    </div>
+                    <div class="font-semibold text-emerald-300">${formatMoney(item.amount)}</div>
+                </div>
+            `).join('') : `
+                <div class="px-4 py-4 text-sm text-slate-400">Detail item tidak tersedia.</div>
+            `;
+
+            refs.transactionModal.classList.remove('hidden');
+            refs.transactionModal.classList.add('flex');
+        };
+
+        const closeTransactionModal = () => {
+            refs.transactionModal.classList.add('hidden');
+            refs.transactionModal.classList.remove('flex');
+        };
+
+        const renderTransactionHistory = (transactions) => {
+            refs.transactionsMeta.textContent = `${transactions.length} transaksi`;
+
+            if (!transactions.length) {
+                refs.transactionHistory.innerHTML = `
+                    <div class="rounded-2xl border border-dashed border-white/10 bg-slate-950/60 p-4 text-sm text-slate-400">
+                        Belum ada transaksi.
+                    </div>
+                `;
+                return;
+            }
+
+            refs.transactionHistory.innerHTML = transactions.slice(0, 5).map((transaction) => {
+                const details = transaction.details ?? [];
+                const itemCount = details.reduce((total, item) => total + Number(item.quantity || 0), 0);
+                const transactionCode = `TRX-${String(transaction.id).padStart(4, '0')}`;
+
+                return `
+                    <div class="rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm">
+                        <button type="button" data-show-transaction="${transaction.id}" class="flex w-full items-start justify-between gap-3 text-left">
+                            <div>
+                                <div class="font-semibold text-white">${transactionCode}</div>
+                                <div class="mt-1 text-xs text-slate-400">${formatDateTime(transaction.created_at)}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-emerald-300">${formatMoney(transaction.total)}</div>
+                                <div class="mt-1 text-xs text-slate-400">${itemCount} item</div>
+                            </div>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            refs.transactionHistory.querySelectorAll('[data-show-transaction]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const transaction = transactions.find((item) => String(item.id) === button.dataset.showTransaction);
+
+                    if (transaction) {
+                        openTransactionModal(transaction);
+                    }
+                });
+            });
+        };
+
         const checkout = async () => {
             if (state.cart.length === 0) {
                 refs.checkoutStatus.textContent = 'Keranjang masih kosong.';
@@ -605,6 +737,7 @@
             try {
                 const response = await fetchJson('/transactions');
                 const transactions = response.data ?? [];
+                renderTransactionHistory(transactions);
 
                 if (!transactions.length || state.receipt) {
                     return;
@@ -672,6 +805,17 @@
         refs.cashTendered.addEventListener('input', updateSummary);
         refs.paymentMethod.addEventListener('change', updateSummary);
         refs.checkoutButton.addEventListener('click', checkout);
+        refs.closeTransactionModal.addEventListener('click', closeTransactionModal);
+        refs.transactionModal.addEventListener('click', (event) => {
+            if (event.target === refs.transactionModal) {
+                closeTransactionModal();
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeTransactionModal();
+            }
+        });
         refs.themeToggle.addEventListener('click', () => {
             const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
             applyTheme(currentTheme === 'light' ? 'dark' : 'light');

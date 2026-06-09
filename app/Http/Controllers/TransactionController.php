@@ -12,7 +12,7 @@ class TransactionController extends Controller
 {
     public function getTransaction()
     {
-        $transactions = Transaction::with('details')
+        $transactions = Transaction::with('details.product')
             ->latest()
             ->get();
 
