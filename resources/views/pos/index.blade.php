@@ -106,28 +106,28 @@
                         </div>
 
                        <div id="cardForm" class="hidden mt-4 space-y-3">
+                        <div>
+                            <label class="text-sm text-slate-300">Nama Pemegang Kartu</label>
+                            <input id="cardHolder" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
 
-    <div>
-        <label class="text-sm text-slate-300">Nama Pemegang Kartu</label>
-        <input id="cardHolder" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
-    </div>
+                        <div>
+                            <label class="text-sm text-slate-300">No Kartu (4 digit terakhir)</label>
+                            <input id="cardNumber" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
 
-    <div>
-        <label class="text-sm text-slate-300">No Kartu (4 digit terakhir)</label>
-        <input id="cardNumber" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
-    </div>
+                        <div>
+                            <label class="text-sm text-slate-300">Bank / Provider</label>
+                            <input id="cardBank" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
 
-    <div>
-        <label class="text-sm text-slate-300">Bank / Provider</label>
-        <input id="cardBank" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
-    </div>
+                        <div>
+                            <label class="text-sm text-slate-300">Kode Approval</label>
+                            <input id="approvalCode" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
+                        </div>
 
-    <div>
-        <label class="text-sm text-slate-300">Kode Approval</label>
-        <input id="approvalCode" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
-    </div>
 
-</div>
                         <div>
                             <label class="text-sm text-slate-300" for="cashTendered">Uang dibayar</label>
                             <input id="cashTendered" type="number" min="0" value="0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
@@ -200,11 +200,11 @@
             checkoutStatus: document.getElementById('checkoutStatus'),
             receiptBox: document.getElementById('receiptBox'),
             cardFields: document.getElementById('cardFields'),
-cardForm: document.getElementById('cardForm'),
-cardHolder: document.getElementById('cardHolder'),
-cardNumber: document.getElementById('cardNumber'),
-cardBank: document.getElementById('cardBank'),
-approvalCode: document.getElementById('approvalCode'),
+            cardForm: document.getElementById('cardForm'),
+            cardHolder: document.getElementById('cardHolder'),
+            cardNumber: document.getElementById('cardNumber'),
+            cardBank: document.getElementById('cardBank'),
+            approvalCode: document.getElementById('approvalCode'),
         };
 
         const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
