@@ -103,8 +103,8 @@ class TransactionController extends Controller
         ], 201);
     }
 
-        public function store(Request $request)
-        {
+    public function store(Request $request)
+    {
             $request->validate([
                 'total' => 'required|numeric',
                 'details' => 'required|array'
