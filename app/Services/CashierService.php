@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\Cashier;
+use App\Models\Cashiers;
 
 class CashierService
 {
     public function findCashier($keyword)
     {
-        return Cashier::search($keyword)->get();
+        return Cashier::query()->search($keyword)->get();
     }
 }
