@@ -147,9 +147,18 @@
                 </div>
 
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-                    <div class="mb-4 flex items-center justify-between">
+                    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
                         <h2 class="text-lg font-semibold text-white">Daftar Produk</h2>
-                        <span id="productsMeta" class="text-sm text-slate-400"></span>
+                        <div class="flex items-center gap-2">
+                            <span id="productsMeta" class="text-sm text-slate-400"></span>
+                            <select id="sortBy" class="rounded-xl border border-white/10 bg-slate-950/70 px-3 py-1.5 text-sm text-white outline-none focus:border-cyan-400">
+                                <option value="name">Nama</option>
+                                <option value="selling_price">Harga</option>
+                            </select>
+                            <button id="sortDirToggle" title="Urutan" class="flex items-center gap-1 rounded-xl border border-white/10 bg-slate-950/70 px-3 py-1.5 text-sm text-slate-300 transition hover:border-cyan-400/50 hover:text-white">
+                                <span id="sortDirLabel">A→Z</span>
+                            </button>
+                        </div>
                     </div>
                     <div id="productGrid" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"></div>
                 </div>
@@ -239,6 +248,8 @@
             products: [],
             cart: [],
             receipt: null,
+            sortBy: 'name',
+            sortDir: 'asc',
         };
 
         const refs = {
@@ -252,6 +263,9 @@
             productsMeta: document.getElementById('productsMeta'),
             productGrid: document.getElementById('productGrid'),
             productCount: document.getElementById('productCount'),
+            sortBy: document.getElementById('sortBy'),
+            sortDirToggle: document.getElementById('sortDirToggle'),
+            sortDirLabel: document.getElementById('sortDirLabel'),
             cartCount: document.getElementById('cartCount'),
             subtotalLabel: document.getElementById('subtotalLabel'),
             totalLabel: document.getElementById('totalLabel'),
@@ -501,8 +515,12 @@
             refs.productsStatus.textContent = 'Memuat produk...';
 
             try {
-                const queryString = search ? `?search=${encodeURIComponent(search)}` : '';
-                const response = await fetchJson(`/products${queryString}`);
+                const params = new URLSearchParams();
+                if (search) params.set('search', search);
+                params.set('sort_by', state.sortBy);
+                params.set('sort_dir', state.sortDir);
+
+                const response = await fetchJson(`/products/sort?${params.toString()}`);
                 state.products = response.data ?? [];
                 renderProducts();
                 updateSummary();
@@ -664,6 +682,23 @@
         });
 
         refs.refreshProducts.addEventListener('click', () => loadProducts(refs.productSearch.value.trim()));
+
+        refs.sortBy.addEventListener('change', () => {
+            state.sortBy = refs.sortBy.value;
+            // Update label tombol arah sesuai kolom
+            refs.sortDirLabel.textContent = state.sortDir === 'asc'
+                ? (state.sortBy === 'selling_price' ? 'Murah→Mahal' : 'A→Z')
+                : (state.sortBy === 'selling_price' ? 'Mahal→Murah' : 'Z→A');
+            loadProducts(refs.productSearch.value.trim());
+        });
+
+        refs.sortDirToggle.addEventListener('click', () => {
+            state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+            refs.sortDirLabel.textContent = state.sortDir === 'asc'
+                ? (state.sortBy === 'selling_price' ? 'Murah→Mahal' : 'A→Z')
+                : (state.sortBy === 'selling_price' ? 'Mahal→Murah' : 'Z→A');
+            loadProducts(refs.productSearch.value.trim());
+        });
         refs.clearCart.addEventListener('click', () => {
             state.cart = [];
             renderCart();
