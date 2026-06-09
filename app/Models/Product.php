@@ -26,6 +26,13 @@ class Product extends Model
         'is_active',
     ];
 
+    protected $casts = [
+        'is_active'      => 'boolean',
+        'selling_price'  => 'integer',
+        'stock_quantity' => 'integer',
+        'min_stock'      => 'integer',
+    ];
+
     public function transactionDetails()
     {
         return $this->hasMany(TransactionDetail::class, 'product_id', 'product_id');
@@ -34,5 +41,10 @@ class Product extends Model
     public function getColumn(int $index): string
     {
         return $this->fillable[$index];
+    }
+
+    public static function getItemBySKU(string $sku): ?self
+    {
+        return self::where('sku', $sku)->first();
     }
 }
