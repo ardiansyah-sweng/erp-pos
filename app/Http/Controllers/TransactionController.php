@@ -118,8 +118,7 @@ class TransactionController extends Controller
 
         $pdf = Pdf::loadView('pdf.invoice', $data);
 
-      return $pdf->stream('invoice-'.$transaction->id.'.pdf');
-      
+        return $pdf->stream('invoice-'.$transaction->id.'.pdf');
     }
 
 
@@ -130,9 +129,7 @@ class TransactionController extends Controller
             ->get();
 
         $totalTransactions = Transaction::count();
-
         $totalRevenue = Transaction::sum('total');
-
         $totalItemsSold = TransactionDetail::sum('quantity');
 
         return view('transactions.index', compact(
@@ -141,6 +138,33 @@ class TransactionController extends Controller
             'totalRevenue',
             'totalItemsSold'
         ));
+    }
+
+        public function store(Request $request)
+    {
+        $request->validate([
+            'total' => 'required|numeric',
+            'details' => 'required|array'
+        ]);
+
+        $transaction = Transaction::create([
+            'total' => $request->total
+        ]);
+
+        foreach ($request->details as $detail) {
+            TransactionDetail::create([
+                'transaction_id' => $transaction->id,
+                'product_id' => $detail['product_id'],
+                'quantity' => $detail['quantity'],
+                'price' => $detail['price'],
+                'amount' => $detail['quantity'] * $detail['price']
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Transaction berhasil ditambahkan',
+            'data' => $transaction
+        ], 201);
     }
       
 }
