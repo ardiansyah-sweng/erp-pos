@@ -102,31 +102,31 @@ class TransactionController extends Controller
             ],
         ], 201);
     }
-    
+
         public function store(Request $request)
-    {
-        $request->validate([
-            'total' => 'required|numeric',
-            'details' => 'required|array'
-        ]);
-
-        $transaction = Transaction::create([
-            'total' => $request->total
-        ]);
-
-        foreach ($request->details as $detail) {
-            TransactionDetail::create([
-                'transaction_id' => $transaction->id,
-                'product_id' => $detail['product_id'],
-                'quantity' => $detail['quantity'],
-                'price' => $detail['price'],
-                'amount' => $detail['quantity'] * $detail['price']
+        {
+            $request->validate([
+                'total' => 'required|numeric',
+                'details' => 'required|array'
             ]);
-        }
 
-        return response()->json([
-            'message' => 'Transaction berhasil ditambahkan',
-            'data' => $transaction
-        ], 201);
-    }
+            $transaction = Transaction::create([
+                'total' => $request->total
+            ]);
+
+            foreach ($request->details as $detail) {
+                TransactionDetail::create([
+                    'transaction_id' => $transaction->id,
+                    'product_id' => $detail['product_id'],
+                    'quantity' => $detail['quantity'],
+                    'price' => $detail['price'],
+                    'amount' => $detail['quantity'] * $detail['price']
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Transaction berhasil ditambahkan',
+                'data' => $transaction
+            ], 201);
+        }
 }
