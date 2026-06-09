@@ -5,7 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>ERP POS</title>
+    <script>
+        try {
+            document.documentElement.dataset.theme = localStorage.getItem('erp-pos-theme') || 'dark';
+        } catch (error) {
+            document.documentElement.dataset.theme = 'dark';
+        }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html[data-theme="light"] body {
+            background: #f6f8fb !important;
+            color: #0f172a !important;
+        }
+
+        html[data-theme="light"] body > .absolute {
+            opacity: 0.45;
+        }
+
+        html[data-theme="light"] .bg-white\/5 {
+            background-color: rgba(255, 255, 255, 0.94) !important;
+        }
+
+        html[data-theme="light"] .bg-white\/10 {
+            background-color: #f1f5f9 !important;
+        }
+
+        html[data-theme="light"] .bg-slate-950\/70,
+        html[data-theme="light"] .bg-slate-950\/60,
+        html[data-theme="light"] .bg-slate-950\/50 {
+            background-color: #ffffff !important;
+        }
+
+        html[data-theme="light"] .bg-slate-900\/80,
+        html[data-theme="light"] .bg-slate-900\/90 {
+            background-color: #f8fafc !important;
+        }
+
+        html[data-theme="light"] .border-white\/10 {
+            border-color: #dbe3ea !important;
+        }
+
+        html[data-theme="light"] .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
+            border-color: #e2e8f0 !important;
+        }
+
+        html[data-theme="light"] .text-white {
+            color: #0f172a !important;
+        }
+
+        html[data-theme="light"] .text-slate-200,
+        html[data-theme="light"] .text-slate-300,
+        html[data-theme="light"] .text-slate-400,
+        html[data-theme="light"] .text-slate-500 {
+            color: #64748b !important;
+        }
+
+        html[data-theme="light"] .text-slate-200 {
+            color: #334155 !important;
+        }
+
+        html[data-theme="light"] .text-rose-300 {
+            color: #e11d48 !important;
+        }
+
+        html[data-theme="light"] .text-cyan-300\/80,
+        html[data-theme="light"] .text-cyan-300\/70,
+        html[data-theme="light"] .text-cyan-200 {
+            color: #0e7490 !important;
+        }
+
+        html[data-theme="light"] .text-emerald-300 {
+            color: #047857 !important;
+        }
+
+        html[data-theme="light"] input,
+        html[data-theme="light"] select,
+        html[data-theme="light"] textarea {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+
+        html[data-theme="light"] input::placeholder,
+        html[data-theme="light"] textarea::placeholder {
+            color: #94a3b8 !important;
+        }
+    </style>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100">
     <div class="absolute inset-x-0 top-0 h-72 bg-gradient-to-r from-emerald-500/30 via-cyan-500/20 to-transparent blur-3xl"></div>
@@ -16,6 +101,10 @@
                     <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/80">Point of Sales</p>
                     <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat untuk transaksi harian.</h1>
                     <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari atau scan produk, cek isi keranjang, lalu selesaikan pembayaran tanpa reload halaman.</p>
+                    <button id="themeToggle" type="button" class="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white" aria-pressed="false">
+                        <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
+                        <span id="themeLabel">Mode terang</span>
+                    </button>
                 </div>
                 <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                     <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
@@ -153,7 +242,10 @@
         };
 
         const refs = {
+            themeToggle: document.getElementById('themeToggle'),
             productSearch: document.getElementById('productSearch'),
+            themeIcon: document.getElementById('themeIcon'),
+            themeLabel: document.getElementById('themeLabel'),
             barcodeSearch: document.getElementById('barcodeSearch'),
             refreshProducts: document.getElementById('refreshProducts'),
             productsStatus: document.getElementById('productsStatus'),
@@ -184,6 +276,40 @@
         const getCashTendered = () => Math.max(0, Number(refs.cashTendered.value || 0));
         const calculateSubtotal = () => state.cart.reduce((total, item) => total + (item.quantity * item.selling_price), 0);
         const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getDiscount());
+        const themeStorageKey = 'erp-pos-theme';
+        const themeIcons = {
+            sun: `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2"></path>
+                    <path d="M12 20v2"></path>
+                    <path d="m4.93 4.93 1.41 1.41"></path>
+                    <path d="m17.66 17.66 1.41 1.41"></path>
+                    <path d="M2 12h2"></path>
+                    <path d="M20 12h2"></path>
+                    <path d="m6.34 17.66-1.41 1.41"></path>
+                    <path d="m19.07 4.93-1.41 1.41"></path>
+                </svg>
+            `,
+            moon: `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <path d="M12 3a6 6 0 0 0 9 7.5A9 9 0 1 1 12 3Z"></path>
+                </svg>
+            `,
+        };
+
+        const applyTheme = (theme) => {
+            document.documentElement.dataset.theme = theme;
+            refs.themeIcon.innerHTML = theme === 'light' ? themeIcons.moon : themeIcons.sun;
+            refs.themeLabel.textContent = theme === 'light' ? 'Mode gelap' : 'Mode terang';
+            refs.themeToggle.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
+
+            try {
+                localStorage.setItem(themeStorageKey, theme);
+            } catch (error) {
+                console.error(error);
+            }
+        };
 
         const calculateChange = () => {
             if (refs.paymentMethod.value !== 'cash') {
@@ -546,7 +672,12 @@
         refs.cashTendered.addEventListener('input', updateSummary);
         refs.paymentMethod.addEventListener('change', updateSummary);
         refs.checkoutButton.addEventListener('click', checkout);
+        refs.themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+        });
 
+        applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
         loadProducts();
         loadTransactions();
     </script>
