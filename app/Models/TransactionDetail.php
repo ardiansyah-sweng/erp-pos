@@ -14,6 +14,9 @@ class TransactionDetail extends Model
         return $this->belongsTo(Transaction::class, 'transaction_id');
     }
 
+/**
+ * Ambil nama kolom tertentu dari $fillable
+ */
     public function getColumn($index)
     {
         $fillable = $this->getFillable();
