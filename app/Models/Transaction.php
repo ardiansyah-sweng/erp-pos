@@ -7,7 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Transaction extends Model
 {
     protected $table = 'transaction';
-    protected $fillable = ['total'];
+    protected $fillable = [
+        'total',
+        'payment_method',
+        'discount_amount',
+        'cash_tendered',
+        'change_amount',
+    ];
 
     public function details()
     {

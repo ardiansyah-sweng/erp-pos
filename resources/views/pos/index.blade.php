@@ -188,7 +188,7 @@
                     <div class="mt-4 space-y-4">
                         <div>
                             <label class="text-sm text-slate-300" for="discountAmount">Diskon</label>
-                            <input id="discountAmount" type="number" min="0" value="0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
+                            <input id="discountAmount" type="text" inputmode="numeric" value="Rp 0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
                         </div>
                         <div>
                             <label class="text-sm text-slate-300" for="paymentMethod">Metode pembayaran</label>
@@ -201,7 +201,7 @@
                         </div>
                         <div>
                             <label class="text-sm text-slate-300" for="cashTendered">Uang dibayar</label>
-                            <input id="cashTendered" type="number" min="0" value="0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
+                            <input id="cashTendered" type="text" inputmode="numeric" value="Rp 0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
                         </div>
                         <div>
                             <label class="text-sm text-slate-300" for="notes">Catatan</label>
@@ -217,20 +217,18 @@
                     </div>
 
                     <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50" disabled>Checkout</button>
-                    <p id="checkoutStatus" class="mt-3 text-sm text-slate-400"></p>
-                </div>
-
-                <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-                    <h2 class="text-lg font-semibold text-white">Struk Terakhir</h2>
-                    <div id="receiptBox" class="mt-4 rounded-2xl border border-dashed border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300">
-                        Belum ada transaksi.
-                    </div>
+                    <div id="checkoutStatus" class="mt-3 hidden rounded-2xl border px-4 py-3 text-sm font-medium"></div>
                 </div>
 
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
                     <div class="mb-4 flex items-center justify-between gap-3">
-                        <h2 class="text-lg font-semibold text-white">Riwayat Transaksi</h2>
-                        <span id="transactionsMeta" class="text-sm text-slate-400">0 transaksi</span>
+                        <div>
+                            <h2 class="text-lg font-semibold text-white">Riwayat Transaksi</h2>
+                            <span id="transactionsMeta" class="text-sm text-slate-400">0 transaksi</span>
+                        </div>
+                        <a href="{{ route('transactions.index') }}" class="rounded-full border border-white/10 bg-slate-950/60 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white">
+                            Lihat semua
+                        </a>
                     </div>
                     <div id="transactionHistory" class="space-y-3">
                         <div class="rounded-2xl border border-dashed border-white/10 bg-slate-950/60 p-4 text-sm text-slate-400">
@@ -253,6 +251,7 @@
                 <button id="closeTransactionModal" type="button" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300 transition hover:text-white">Tutup</button>
             </div>
             <div id="transactionModalItems" class="divide-y divide-white/5 rounded-2xl border border-white/10 bg-slate-950/60"></div>
+            <div id="transactionModalPayment" class="mt-4 grid gap-2 rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300"></div>
             <div class="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
                 <div class="flex items-center justify-between text-sm text-slate-300">
                     <span>Total Belanja</span>
@@ -305,18 +304,41 @@
             changeValue: document.getElementById('changeValue'),
             checkoutButton: document.getElementById('checkoutButton'),
             checkoutStatus: document.getElementById('checkoutStatus'),
-            receiptBox: document.getElementById('receiptBox'),
             transactionsMeta: document.getElementById('transactionsMeta'),
             transactionHistory: document.getElementById('transactionHistory'),
             transactionModal: document.getElementById('transactionModal'),
             transactionModalTitle: document.getElementById('transactionModalTitle'),
             transactionModalDate: document.getElementById('transactionModalDate'),
             transactionModalItems: document.getElementById('transactionModalItems'),
+            transactionModalPayment: document.getElementById('transactionModalPayment'),
             transactionModalTotal: document.getElementById('transactionModalTotal'),
             closeTransactionModal: document.getElementById('closeTransactionModal'),
         };
 
         const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
+        const parseCurrencyInput = (value) => Number(String(value || '').replace(/\D/g, '')) || 0;
+        const formatCurrencyInput = (value) => `Rp ${new Intl.NumberFormat('id-ID').format(Number(value || 0))}`;
+        const checkoutStatusClasses = {
+            info: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-100',
+            error: 'border-rose-400/30 bg-rose-400/10 text-rose-100',
+            success: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-100',
+        };
+        const setCheckoutStatus = (message = '', type = 'info') => {
+            refs.checkoutStatus.className = `mt-3 rounded-2xl border px-4 py-3 text-sm font-medium ${checkoutStatusClasses[type] || checkoutStatusClasses.info}`;
+            refs.checkoutStatus.textContent = message;
+            refs.checkoutStatus.classList.toggle('hidden', !message);
+        };
+        const setCurrencyInputValue = (input, value) => {
+            input.value = formatCurrencyInput(value);
+        };
+        const normalizeCurrencyInput = (input) => {
+            const digits = String(input.value || '').replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+            const value = Number(digits || 0);
+
+            input.value = digits ? formatCurrencyInput(value) : '';
+
+            return value;
+        };
         const formatDateTime = (value) => {
             if (!value) {
                 return '-';
@@ -330,10 +352,12 @@
                 minute: '2-digit',
             }).format(new Date(value));
         };
-        const getDiscount = () => Math.max(0, Number(refs.discountAmount.value || 0));
-        const getCashTendered = () => Math.max(0, Number(refs.cashTendered.value || 0));
+        const getDiscount = () => Math.max(0, parseCurrencyInput(refs.discountAmount.value));
+        const getCashTendered = () => Math.max(0, parseCurrencyInput(refs.cashTendered.value));
         const calculateSubtotal = () => state.cart.reduce((total, item) => total + (item.quantity * item.selling_price), 0);
-        const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getDiscount());
+        const getAppliedDiscount = () => Math.min(getDiscount(), calculateSubtotal());
+        const isDiscountTooHigh = () => calculateSubtotal() > 0 && getDiscount() >= calculateSubtotal();
+        const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getAppliedDiscount());
         const themeStorageKey = 'erp-pos-theme';
         const themeIcons = {
             sun: `
@@ -405,11 +429,8 @@
             const grandTotal = Math.max(0, subtotal - discount);
             const change = calculateChange();
             const isCashPayment = refs.paymentMethod.value === 'cash';
+            const isInvalidDiscount = isDiscountTooHigh();
             const isCashInsufficient = isCashPayment && state.cart.length > 0 && getCashTendered() < grandTotal;
-
-            if (getDiscount() > subtotal) {
-                refs.discountAmount.value = String(subtotal);
-            }
 
             refs.productCount.textContent = String(state.products.length);
             refs.cartCount.textContent = String(state.cart.reduce((total, item) => total + item.quantity, 0));
@@ -419,12 +440,24 @@
             refs.discountValue.textContent = formatMoney(discount);
             refs.grandTotalValue.textContent = formatMoney(grandTotal);
             refs.changeValue.textContent = formatMoney(change);
-            refs.checkoutButton.disabled = state.cart.length === 0 || isCashInsufficient;
-            refs.checkoutStatus.textContent = state.cart.length === 0
-                ? 'Tambahkan produk ke keranjang terlebih dahulu.'
-                : isCashInsufficient
-                    ? 'Uang dibayar belum cukup.'
-                    : '';
+            refs.checkoutButton.disabled = state.cart.length === 0 || isInvalidDiscount || isCashInsufficient;
+
+            if (state.cart.length === 0) {
+                setCheckoutStatus('Tambahkan produk ke keranjang terlebih dahulu.', 'info');
+                return;
+            }
+
+            if (isInvalidDiscount) {
+                setCheckoutStatus('Diskon harus lebih kecil dari subtotal.', 'error');
+                return;
+            }
+
+            if (isCashInsufficient) {
+                setCheckoutStatus('Uang dibayar belum cukup.', 'error');
+                return;
+            }
+
+            setCheckoutStatus();
         };
 
         const findCartItem = (productId) => state.cart.find((item) => item.id === productId);
@@ -579,40 +612,6 @@
             }
         };
 
-        const renderReceipt = (receipt) => {
-            refs.receiptBox.innerHTML = `
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <div class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">${receipt.transaction_number}</div>
-                            <div class="mt-1 text-base font-semibold text-white">${receipt.payment_status}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm text-slate-400">Total</div>
-                            <div class="text-lg font-semibold text-emerald-300">${formatMoney(receipt.total_amount)}</div>
-                        </div>
-                    </div>
-                    <div class="divide-y divide-white/5 rounded-2xl border border-white/10 bg-slate-950/60">
-                        ${receipt.details.map((item) => `
-                            <div class="flex items-center justify-between px-4 py-3 text-sm text-slate-300">
-                                <div>
-                                    <div class="font-medium text-white">${item.product.name}</div>
-                                    <div class="text-xs text-slate-400">${item.quantity} x ${formatMoney(item.unit_price)}</div>
-                                </div>
-                                <div class="font-semibold text-emerald-300">${formatMoney(item.total_price)}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300">
-                        <div>Metode: <span class="font-semibold text-white">${receipt.payment_method}</span></div>
-                        <div>Cash: <span class="font-semibold text-white">${formatMoney(receipt.cash_tendered)}</span></div>
-                        <div>Diskon: <span class="font-semibold text-white">${formatMoney(receipt.discount_amount)}</span></div>
-                        <div>Kembalian: <span class="font-semibold text-white">${formatMoney(receipt.change_amount)}</span></div>
-                    </div>
-                </div>
-            `;
-        };
-
         const openTransactionModal = (transaction) => {
             const details = transaction.details ?? [];
             const transactionCode = `TRX-${String(transaction.id).padStart(4, '0')}`;
@@ -620,6 +619,12 @@
             refs.transactionModalTitle.textContent = transactionCode;
             refs.transactionModalDate.textContent = formatDateTime(transaction.created_at);
             refs.transactionModalTotal.textContent = formatMoney(transaction.total);
+            refs.transactionModalPayment.innerHTML = `
+                <div>Metode: <span class="font-semibold text-white">${transaction.payment_method || 'cash'}</span></div>
+                <div>Cash: <span class="font-semibold text-white">${formatMoney(transaction.cash_tendered)}</span></div>
+                <div>Diskon: <span class="font-semibold text-white">${formatMoney(transaction.discount_amount)}</span></div>
+                <div>Kembalian: <span class="font-semibold text-white">${formatMoney(transaction.change_amount)}</span></div>
+            `;
             refs.transactionModalItems.innerHTML = details.length ? details.map((item) => `
                 <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm text-slate-300">
                     <div>
@@ -642,7 +647,7 @@
         };
 
         const renderTransactionHistory = (transactions) => {
-            refs.transactionsMeta.textContent = `${transactions.length} transaksi`;
+            refs.transactionsMeta.textContent = transactions.length > 5 ? `5 terbaru dari ${transactions.length} transaksi` : `${transactions.length} transaksi`;
 
             if (!transactions.length) {
                 refs.transactionHistory.innerHTML = `
@@ -687,11 +692,15 @@
 
         const checkout = async () => {
             if (state.cart.length === 0) {
-                refs.checkoutStatus.textContent = 'Keranjang masih kosong.';
+                setCheckoutStatus('Keranjang masih kosong.', 'info');
+                return;
+            }
+            if (isDiscountTooHigh()) {
+                setCheckoutStatus('Diskon harus lebih kecil dari subtotal.', 'error');
                 return;
             }
             if (refs.paymentMethod.value === 'cash' && getCashTendered() < calculateGrandTotal()) {
-                refs.checkoutStatus.textContent = 'Uang dibayar belum cukup.';
+                setCheckoutStatus('Uang dibayar belum cukup.', 'error');
                 return;
             }
 
@@ -701,14 +710,14 @@
                     quantity: item.quantity,
                     unit_price: item.selling_price,
                 })),
-                discount_amount: getDiscount(),
+                discount_amount: getAppliedDiscount(),
                 payment_method: refs.paymentMethod.value,
                 cash_tendered: refs.paymentMethod.value === 'cash' ? getCashTendered() : 0,
                 notes: refs.notes.value,
             };
 
             refs.checkoutButton.disabled = true;
-            refs.checkoutStatus.textContent = 'Menyimpan transaksi...';
+            setCheckoutStatus('Menyimpan transaksi...', 'info');
 
             try {
                 const response = await fetchJson('/pos/checkout', {
@@ -717,17 +726,16 @@
                 });
 
                 state.receipt = response.data;
-                renderReceipt(state.receipt);
                 state.cart = [];
-                refs.discountAmount.value = '0';
-                refs.cashTendered.value = '0';
+                setCurrencyInputValue(refs.discountAmount, 0);
+                setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
                 renderCart();
                 await loadProducts(refs.productSearch.value.trim());
                 await loadTransactions();
-                refs.checkoutStatus.textContent = 'Transaksi berhasil disimpan.';
+                setCheckoutStatus('Transaksi berhasil disimpan.', 'success');
             } catch (error) {
-                refs.checkoutStatus.textContent = error.message || 'Checkout gagal.';
+                setCheckoutStatus(error.message || 'Checkout gagal.', 'error');
             } finally {
                 refs.checkoutButton.disabled = state.cart.length === 0;
             }
@@ -739,20 +747,6 @@
                 const transactions = response.data ?? [];
                 renderTransactionHistory(transactions);
 
-                if (!transactions.length || state.receipt) {
-                    return;
-                }
-
-                const latest = transactions[0];
-                const itemCount = latest.details?.length ?? 0;
-
-                refs.receiptBox.innerHTML = `
-                    <div class="space-y-2">
-                        <div class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">Transaksi terakhir</div>
-                        <div class="text-base font-semibold text-white">Total ${formatMoney(latest.total)}</div>
-                        <div class="text-sm text-slate-400">${itemCount} item tersimpan di database.</div>
-                    </div>
-                `;
             } catch (error) {
                 console.error(error);
             }
@@ -801,8 +795,18 @@
             state.cart = [];
             renderCart();
         });
-        refs.discountAmount.addEventListener('input', updateSummary);
-        refs.cashTendered.addEventListener('input', updateSummary);
+        [refs.discountAmount, refs.cashTendered].forEach((input) => {
+            input.addEventListener('input', () => {
+                normalizeCurrencyInput(input);
+                updateSummary();
+            });
+            input.addEventListener('blur', () => {
+                if (!input.value) {
+                    setCurrencyInputValue(input, 0);
+                    updateSummary();
+                }
+            });
+        });
         refs.paymentMethod.addEventListener('change', updateSummary);
         refs.checkoutButton.addEventListener('click', checkout);
         refs.closeTransactionModal.addEventListener('click', closeTransactionModal);
@@ -822,6 +826,8 @@
         });
 
         applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+        setCurrencyInputValue(refs.discountAmount, getDiscount());
+        setCurrencyInputValue(refs.cashTendered, getCashTendered());
         loadProducts();
         loadTransactions();
     </script>
