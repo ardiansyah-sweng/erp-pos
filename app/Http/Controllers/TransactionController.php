@@ -80,6 +80,16 @@ class TransactionController extends Controller
                     'price' => (int) $item['unit_price'],
                     'amount' => (int) $item['quantity'] * (int) $item['unit_price'],
                 ]);
+
+                $product = Product::find((int) $item['product_id']);
+
+                if ($product->stock_quantity < $item['quantity']) {
+                    throw new \Exception("Stok {$product->name} tidak cukup");
+                }
+
+                $product->stock_quantity -= $item['quantity'];
+                $product->save();
+    
             }
 
             return $transaction;
