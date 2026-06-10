@@ -104,73 +104,42 @@ class TransactionController extends Controller
         ], 201);
     }
 
-<<<<<<< HEAD
+        public function downloadPdf($id)
+        {
+            $transaction = Transaction::with('details.product')->findOrFail($id);
 
-           public function downloadPdf($id)
-    {
-        $transaction = Transaction::with('details.product')->findOrFail($id);
+            $data = [
+                'transaction' => $transaction,
+                'transaction_number' => 'TRX-' . $transaction->created_at->format('YmdHis') . '-' . str_pad($transaction->id, 4, '0', STR_PAD_LEFT),
+                'created_at' => $transaction->created_at,
+                'details' => $transaction->details,
+            ];
 
-        $data = [
-            'transaction' => $transaction,
-            'transaction_number' => 'TRX-' . $transaction->created_at->format('YmdHis') . '-' . str_pad($transaction->id, 4, '0', STR_PAD_LEFT),
-            'created_at' => $transaction->created_at,
-            'details' => $transaction->details, 
-        ];
+            $pdf = Pdf::loadView('pdf.invoice', $data);
 
-        $pdf = Pdf::loadView('pdf.invoice', $data);
-
-        return $pdf->stream('invoice-'.$transaction->id.'.pdf');
-    }
-
-
-        public function index()
-    {
-        $transactions = Transaction::with('details')
-            ->latest()
-            ->get();
-
-        $totalTransactions = Transaction::count();
-        $totalRevenue = Transaction::sum('total');
-        $totalItemsSold = TransactionDetail::sum('quantity');
-
-        return view('transactions.index', compact(
-            'transactions',
-            'totalTransactions',
-            'totalRevenue',
-            'totalItemsSold'
-        ));
-    }
-
-        public function store(Request $request)
-    {
-        $request->validate([
-            'total' => 'required|numeric',
-            'details' => 'required|array'
-        ]);
-
-        $transaction = Transaction::create([
-            'total' => $request->total
-        ]);
-
-        foreach ($request->details as $detail) {
-            TransactionDetail::create([
-                'transaction_id' => $transaction->id,
-                'product_id' => $detail['product_id'],
-                'quantity' => $detail['quantity'],
-                'price' => $detail['price'],
-                'amount' => $detail['quantity'] * $detail['price']
-            ]);
+            return $pdf->stream('invoice-' . $transaction->id . '.pdf');
         }
 
-        return response()->json([
-            'message' => 'Transaction berhasil ditambahkan',
-            'data' => $transaction
-        ], 201);
-    }
-      
-=======
-    public function store(Request $request)
-    {
+        public function index()
+        {
+            $transactions = Transaction::with('details')
+                ->latest()
+                ->get();
+
+            $totalTransactions = Transaction::count();
+            $totalRevenue = Transaction::sum('total');
+            $totalItemsSold = TransactionDetail::sum('quantity');
+
+            return view('transactions.index', compact(
+                'transactions',
+                'totalTransactions',
+                'totalRevenue',
+                'totalItemsSold'
+            ));
+        }
+
+        public function store(Request $request)
+        {
             $request->validate([
                 'total' => 'required|numeric',
                 'details' => 'required|array'
@@ -195,5 +164,5 @@ class TransactionController extends Controller
                 'data' => $transaction
             ], 201);
         }
->>>>>>> develop
+
 }
