@@ -1,344 +1,11 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<<<<<<< HEAD
-    <meta charset="UTF-8">
-    <title>POS - Point of Sale</title>
-
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Icon -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-
-    <style>
-        body {
-            background: #f4f7fb;
-        }
-
-        .header-box {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .logo-box {
-            width: 50px;
-            height: 50px;
-            background: #0d6efd;
-            color: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-        }
-
-        .product-card {
-            border-radius: 10px;
-            border: 1px solid #e5e7eb;
-            padding: 15px;
-            text-align: center;
-            background: white;
-        }
-
-        .product-img img {
-            height: 80px;
-            object-fit: contain;
-        }
-
-        .cart-box {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .empty-cart {
-            text-align: center;
-            color: #94a3b8;
-            padding: 40px 0;
-        }
-
-        .empty-cart i {
-            font-size: 60px;
-        }
-
-        .pay-btn {
-            background: #16a34a;
-            color: white;
-            padding: 12px;
-            border: none;
-            width: 100%;
-            border-radius: 8px;
-            font-weight: bold;
-        }
-    </style>
-</head>
-
-<body>
-
-<div class="container mt-4">
-
-    <!-- HEADER -->
-    <div class="header-box d-flex justify-content-between align-items-center mb-4">
-
-        <div class="d-flex align-items-center gap-3">
-            <div class="logo-box">
-                <i class="bi bi-cart3"></i>
-            </div>
-            <div>
-                <h4 class="mb-0">POS - Point of Sale</h4>
-                <small class="text-muted">Sistem Kasir</small>
-            </div>
-        </div>
-
-        <div class="d-flex align-items-center gap-4">
-            <div>
-                <i class="bi bi-calendar"></i> <span id="date"></span><br>
-                <i class="bi bi-clock"></i> <span id="time"></span>
-            </div>
-
-            <div class="d-flex align-items-center gap-2">
-                <div class="rounded-circle bg-light p-2">
-                    <i class="bi bi-person"></i>
-                </div>
-                <div>
-                    <b>Kasir</b><br>
-                    <small>Admin</small>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- INPUT SKU -->
-    <div class="card p-3 mb-4">
-        <label class="mb-2">Scan / Input SKU</label>
-        <input type="text" class="form-control" placeholder="Masukkan SKU produk">
-    </div>
-
-    <div class="row">
-
-        <!-- PRODUK -->
-        <div class="col-md-8">
-            <div class="card p-3">
-                <h5>Daftar Produk</h5>
-
-                <div class="row mt-3">
-
-                    <!-- PRODUK 1 -->
-                    <div class="col-md-4 mb-3">
-                        <div class="product-card">
-                            <div class="product-img">
-                                <img src="https://via.placeholder.com/80">
-                            </div>
-                            <h6>Air Mineral</h6>
-                            <small>SKU: AM001</small>
-                            <p class="text-primary fw-bold mt-2">Rp 4.000</p>
-                            <button class="btn btn-primary btn-sm w-100">Tambah</button>
-                        </div>
-                    </div>
-
-                    <!-- PRODUK 2 -->
-                    <div class="col-md-4 mb-3">
-                        <div class="product-card">
-                            <div class="product-img">
-                                <img src="https://via.placeholder.com/80">
-                            </div>
-                            <h6>Indomie</h6>
-                            <small>SKU: IND01</small>
-                            <p class="text-primary fw-bold mt-2">Rp 3.500</p>
-                            <button class="btn btn-primary btn-sm w-100">Tambah</button>
-                        </div>
-                    </div>
-
-                    <!-- PRODUK 3 -->
-                    <div class="col-md-4 mb-3">
-                        <div class="product-card">
-                            <div class="product-img">
-                                <img src="https://via.placeholder.com/80">
-                            </div>
-                            <h6>Coca Cola</h6>
-                            <small>SKU: CC01</small>
-                            <p class="text-primary fw-bold mt-2">Rp 6.500</p>
-                            <button class="btn btn-primary btn-sm w-100">Tambah</button>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-        <!-- KERANJANG -->
-        <div class="col-md-4">
-            <div class="cart-box">
-
-                <div class="d-flex justify-content-between mb-3">
-                    <h5><i class="bi bi-cart"></i> Keranjang</h5>
-                    <button class="btn btn-outline-danger btn-sm">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-
-                <div class="empty-cart">
-                    <i class="bi bi-cart-x"></i>
-                    <p>Keranjang masih kosong</p>
-                </div>
-
-                <hr>
-
-                <div class="d-flex justify-content-between">
-                    <span>Subtotal</span>
-                    <span>Rp 0</span>
-                </div>
-
-                <div class="d-flex justify-content-between">
-                    <span>Pajak</span>
-                    <span>Rp 0</span>
-                </div>
-
-                <hr>
-
-                <div class="d-flex justify-content-between fw-bold">
-                    <span>Total</span>
-                    <span>Rp 0</span>
-                </div>
-
-                <button class="pay-btn mt-3">
-                    <i class="bi bi-cash-stack"></i> Bayar
-                </button>
-
-            </div>
-        </div>
-
-    </div>
-
-</div>
-
-<!-- SCRIPT JAM -->
-<script>
-function updateDateTime() {
-    const now = new Date();
-
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-    document.getElementById("date").innerText =
-        now.toLocaleDateString('id-ID', options);
-
-    document.getElementById("time").innerText =
-        now.toLocaleTimeString('id-ID', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-}
-
-updateDateTime();
-setInterval(updateDateTime, 1000);
-</script>
-
-</body>
-</html>
-=======
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>ERP POS</title>
-    <script>
-        try {
-            document.documentElement.dataset.theme = localStorage.getItem('erp-pos-theme') || 'dark';
-        } catch (error) {
-            document.documentElement.dataset.theme = 'dark';
-        }
-    </script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        html[data-theme="light"] body {
-            background: #f6f8fb !important;
-            color: #0f172a !important;
-        }
-
-        html[data-theme="light"] body > .absolute {
-            opacity: 0.45;
-        }
-
-        html[data-theme="light"] .bg-white\/5 {
-            background-color: rgba(255, 255, 255, 0.94) !important;
-        }
-
-        html[data-theme="light"] .bg-white\/10 {
-            background-color: #f1f5f9 !important;
-        }
-
-        html[data-theme="light"] .bg-slate-950\/70,
-        html[data-theme="light"] .bg-slate-950\/60,
-        html[data-theme="light"] .bg-slate-950\/50 {
-            background-color: #ffffff !important;
-        }
-
-        html[data-theme="light"] .bg-slate-900\/80,
-        html[data-theme="light"] .bg-slate-900\/90 {
-            background-color: #f8fafc !important;
-        }
-
-        html[data-theme="light"] .border-white\/10 {
-            border-color: #dbe3ea !important;
-        }
-
-        html[data-theme="light"] .border-x {
-            border-color: #dbe3ea !important;
-        }
-
-        html[data-theme="light"] .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
-            border-color: #e2e8f0 !important;
-        }
-
-        html[data-theme="light"] .text-white {
-            color: #0f172a !important;
-        }
-
-        html[data-theme="light"] .text-slate-200,
-        html[data-theme="light"] .text-slate-300,
-        html[data-theme="light"] .text-slate-400,
-        html[data-theme="light"] .text-slate-500 {
-            color: #64748b !important;
-        }
-
-        html[data-theme="light"] .text-slate-200 {
-            color: #334155 !important;
-        }
-
-        html[data-theme="light"] .text-rose-300 {
-            color: #e11d48 !important;
-        }
-
-        html[data-theme="light"] .text-amber-300 {
-            color: #b45309 !important;
-        }
-
-        html[data-theme="light"] .text-cyan-300\/80,
-        html[data-theme="light"] .text-cyan-300\/70,
-        html[data-theme="light"] .text-cyan-200 {
-            color: #0e7490 !important;
-        }
-
-        html[data-theme="light"] .text-emerald-300 {
-            color: #047857 !important;
-        }
-
-        html[data-theme="light"] input,
-        html[data-theme="light"] select,
-        html[data-theme="light"] textarea {
-            background-color: #ffffff !important;
-            color: #0f172a !important;
-        }
-
-        html[data-theme="light"] input::placeholder,
-        html[data-theme="light"] textarea::placeholder {
-            color: #94a3b8 !important;
-        }
-    </style>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100">
     <div class="absolute inset-x-0 top-0 h-72 bg-gradient-to-r from-emerald-500/30 via-cyan-500/20 to-transparent blur-3xl"></div>
@@ -347,12 +14,8 @@ setInterval(updateDateTime, 1000);
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/80">Point of Sales</p>
-                    <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat untuk transaksi harian.</h1>
-                    <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari atau scan produk, cek isi keranjang, lalu selesaikan pembayaran tanpa reload halaman.</p>
-                    <button id="themeToggle" type="button" class="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white" aria-pressed="false">
-                        <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
-                        <span id="themeLabel">Mode terang</span>
-                    </button>
+                    <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat, pencarian produk, dan checkout AJAX.</h1>
+                    <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari produk, masukkan ke keranjang, hitung total otomatis, lalu simpan transaksi tanpa reload halaman.</p>
                 </div>
                 <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                     <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
@@ -403,15 +66,13 @@ setInterval(updateDateTime, 1000);
                 </div>
             </div>
 
-            <aside class="space-y-6 lg:sticky lg:top-6 lg:self-start">
+            <aside class="space-y-6">
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
                     <div class="mb-4 flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-white">Keranjang</h2>
                         <button id="clearCart" class="text-sm text-rose-300 transition hover:text-rose-200">Kosongkan</button>
                     </div>
-                    <div id="cartEmptyState" class="rounded-2xl border border-dashed border-white/10 bg-slate-950/50 px-4 py-8 text-center text-sm text-slate-400">
-                        Keranjang masih kosong. Pilih produk atau scan barcode untuk mulai transaksi.
-                    </div>
+                    <div id="cartEmptyState" class="rounded-2xl border border-dashed border-white/10 bg-slate-950/50 px-4 py-8 text-center text-sm text-slate-400">Keranjang masih kosong.</div>
                     <div class="overflow-hidden rounded-2xl border border-white/10">
                         <table class="min-w-full text-left text-sm text-slate-200">
                             <thead class="bg-slate-900/90 text-slate-400">
@@ -484,7 +145,7 @@ setInterval(updateDateTime, 1000);
                         <div class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
                     </div>
 
-                    <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50" disabled>Checkout</button>
+                    <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">Checkout</button>
                     <p id="checkoutStatus" class="mt-3 text-sm text-slate-400"></p>
                 </div>
 
@@ -514,10 +175,7 @@ setInterval(updateDateTime, 1000);
         };
 
         const refs = {
-            themeToggle: document.getElementById('themeToggle'),
             productSearch: document.getElementById('productSearch'),
-            themeIcon: document.getElementById('themeIcon'),
-            themeLabel: document.getElementById('themeLabel'),
             barcodeSearch: document.getElementById('barcodeSearch'),
             refreshProducts: document.getElementById('refreshProducts'),
             productsStatus: document.getElementById('productsStatus'),
@@ -554,63 +212,6 @@ setInterval(updateDateTime, 1000);
         const getCashTendered = () => Math.max(0, Number(refs.cashTendered.value || 0));
         const calculateSubtotal = () => state.cart.reduce((total, item) => total + (item.quantity * item.selling_price), 0);
         const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getDiscount());
-        const getStockBadge = (product) => {
-            const stock = getRemainingStock(product);
-            const minStock = Number(product.min_stock || 0);
-
-            if (stock <= 0) {
-                return {
-                    label: 'Stok habis',
-                    className: 'border-rose-400/40 bg-rose-400/10 text-rose-300',
-                };
-            }
-
-            if (stock <= minStock) {
-                return {
-                    label: `Stok menipis: ${stock}`,
-                    className: 'border-amber-400/40 bg-amber-400/10 text-amber-300',
-                };
-            }
-
-            return {
-                label: `Stok aman: ${stock}`,
-                className: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300',
-            };
-        };
-        const themeStorageKey = 'erp-pos-theme';
-        const themeIcons = {
-            sun: `
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                    <circle cx="12" cy="12" r="4"></circle>
-                    <path d="M12 2v2"></path>
-                    <path d="M12 20v2"></path>
-                    <path d="m4.93 4.93 1.41 1.41"></path>
-                    <path d="m17.66 17.66 1.41 1.41"></path>
-                    <path d="M2 12h2"></path>
-                    <path d="M20 12h2"></path>
-                    <path d="m6.34 17.66-1.41 1.41"></path>
-                    <path d="m19.07 4.93-1.41 1.41"></path>
-                </svg>
-            `,
-            moon: `
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                    <path d="M12 3a6 6 0 0 0 9 7.5A9 9 0 1 1 12 3Z"></path>
-                </svg>
-            `,
-        };
-
-        const applyTheme = (theme) => {
-            document.documentElement.dataset.theme = theme;
-            refs.themeIcon.innerHTML = theme === 'light' ? themeIcons.moon : themeIcons.sun;
-            refs.themeLabel.textContent = theme === 'light' ? 'Mode gelap' : 'Mode terang';
-            refs.themeToggle.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
-
-            try {
-                localStorage.setItem(themeStorageKey, theme);
-            } catch (error) {
-                console.error(error);
-            }
-        };
 
         const calculateChange = () => {
             if (refs.paymentMethod.value !== 'cash') {
@@ -644,42 +245,25 @@ setInterval(updateDateTime, 1000);
 
         const updateSummary = () => {
             const subtotal = calculateSubtotal();
-            const discount = Math.min(getDiscount(), subtotal);
-            const grandTotal = Math.max(0, subtotal - discount);
+            const discount = getDiscount();
+            const grandTotal = calculateGrandTotal();
             const change = calculateChange();
-            const isCashPayment = refs.paymentMethod.value === 'cash';
-            const isCashInsufficient = isCashPayment && state.cart.length > 0 && getCashTendered() < grandTotal;
-
-            if (getDiscount() > subtotal) {
-                refs.discountAmount.value = String(subtotal);
-            }
 
             refs.productCount.textContent = String(state.products.length);
-            refs.cartCount.textContent = String(state.cart.reduce((total, item) => total + item.quantity, 0));
+            refs.cartCount.textContent = String(state.cart.length);
             refs.subtotalLabel.textContent = formatMoney(subtotal);
             refs.totalLabel.textContent = formatMoney(grandTotal);
             refs.subtotalValue.textContent = formatMoney(subtotal);
             refs.discountValue.textContent = formatMoney(discount);
             refs.grandTotalValue.textContent = formatMoney(grandTotal);
             refs.changeValue.textContent = formatMoney(change);
-            refs.checkoutButton.disabled = state.cart.length === 0 || isCashInsufficient;
-            refs.checkoutStatus.textContent = state.cart.length === 0
-                ? 'Tambahkan produk ke keranjang terlebih dahulu.'
-                : isCashInsufficient
-                    ? 'Uang dibayar belum cukup.'
-                    : '';
+            refs.checkoutButton.disabled = state.cart.length === 0;
+            refs.checkoutStatus.textContent = state.cart.length === 0 ? 'Tambahkan produk ke keranjang terlebih dahulu.' : '';
         };
 
         const findCartItem = (productId) => state.cart.find((item) => item.id === productId);
-        const getCartQuantity = (productId) => findCartItem(productId)?.quantity || 0;
-        const getRemainingStock = (product) => Math.max(0, Number(product.stock_quantity || 0) - getCartQuantity(product.id));
 
         const addToCart = (product) => {
-            if (getRemainingStock(product) <= 0) {
-                refs.productsStatus.textContent = `${product.name} sudah mencapai batas stok.`;
-                return;
-            }
-
             const existingItem = findCartItem(product.id);
 
             if (existingItem) {
@@ -691,45 +275,18 @@ setInterval(updateDateTime, 1000);
                 });
             }
 
-            refs.productsStatus.textContent = `${product.name} ditambahkan ke keranjang.`;
             renderCart();
-            renderProducts();
         };
 
         const removeFromCart = (productId) => {
             state.cart = state.cart.filter((item) => item.id !== productId);
             renderCart();
-            renderProducts();
-        };
-
-        const setQuantity = (productId, quantity) => {
-            const item = findCartItem(productId);
-
-            if (!item) {
-                return;
-            }
-
-            const stock = Number(item.stock_quantity || 0);
-            const nextQuantity = Math.max(1, Math.min(stock, Number(quantity || 1)));
-
-            if (nextQuantity !== Number(quantity || 1)) {
-                refs.checkoutStatus.textContent = `Qty ${item.name} disesuaikan dengan stok tersedia.`;
-            }
-
-            item.quantity = nextQuantity;
-            renderCart();
-            renderProducts();
         };
 
         const changeQuantity = (productId, delta) => {
             const item = findCartItem(productId);
 
             if (!item) {
-                return;
-            }
-
-            if (delta > 0 && item.quantity >= Number(item.stock_quantity || 0)) {
-                refs.checkoutStatus.textContent = 'Jumlah item sudah mencapai stok tersedia.';
                 return;
             }
 
@@ -741,7 +298,6 @@ setInterval(updateDateTime, 1000);
             }
 
             renderCart();
-            renderProducts();
         };
 
         const renderProducts = () => {
@@ -750,7 +306,7 @@ setInterval(updateDateTime, 1000);
             if (state.products.length === 0) {
                 refs.productGrid.innerHTML = `
                     <div class="rounded-2xl border border-dashed border-white/10 bg-slate-950/60 px-4 py-10 text-center text-sm text-slate-400 md:col-span-2 xl:col-span-3">
-                        Produk tidak ditemukan. Coba kata kunci lain atau muat ulang daftar produk.
+                        Produk tidak ditemukan.
                     </div>
                 `;
                 refs.productsMeta.textContent = '0 item';
@@ -759,30 +315,22 @@ setInterval(updateDateTime, 1000);
 
             refs.productsMeta.textContent = `${state.products.length} item`;
 
-            refs.productGrid.innerHTML = state.products.map((product) => {
-                const stockBadge = getStockBadge(product);
-
-                return `
-                    <button type="button" data-product-id="${product.id}" class="group flex min-h-44 flex-col justify-between rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-slate-900/90 hover:shadow-xl hover:shadow-cyan-950/30">
+            refs.productGrid.innerHTML = state.products.map((product) => `
+                <button type="button" data-product-id="${product.id}" class="group rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-slate-900/90">
+                    <div class="flex items-start justify-between gap-3">
                         <div>
-                            <div class="flex items-start justify-between gap-3">
-                                <span class="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">${product.sku || '-'}</span>
-                            </div>
-                            <h3 class="mt-4 line-clamp-2 text-lg font-semibold leading-snug text-white">${product.name}</h3>
-                            <p class="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-400">${product.description || 'Tanpa deskripsi'}</p>
+                            <div class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">${product.sku || '-'}</div>
+                            <h3 class="mt-2 text-base font-semibold text-white">${product.name}</h3>
+                            <p class="mt-1 line-clamp-2 text-sm text-slate-400">${product.description || 'Tanpa deskripsi'}</p>
                         </div>
-                        <div class="mt-5 space-y-3 border-t border-white/10 pt-4">
-                            <div class="flex items-center justify-between gap-3 text-sm">
-                                <span class="text-lg font-semibold text-emerald-300">${formatMoney(product.selling_price)}</span>
-                                <span class="rounded-full bg-white/10 px-3 py-1.5 font-medium text-slate-300 transition group-hover:bg-cyan-400/20 group-hover:text-cyan-100">Tambah</span>
-                            </div>
-                            <div>
-                                <span class="block w-full rounded-xl border px-3 py-2 text-center text-xs font-semibold ${stockBadge.className}">${stockBadge.label}</span>
-                            </div>
-                        </div>
-                    </button>
-                `;
-            }).join('');
+                        <span class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">Stok ${product.stock_quantity}</span>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between text-sm">
+                        <span class="font-semibold text-emerald-300">${formatMoney(product.selling_price)}</span>
+                        <span class="text-slate-500 group-hover:text-slate-300">Klik untuk tambah</span>
+                    </div>
+                </button>
+            `).join('');
 
             refs.productGrid.querySelectorAll('[data-product-id]').forEach((button) => {
                 button.addEventListener('click', () => {
@@ -814,7 +362,7 @@ setInterval(updateDateTime, 1000);
                     <td class="px-3 py-3 align-top">
                         <div class="inline-flex items-center rounded-full border border-white/10 bg-slate-950/70">
                             <button type="button" data-decrease="${item.id}" class="px-2 py-1 text-slate-300 hover:text-white">-</button>
-                            <input type="number" min="1" max="${item.stock_quantity}" value="${item.quantity}" data-quantity="${item.id}" class="w-14 border-x border-white/10 bg-transparent px-2 py-1 text-center text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none">
+                            <span class="min-w-10 px-3 py-1 text-center">${item.quantity}</span>
                             <button type="button" data-increase="${item.id}" class="px-2 py-1 text-slate-300 hover:text-white">+</button>
                         </div>
                     </td>
@@ -833,17 +381,6 @@ setInterval(updateDateTime, 1000);
                 button.addEventListener('click', () => changeQuantity(Number(button.dataset.increase), 1));
             });
 
-            refs.cartTable.querySelectorAll('[data-quantity]').forEach((input) => {
-                input.addEventListener('change', () => setQuantity(Number(input.dataset.quantity), input.value));
-                input.addEventListener('keydown', (event) => {
-                    if (event.key === 'Enter') {
-                        event.preventDefault();
-                        setQuantity(Number(input.dataset.quantity), input.value);
-                        input.blur();
-                    }
-                });
-            });
-
             refs.cartTable.querySelectorAll('[data-remove]').forEach((button) => {
                 button.addEventListener('click', () => removeFromCart(Number(button.dataset.remove)));
             });
@@ -859,10 +396,7 @@ setInterval(updateDateTime, 1000);
                 const response = await fetchJson(`/products${queryString}`);
                 state.products = response.data ?? [];
                 renderProducts();
-                updateSummary();
-                refs.productsStatus.textContent = search
-                    ? `Menampilkan hasil untuk "${search}".`
-                    : 'Pilih produk untuk dimasukkan ke keranjang.';
+                refs.productsStatus.textContent = 'Pilih produk untuk dimasukkan ke keranjang.';
             } catch (error) {
                 refs.productsStatus.textContent = error.message || 'Gagal memuat produk.';
                 refs.productGrid.innerHTML = `
@@ -910,10 +444,6 @@ setInterval(updateDateTime, 1000);
         const checkout = async () => {
             if (state.cart.length === 0) {
                 refs.checkoutStatus.textContent = 'Keranjang masih kosong.';
-                return;
-            }
-            if (refs.paymentMethod.value === 'cash' && getCashTendered() < calculateGrandTotal()) {
-                refs.checkoutStatus.textContent = 'Uang dibayar belum cukup.';
                 return;
             }
 
@@ -1031,7 +561,6 @@ setInterval(updateDateTime, 1000);
         refs.clearCart.addEventListener('click', () => {
             state.cart = [];
             renderCart();
-            renderProducts();
         });
         refs.discountAmount.addEventListener('input', updateSummary);
         refs.cashTendered.addEventListener('input', updateSummary);
@@ -1045,15 +574,9 @@ setInterval(updateDateTime, 1000);
     }
 });
         refs.checkoutButton.addEventListener('click', checkout);
-        refs.themeToggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
-            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
-        });
 
-        applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
         loadProducts();
         loadTransactions();
     </script>
 </body>
 </html>
->>>>>>> develop
