@@ -46,6 +46,10 @@
             border-color: #dbe3ea !important;
         }
 
+        html[data-theme="light"] .border-x {
+            border-color: #dbe3ea !important;
+        }
+
         html[data-theme="light"] .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
             border-color: #e2e8f0 !important;
         }
@@ -67,6 +71,10 @@
 
         html[data-theme="light"] .text-rose-300 {
             color: #e11d48 !important;
+        }
+
+        html[data-theme="light"] .text-amber-300 {
+            color: #b45309 !important;
         }
 
         html[data-theme="light"] .text-cyan-300\/80,
@@ -276,6 +284,29 @@
         const getCashTendered = () => Math.max(0, Number(refs.cashTendered.value || 0));
         const calculateSubtotal = () => state.cart.reduce((total, item) => total + (item.quantity * item.selling_price), 0);
         const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getDiscount());
+        const getStockBadge = (product) => {
+            const stock = getRemainingStock(product);
+            const minStock = Number(product.min_stock || 0);
+
+            if (stock <= 0) {
+                return {
+                    label: 'Stok habis',
+                    className: 'border-rose-400/40 bg-rose-400/10 text-rose-300',
+                };
+            }
+
+            if (stock <= minStock) {
+                return {
+                    label: `Stok menipis: ${stock}`,
+                    className: 'border-amber-400/40 bg-amber-400/10 text-amber-300',
+                };
+            }
+
+            return {
+                label: `Stok aman: ${stock}`,
+                className: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300',
+            };
+        };
         const themeStorageKey = 'erp-pos-theme';
         const themeIcons = {
             sun: `
@@ -370,8 +401,15 @@
         };
 
         const findCartItem = (productId) => state.cart.find((item) => item.id === productId);
+        const getCartQuantity = (productId) => findCartItem(productId)?.quantity || 0;
+        const getRemainingStock = (product) => Math.max(0, Number(product.stock_quantity || 0) - getCartQuantity(product.id));
 
         const addToCart = (product) => {
+            if (getRemainingStock(product) <= 0) {
+                refs.productsStatus.textContent = `${product.name} sudah mencapai batas stok.`;
+                return;
+            }
+
             const existingItem = findCartItem(product.id);
 
             if (existingItem) {
@@ -385,17 +423,43 @@
 
             refs.productsStatus.textContent = `${product.name} ditambahkan ke keranjang.`;
             renderCart();
+            renderProducts();
         };
 
         const removeFromCart = (productId) => {
             state.cart = state.cart.filter((item) => item.id !== productId);
             renderCart();
+            renderProducts();
+        };
+
+        const setQuantity = (productId, quantity) => {
+            const item = findCartItem(productId);
+
+            if (!item) {
+                return;
+            }
+
+            const stock = Number(item.stock_quantity || 0);
+            const nextQuantity = Math.max(1, Math.min(stock, Number(quantity || 1)));
+
+            if (nextQuantity !== Number(quantity || 1)) {
+                refs.checkoutStatus.textContent = `Qty ${item.name} disesuaikan dengan stok tersedia.`;
+            }
+
+            item.quantity = nextQuantity;
+            renderCart();
+            renderProducts();
         };
 
         const changeQuantity = (productId, delta) => {
             const item = findCartItem(productId);
 
             if (!item) {
+                return;
+            }
+
+            if (delta > 0 && item.quantity >= Number(item.stock_quantity || 0)) {
+                refs.checkoutStatus.textContent = 'Jumlah item sudah mencapai stok tersedia.';
                 return;
             }
 
@@ -407,6 +471,7 @@
             }
 
             renderCart();
+            renderProducts();
         };
 
         const renderProducts = () => {
@@ -424,22 +489,30 @@
 
             refs.productsMeta.textContent = `${state.products.length} item`;
 
-            refs.productGrid.innerHTML = state.products.map((product) => `
-                <button type="button" data-product-id="${product.id}" class="group flex min-h-44 flex-col justify-between rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-slate-900/90 hover:shadow-xl hover:shadow-cyan-950/30">
-                    <div>
-                        <div class="flex items-start justify-between gap-3">
-                            <span class="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">${product.sku || '-'}</span>
-                            <span class="shrink-0 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">Stok ${product.stock_quantity}</span>
+            refs.productGrid.innerHTML = state.products.map((product) => {
+                const stockBadge = getStockBadge(product);
+
+                return `
+                    <button type="button" data-product-id="${product.id}" class="group flex min-h-44 flex-col justify-between rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-slate-900/90 hover:shadow-xl hover:shadow-cyan-950/30">
+                        <div>
+                            <div class="flex items-start justify-between gap-3">
+                                <span class="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">${product.sku || '-'}</span>
+                            </div>
+                            <h3 class="mt-4 line-clamp-2 text-lg font-semibold leading-snug text-white">${product.name}</h3>
+                            <p class="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-400">${product.description || 'Tanpa deskripsi'}</p>
                         </div>
-                        <h3 class="mt-4 line-clamp-2 text-lg font-semibold leading-snug text-white">${product.name}</h3>
-                        <p class="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-400">${product.description || 'Tanpa deskripsi'}</p>
-                    </div>
-                    <div class="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4 text-sm">
-                        <span class="text-lg font-semibold text-emerald-300">${formatMoney(product.selling_price)}</span>
-                        <span class="rounded-full bg-white/10 px-3 py-1.5 font-medium text-slate-300 transition group-hover:bg-cyan-400/20 group-hover:text-cyan-100">Tambah</span>
-                    </div>
-                </button>
-            `).join('');
+                        <div class="mt-5 space-y-3 border-t border-white/10 pt-4">
+                            <div class="flex items-center justify-between gap-3 text-sm">
+                                <span class="text-lg font-semibold text-emerald-300">${formatMoney(product.selling_price)}</span>
+                                <span class="rounded-full bg-white/10 px-3 py-1.5 font-medium text-slate-300 transition group-hover:bg-cyan-400/20 group-hover:text-cyan-100">Tambah</span>
+                            </div>
+                            <div>
+                                <span class="block w-full rounded-xl border px-3 py-2 text-center text-xs font-semibold ${stockBadge.className}">${stockBadge.label}</span>
+                            </div>
+                        </div>
+                    </button>
+                `;
+            }).join('');
 
             refs.productGrid.querySelectorAll('[data-product-id]').forEach((button) => {
                 button.addEventListener('click', () => {
@@ -471,7 +544,7 @@
                     <td class="px-3 py-3 align-top">
                         <div class="inline-flex items-center rounded-full border border-white/10 bg-slate-950/70">
                             <button type="button" data-decrease="${item.id}" class="px-2 py-1 text-slate-300 hover:text-white">-</button>
-                            <span class="min-w-10 px-3 py-1 text-center">${item.quantity}</span>
+                            <input type="number" min="1" max="${item.stock_quantity}" value="${item.quantity}" data-quantity="${item.id}" class="w-14 border-x border-white/10 bg-transparent px-2 py-1 text-center text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none">
                             <button type="button" data-increase="${item.id}" class="px-2 py-1 text-slate-300 hover:text-white">+</button>
                         </div>
                     </td>
@@ -488,6 +561,17 @@
 
             refs.cartTable.querySelectorAll('[data-increase]').forEach((button) => {
                 button.addEventListener('click', () => changeQuantity(Number(button.dataset.increase), 1));
+            });
+
+            refs.cartTable.querySelectorAll('[data-quantity]').forEach((input) => {
+                input.addEventListener('change', () => setQuantity(Number(input.dataset.quantity), input.value));
+                input.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        setQuantity(Number(input.dataset.quantity), input.value);
+                        input.blur();
+                    }
+                });
             });
 
             refs.cartTable.querySelectorAll('[data-remove]').forEach((button) => {
@@ -681,6 +765,7 @@
         refs.clearCart.addEventListener('click', () => {
             state.cart = [];
             renderCart();
+            renderProducts();
         });
         refs.discountAmount.addEventListener('input', updateSummary);
         refs.cashTendered.addEventListener('input', updateSummary);
