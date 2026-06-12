@@ -150,53 +150,55 @@
                 </div>
             </div>
 
-            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 
-                <div class="rounded-2xl bg-slate-900/40 p-4">
-                    <p class="text-sm text-slate-400">
-                        Total Transaksi
-                    </p>
+            <div class="rounded-2xl border border-cyan-400/20 bg-cyan-500/10 p-4 shadow-sm">
+                <p class="text-sm text-cyan-300">
+                    Total Transaksi
+                </p>
 
-                    <h3 class="mt-2 text-3xl font-bold text-cyan-300">
-                        {{ $totalTransactions }}
-                    </h3>
-                </div>
-
-                <div class="rounded-2xl bg-slate-900/40 p-4">
-                    <p class="text-sm text-slate-400">
-                        Total Omzet
-                    </p>
-
-                    <h3 class="mt-2 text-3xl font-bold text-emerald-300">
-                        Rp{{ number_format($totalRevenue, 0, ',', '.') }}
-                    </h3>
-                </div>
-
-                <div class="rounded-2xl bg-slate-900/40 p-4">
-                    <p class="text-sm text-slate-400">
-                        Item Terjual
-                    </p>
-
-                    <h3 class="mt-2 text-3xl font-bold text-amber-300">
-                        {{ $totalItemsSold }}
-                    </h3>
-                </div>
-
-                <div class="rounded-2xl bg-slate-900/40 p-4">
-                    <p class="text-sm text-slate-400">
-                        Produk Terlaris
-                    </p>
-
-                    <h3 class="mt-2 text-lg font-bold text-white">
-                        {{ $topProduct?->product?->name ?? 'Belum ada data' }}
-                    </h3>
-
-                    <p class="mt-2 text-sm text-slate-400">
-                        Terjual {{ $topProduct?->total_sold ?? 0 }} pcs
-                    </p>
-                </div>
-
+                <h3 class="mt-2 text-3xl font-bold text-white">
+                    {{ $totalTransactions }}
+                </h3>
             </div>
+
+            <div class="rounded-2xl border border-cyan-400/20 bg-cyan-500/10 p-4 shadow-sm">
+                <p class="text-sm text-cyan-300">
+                    Total Omzet
+                </p>
+
+                <h3 class="mt-2 text-3xl font-bold text-white">
+                    Rp{{ number_format($totalRevenue, 0, ',', '.') }}
+                </h3>
+            </div>
+
+            <div class="rounded-2xl border border-cyan-400/20 bg-cyan-500/10 p-4 shadow-sm">
+                <p class="text-sm text-cyan-300">
+                    Item Terjual
+                </p>
+
+                <h3 class="mt-2 text-3xl font-bold text-white">
+                    {{ $totalItemsSold }}
+                </h3>
+            </div>
+
+            <div class="rounded-2xl border border-cyan-400/20 bg-cyan-500/10 p-4 shadow-sm">
+                <p class="text-sm text-cyan-300">
+                    Produk Terlaris
+                </p>
+
+                <h3 class="mt-2 text-lg font-bold text-white">
+                    {{ $topProduct?->product?->name ?? 'Belum ada data' }}
+                </h3>
+
+                <p class="mt-2 text-sm text-slate-300">
+                    Terjual {{ $topProduct?->total_sold ?? 0 }} pcs
+                </p>
+            </div>
+
+        </div>
+
+        </div>
         </section>
 
     <section class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
