@@ -28,4 +28,16 @@ class ProductController extends Controller
             'data' => $products,
         ]);
     }
+
+    function searchProduct(Request $request)
+    {
+        $keyword = $request->query('q', '');
+
+        $products = $this->productService->searchProduct($keyword);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $products,
+        ], 200);
+    }
 }
