@@ -114,6 +114,7 @@
                         <span id="themeLabel">Mode terang</span>
                     </button>
                 </div>
+                
                 <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                     <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
                         <div class="text-slate-400">Produk</div>
@@ -133,9 +134,74 @@
                     </div>
                 </div>
             </div>
+        
         </section>
 
-        <section class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <section class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+            <div class="mb-6 flex items-center justify-between">
+                <div>
+                    <p class="text-sm uppercase tracking-widest text-slate-400">
+                        Dashboard Penjualan
+                    </p>
+
+                    <h2 class="mt-1 text-xl font-bold text-white">
+                        Ringkasan Statistik
+                    </h2>
+                </div>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+
+                <div class="rounded-2xl bg-slate-900/40 p-4">
+                    <p class="text-sm text-slate-400">
+                        Total Transaksi
+                    </p>
+
+                    <h3 class="mt-2 text-3xl font-bold text-cyan-300">
+                        {{ $totalTransactions }}
+                    </h3>
+                </div>
+
+                <div class="rounded-2xl bg-slate-900/40 p-4">
+                    <p class="text-sm text-slate-400">
+                        Total Omzet
+                    </p>
+
+                    <h3 class="mt-2 text-3xl font-bold text-emerald-300">
+                        Rp{{ number_format($totalRevenue, 0, ',', '.') }}
+                    </h3>
+                </div>
+
+                <div class="rounded-2xl bg-slate-900/40 p-4">
+                    <p class="text-sm text-slate-400">
+                        Item Terjual
+                    </p>
+
+                    <h3 class="mt-2 text-3xl font-bold text-amber-300">
+                        {{ $totalItemsSold }}
+                    </h3>
+                </div>
+
+                <div class="rounded-2xl bg-slate-900/40 p-4">
+                    <p class="text-sm text-slate-400">
+                        Produk Terlaris
+                    </p>
+
+                    <h3 class="mt-2 text-lg font-bold text-white">
+                        {{ $topProduct?->product?->name ?? 'Belum ada data' }}
+                    </h3>
+
+                    <p class="mt-2 text-sm text-slate-400">
+                        Terjual {{ $topProduct?->total_sold ?? 0 }} pcs
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+    <section class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+
+
             <div class="space-y-6">
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
                     <div class="grid gap-3 md:grid-cols-2">
@@ -692,6 +758,7 @@
                 await loadProducts(refs.productSearch.value.trim());
                 await loadTransactions();
                 refs.checkoutStatus.textContent = 'Transaksi berhasil disimpan.';
+
             } catch (error) {
                 refs.checkoutStatus.textContent = error.message || 'Checkout gagal.';
             } finally {

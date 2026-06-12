@@ -25,10 +25,5 @@ Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('
 Route::get('/transactions/{id}/pdf', [TransactionController::class, 'downloadPdf']);
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-<<<<<<< HEAD
+Route::post('/transaction/store', [TransactionController::class, 'store']);
 
-Route::post('/transaction/store', [TransactionController::class, 'store']);
-=======
-Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
-Route::post('/transaction/store', [TransactionController::class, 'store']);
->>>>>>> develop
