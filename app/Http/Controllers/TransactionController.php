@@ -30,7 +30,7 @@ class TransactionController extends Controller
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.unit_price' => ['required', 'integer', 'min:0'],
             'discount_amount' => ['nullable', 'integer', 'min:0'],
-            'payment_method' => ['required', 'in:cash,card,e_wallet,bank_transfer'],
+            'payment_method' => ['required', 'in:cash,card,e_wallet,bank_transfer,qris'],
             'cash_tendered' => ['nullable', 'integer', 'min:0'],
             'notes' => ['nullable', 'string', 'max:255'],
         ]);

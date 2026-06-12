@@ -201,9 +201,10 @@
                                 <option value="card">Card</option>
                                 <option value="e_wallet">E-wallet</option>
                                 <option value="bank_transfer">Bank Transfer</option>
+                                <option value="qris">QRIS</option>
                             </select>
                         </div>
-                        <div>
+                        <div id="cashTenderedWrapper">
                             <label class="text-sm text-slate-300" for="cashTendered">Uang dibayar</label>
                             <input id="cashTendered" type="number" min="0" value="0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
                         </div>
@@ -217,7 +218,7 @@
                         <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
                         <div class="flex items-center justify-between"><span>Diskon</span><span id="discountValue" class="font-semibold text-white">Rp0</span></div>
                         <div class="flex items-center justify-between"><span>Total</span><span id="grandTotalValue" class="font-semibold text-emerald-300">Rp0</span></div>
-                        <div class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
+                        <div id="changeRow" class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
                     </div>
 
                     <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50" disabled>Checkout</button>
@@ -234,6 +235,71 @@
         </section>
     </main>
 
+    <!-- QRIS Payment Modal -->
+    <div id="qrisModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div class="relative mx-auto w-full max-w-sm rounded-3xl border border-white/10 bg-slate-900 shadow-2xl shadow-black/60 overflow-hidden max-h-[92vh] flex flex-col">
+            <!-- Header -->
+            <div class="flex-shrink-0 bg-gradient-to-r from-emerald-500/20 via-cyan-500/15 to-transparent px-6 py-4 text-center border-b border-white/10">
+                <p class="text-xs uppercase tracking-[0.35em] text-cyan-300/80">Pembayaran</p>
+                <h2 class="mt-0.5 text-2xl font-bold text-white">QRIS</h2>
+            </div>
+
+            <!-- Scrollable body -->
+            <div class="overflow-y-auto flex-1 px-6 py-4 space-y-3">
+                <!-- QR Image -->
+                <div class="flex justify-center">
+                    <div class="rounded-2xl border-2 border-white/20 bg-white p-3 shadow-xl w-60">
+                        <img id="qrisImage" src="/images/qris.png" alt="QRIS Payment Code"
+                             class="w-full aspect-[3/4] object-contain"
+                             onerror="this.style.display='none';document.getElementById('qrisFallback').style.display='flex'">
+                        <div id="qrisFallback" style="display:none"
+                             class="w-full aspect-[3/4] flex-col items-center justify-center rounded-xl bg-slate-100 text-slate-500 text-xs text-center gap-2 px-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-slate-400">
+                                <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+                                <rect x="14" y="14" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/>
+                            </svg>
+                            <span>Simpan gambar QRIS<br>di <b>public/images/qris.png</b></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item list -->
+                <div id="qrisItemsList" class="divide-y divide-white/5 rounded-2xl border border-white/10 bg-slate-950/60 text-sm text-slate-300 overflow-hidden"></div>
+
+                <!-- Summary -->
+                <div class="grid gap-1.5 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-slate-300">
+                    <div class="flex justify-between"><span>Subtotal</span><span id="qrisSubtotal" class="font-semibold text-white">Rp0</span></div>
+                    <div class="flex justify-between"><span>Diskon</span><span id="qrisDiscount" class="font-semibold text-white">Rp0</span></div>
+                    <div class="flex justify-between border-t border-white/10 pt-1.5 mt-0.5">
+                        <span class="font-semibold text-white">Total</span>
+                        <span id="qrisAmount" class="text-lg font-bold text-emerald-300">Rp0</span>
+                    </div>
+                </div>
+
+                <!-- Timer -->
+                <div class="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-center">
+                    <p class="text-sm text-slate-400">Menunggu pembayaran</p>
+                    <p id="qrisTimer" class="mt-1 text-3xl font-bold tabular-nums tracking-wider text-white">01:00</p>
+                    <p class="mt-1 text-xs text-slate-500">Selesaikan pembayaran sebelum waktu habis</p>
+                </div>
+            </div>
+
+            <!-- Fixed footer buttons -->
+            <div class="flex-shrink-0 px-6 pb-5 pt-3 space-y-2 border-t border-white/10 bg-slate-900">
+                <button id="checkQrisButton" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>
+                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/>
+                    </svg>
+                    Cek Pembayaran
+                </button>
+                <button id="cancelQrisButton" class="w-full rounded-2xl px-4 py-2.5 text-sm text-slate-400 transition hover:text-white">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
@@ -247,6 +313,7 @@
             products: [],
             cart: [],
             receipt: null,
+            pendingQrisPayload: null,
         };
 
         const refs = {
@@ -277,6 +344,16 @@
             checkoutButton: document.getElementById('checkoutButton'),
             checkoutStatus: document.getElementById('checkoutStatus'),
             receiptBox: document.getElementById('receiptBox'),
+            cashTenderedWrapper: document.getElementById('cashTenderedWrapper'),
+            changeRow: document.getElementById('changeRow'),
+            qrisModal: document.getElementById('qrisModal'),
+            qrisItemsList: document.getElementById('qrisItemsList'),
+            qrisSubtotal: document.getElementById('qrisSubtotal'),
+            qrisDiscount: document.getElementById('qrisDiscount'),
+            qrisAmount: document.getElementById('qrisAmount'),
+            qrisTimer: document.getElementById('qrisTimer'),
+            checkQrisButton: document.getElementById('checkQrisButton'),
+            cancelQrisButton: document.getElementById('cancelQrisButton'),
         };
 
         const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
@@ -392,6 +469,9 @@
             refs.discountValue.textContent = formatMoney(discount);
             refs.grandTotalValue.textContent = formatMoney(grandTotal);
             refs.changeValue.textContent = formatMoney(change);
+            const showCashFields = refs.paymentMethod.value === 'cash';
+            refs.cashTenderedWrapper.style.display = showCashFields ? '' : 'none';
+            refs.changeRow.style.display = showCashFields ? '' : 'none';
             refs.checkoutButton.disabled = state.cart.length === 0 || isCashInsufficient;
             refs.checkoutStatus.textContent = state.cart.length === 0
                 ? 'Tambahkan produk ke keranjang terlebih dahulu.'
@@ -647,6 +727,36 @@
                 return;
             }
 
+            if (refs.paymentMethod.value === 'qris') {
+                state.pendingQrisPayload = {
+                    items: state.cart.map((item) => ({
+                        product_id: item.id,
+                        quantity: item.quantity,
+                        unit_price: item.selling_price,
+                    })),
+                    discount_amount: getDiscount(),
+                    payment_method: 'qris',
+                    cash_tendered: 0,
+                    notes: refs.notes.value,
+                };
+                const subtotal = calculateSubtotal();
+                const discount = Math.min(getDiscount(), subtotal);
+                refs.qrisSubtotal.textContent = formatMoney(subtotal);
+                refs.qrisDiscount.textContent = formatMoney(discount);
+                refs.qrisAmount.textContent = formatMoney(Math.max(0, subtotal - discount));
+                refs.qrisItemsList.innerHTML = state.cart.map((item) => `
+                    <div class="flex items-center justify-between px-4 py-2.5">
+                        <div>
+                            <div class="font-medium text-white">${item.name}</div>
+                            <div class="text-xs text-slate-400">${item.quantity} × ${formatMoney(item.selling_price)}</div>
+                        </div>
+                        <div class="font-semibold text-emerald-300">${formatMoney(item.quantity * item.selling_price)}</div>
+                    </div>
+                `).join('');
+                openQrisModal();
+                return;
+            }
+
             const payload = {
                 items: state.cart.map((item) => ({
                     product_id: item.id,
@@ -708,6 +818,74 @@
                 console.error(error);
             }
         };
+
+        let qrisTimerInterval = null;
+
+        const openQrisModal = () => {
+            refs.qrisModal.classList.remove('hidden');
+            refs.qrisModal.classList.add('flex');
+            let remaining = 60;
+            refs.qrisTimer.textContent = '01:00';
+            refs.qrisTimer.classList.remove('text-rose-400');
+            refs.qrisTimer.classList.add('text-white');
+            clearInterval(qrisTimerInterval);
+            qrisTimerInterval = setInterval(() => {
+                remaining--;
+                const m = Math.floor(remaining / 60);
+                const s = remaining % 60;
+                refs.qrisTimer.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+                if (remaining <= 10) {
+                    refs.qrisTimer.classList.remove('text-white');
+                    refs.qrisTimer.classList.add('text-rose-400');
+                }
+                if (remaining <= 0) {
+                    closeQrisModal();
+                    refs.checkoutStatus.textContent = 'Waktu pembayaran QRIS habis. Silakan coba lagi.';
+                }
+            }, 1000);
+        };
+
+        const closeQrisModal = () => {
+            refs.qrisModal.classList.add('hidden');
+            refs.qrisModal.classList.remove('flex');
+            clearInterval(qrisTimerInterval);
+            refs.qrisTimer.textContent = '01:00';
+            refs.qrisTimer.classList.remove('text-rose-400');
+            refs.qrisTimer.classList.add('text-white');
+            state.pendingQrisPayload = null;
+        };
+
+        refs.checkQrisButton.addEventListener('click', async () => {
+            if (!state.pendingQrisPayload) return;
+            const originalHTML = refs.checkQrisButton.innerHTML;
+            refs.checkQrisButton.disabled = true;
+            refs.checkQrisButton.textContent = 'Memeriksa...';
+            try {
+                const response = await fetchJson('/pos/checkout', {
+                    method: 'POST',
+                    body: JSON.stringify(state.pendingQrisPayload),
+                });
+                closeQrisModal();
+                state.receipt = response.data;
+                renderReceipt(state.receipt);
+                state.cart = [];
+                refs.discountAmount.value = '0';
+                refs.cashTendered.value = '0';
+                refs.notes.value = '';
+                renderCart();
+                await loadProducts(refs.productSearch.value.trim());
+                await loadTransactions();
+                refs.checkoutStatus.textContent = 'Transaksi QRIS berhasil disimpan.';
+            } catch (error) {
+                refs.checkoutStatus.textContent = error.message || 'Checkout gagal.';
+                closeQrisModal();
+            } finally {
+                refs.checkQrisButton.disabled = false;
+                refs.checkQrisButton.innerHTML = originalHTML;
+            }
+        });
+
+        refs.cancelQrisButton.addEventListener('click', closeQrisModal);
 
         let searchTimer = null;
 
