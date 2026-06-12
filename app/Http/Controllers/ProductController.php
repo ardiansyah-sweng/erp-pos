@@ -33,7 +33,13 @@ class ProductController extends Controller
     {
         $keyword = $request->query('q', '');
 
-        $products = $this->productService->searchProduct($keyword);
+        $products = Product::where('is_active', true)
+            ->where(function ($query) use ($keyword) {
+                $query->where('name', 'like', '%' . $keyword . '%')
+                      ->orWhere('sku', 'like', '%' . $keyword . '%');
+            })
+            ->orderBy('name')
+            ->get();
 
         return response()->json([
             'success' => true,
