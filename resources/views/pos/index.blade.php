@@ -38,7 +38,8 @@
         }
 
         html[data-theme="light"] .bg-slate-900\/80,
-        html[data-theme="light"] .bg-slate-900\/90 {
+        html[data-theme="light"] .bg-slate-900\/90,
+        html[data-theme="light"] .bg-slate-900\/95 {
             background-color: #f8fafc !important;
         }
 
@@ -98,6 +99,56 @@
         html[data-theme="light"] textarea::placeholder {
             color: #94a3b8 !important;
         }
+
+        /* Sort menu – tema terang */
+        html[data-theme="light"] #sortMenuToggle {
+            background-color: #ffffff !important;
+            border-color: #dbe3ea !important;
+            color: #334155 !important;
+        }
+
+        html[data-theme="light"] #sortMenuToggle:hover {
+            border-color: #06b6d4 !important;
+            color: #0f172a !important;
+        }
+
+        html[data-theme="light"] #sortMenu {
+            background-color: #ffffff !important;
+            border-color: #dbe3ea !important;
+            box-shadow: 0 8px 24px rgba(15,23,42,0.10) !important;
+        }
+
+        html[data-theme="light"] #sortMenu .sort-option {
+            color: #475569 !important;
+        }
+
+        html[data-theme="light"] #sortMenu .sort-option:hover {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+
+        html[data-theme="light"] #sortMenu .sort-option.text-cyan-300 {
+            background-color: #ecfeff !important;
+            color: #0e7490 !important;
+        }
+
+        html[data-theme="light"] #sortMenu .sort-option .text-slate-500 {
+            color: #94a3b8 !important;
+        }
+
+        html[data-theme="light"] #sortMenu div.text-slate-500 {
+            color: #94a3b8 !important;
+        }
+
+        html[data-theme="light"] #sortDirBadge {
+            background-color: #ecfeff !important;
+            border-color: #67e8f9 !important;
+            color: #0e7490 !important;
+        }
+
+        html[data-theme="light"] #sortStatusLabel {
+            color: #94a3b8 !important;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100">
@@ -109,10 +160,12 @@
                     <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/80">Point of Sales</p>
                     <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat untuk transaksi harian.</h1>
                     <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari atau scan produk, cek isi keranjang, lalu selesaikan pembayaran tanpa reload halaman.</p>
-                    <button id="themeToggle" type="button" class="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white" aria-pressed="false">
-                        <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
-                        <span id="themeLabel">Mode terang</span>
-                    </button>
+                    <div class="mt-4 flex flex-wrap gap-2">                        <button id="themeToggle" type="button" class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white" aria-pressed="false">
+                            <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
+                            <span id="themeLabel">Mode terang</span>
+                        </button>
+
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                     <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
@@ -159,15 +212,33 @@
                         <h2 class="text-lg font-semibold text-white">Daftar Produk</h2>
                         <div class="flex items-center gap-2">
                             <span id="productsMeta" class="text-sm text-slate-400"></span>
-                            <select id="sortBy" class="rounded-xl border border-white/10 bg-slate-950/70 px-3 py-1.5 text-sm text-white outline-none focus:border-cyan-400">
-                                <option value="name">Nama</option>
-                                <option value="selling_price">Harga</option>
-                            </select>
-                            <button id="sortDirToggle" title="Urutan" class="flex items-center gap-1 rounded-xl border border-white/10 bg-slate-950/70 px-3 py-1.5 text-sm text-slate-300 transition hover:border-cyan-400/50 hover:text-white">
-                                <span id="sortDirLabel">A→Z</span>
-                            </button>
+                            <!-- Sort dropdown trigger -->
+                            <div class="relative">
+                                <button id="sortMenuToggle" type="button" class="flex items-center gap-2 rounded-xl border border-white/10 bg-slate-950/70 px-3 py-1.5 text-sm text-slate-300 transition hover:border-cyan-400/50 hover:text-white">
+                                    <span id="sortByLabel">Nama</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                </button>
+                                <div id="sortMenu" class="absolute right-0 z-20 mt-1 hidden w-48 overflow-hidden rounded-2xl border border-white/10 bg-slate-900/95 shadow-xl backdrop-blur-xl">
+                                    <div class="px-3 py-2 text-xs uppercase tracking-widest text-slate-500">Urutkan berdasarkan:</div>
+                                    <button type="button" data-sort-by="name" data-sort-dir="asc" class="sort-option flex w-full items-center justify-between px-4 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white">
+                                        <span>Nama (A → Z)</span><span class="text-xs text-slate-500">A→Z</span>
+                                    </button>
+                                    <button type="button" data-sort-by="name" data-sort-dir="desc" class="sort-option flex w-full items-center justify-between px-4 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white">
+                                        <span>Nama (Z → A)</span><span class="text-xs text-slate-500">Z→A</span>
+                                    </button>
+                                    <button type="button" data-sort-by="selling_price" data-sort-dir="asc" class="sort-option flex w-full items-center justify-between px-4 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white">
+                                        <span>Harga (Termurah)</span><span class="text-xs text-slate-500">Rp↑</span>
+                                    </button>
+                                    <button type="button" data-sort-by="selling_price" data-sort-dir="desc" class="sort-option flex w-full items-center justify-between px-4 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white">
+                                        <span>Harga (Termahal)</span><span class="text-xs text-slate-500">Rp↓</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Sort dir badge -->
+                            <span id="sortDirBadge" class="rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-3 py-1.5 text-xs font-semibold text-cyan-300">A→Z</span>
                         </div>
                     </div>
+                    <p id="sortStatusLabel" class="mb-3 hidden text-xs text-slate-500"></p>
                     <div id="productGrid" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"></div>
                 </div>
             </div>
@@ -271,9 +342,11 @@
             productsMeta: document.getElementById('productsMeta'),
             productGrid: document.getElementById('productGrid'),
             productCount: document.getElementById('productCount'),
-            sortBy: document.getElementById('sortBy'),
-            sortDirToggle: document.getElementById('sortDirToggle'),
-            sortDirLabel: document.getElementById('sortDirLabel'),
+            sortMenuToggle: document.getElementById('sortMenuToggle'),
+            sortMenu: document.getElementById('sortMenu'),
+            sortByLabel: document.getElementById('sortByLabel'),
+            sortDirBadge: document.getElementById('sortDirBadge'),
+            sortStatusLabel: document.getElementById('sortStatusLabel'),
             cartCount: document.getElementById('cartCount'),
             subtotalLabel: document.getElementById('subtotalLabel'),
             totalLabel: document.getElementById('totalLabel'),
@@ -767,21 +840,47 @@
 
         refs.refreshProducts.addEventListener('click', () => loadProducts(refs.productSearch.value.trim()));
 
-        refs.sortBy.addEventListener('change', () => {
-            state.sortBy = refs.sortBy.value;
-            // Update label tombol arah sesuai kolom
-            refs.sortDirLabel.textContent = state.sortDir === 'asc'
-                ? (state.sortBy === 'selling_price' ? 'Murah→Mahal' : 'A→Z')
-                : (state.sortBy === 'selling_price' ? 'Mahal→Murah' : 'Z→A');
-            loadProducts(refs.productSearch.value.trim());
+        // ---- Sort menu ----
+        const sortLabels = {
+            'name:asc':            { by: 'Nama',  dir: 'A→Z',        status: 'Sorting berdasarkan nama (A → Z)' },
+            'name:desc':           { by: 'Nama',  dir: 'Z→A',        status: 'Sorting berdasarkan nama (Z → A)' },
+            'selling_price:asc':   { by: 'Harga', dir: 'Murah→Mahal', status: 'Sorting berdasarkan harga (Termurah → Termahal)' },
+            'selling_price:desc':  { by: 'Harga', dir: 'Mahal→Murah', status: 'Sorting berdasarkan harga (Termahal → Termurah)' },
+        };
+
+        const applySortUI = () => {
+            const key = `${state.sortBy}:${state.sortDir}`;
+            const label = sortLabels[key] || sortLabels['name:asc'];
+            refs.sortByLabel.textContent = label.by;
+            refs.sortDirBadge.textContent = label.dir;
+            refs.sortStatusLabel.textContent = label.status;
+            refs.sortStatusLabel.classList.remove('hidden');
+
+            // Highlight active option
+            refs.sortMenu.querySelectorAll('.sort-option').forEach((btn) => {
+                const isActive = btn.dataset.sortBy === state.sortBy && btn.dataset.sortDir === state.sortDir;
+                btn.classList.toggle('text-cyan-300', isActive);
+                btn.classList.toggle('bg-cyan-400/10', isActive);
+                btn.classList.toggle('text-slate-300', !isActive);
+            });
+        };
+
+        refs.sortMenuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            refs.sortMenu.classList.toggle('hidden');
         });
 
-        refs.sortDirToggle.addEventListener('click', () => {
-            state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
-            refs.sortDirLabel.textContent = state.sortDir === 'asc'
-                ? (state.sortBy === 'selling_price' ? 'Murah→Mahal' : 'A→Z')
-                : (state.sortBy === 'selling_price' ? 'Mahal→Murah' : 'Z→A');
-            loadProducts(refs.productSearch.value.trim());
+        document.addEventListener('click', () => refs.sortMenu.classList.add('hidden'));
+        refs.sortMenu.addEventListener('click', (e) => e.stopPropagation());
+
+        refs.sortMenu.querySelectorAll('.sort-option').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                state.sortBy  = btn.dataset.sortBy;
+                state.sortDir = btn.dataset.sortDir;
+                applySortUI();
+                refs.sortMenu.classList.add('hidden');
+                loadProducts(refs.productSearch.value.trim());
+            });
         });
         refs.clearCart.addEventListener('click', () => {
             state.cart = [];
@@ -798,6 +897,7 @@
         });
 
         applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+        applySortUI();
         loadProducts();
         loadTransactions();
     </script>
