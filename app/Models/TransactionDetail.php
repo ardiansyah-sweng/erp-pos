@@ -8,7 +8,7 @@ use App\Models\Product;
 class TransactionDetail extends Model
 {
     protected $table = 'transaction_detail';
-    protected $fillable = ['transaction_id','product_id','quantity','price','amount', 'created_at', 'updated_at'];
+    protected $fillable = ['transaction_id','product_id','quantity','price','amount','transaction_date', 'created_at', 'updated_at'];
 
     public function transaction()
     {

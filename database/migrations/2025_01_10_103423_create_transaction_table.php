@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('transaction', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('total');
+            $table->timestamp('transaction_date')->nullable();
             $table->timestamps();
         });
     }

@@ -33,6 +33,7 @@ class TransactionService
         return DB::transaction(function () use ($items, $totalAmount) {
             $transaction = Transaction::create([
                 'total' => $totalAmount,
+                'transaction_date' => now(),
             ]);
 
             foreach ($items as $item) {
@@ -42,6 +43,7 @@ class TransactionService
                     'quantity' => $item['quantity'],
                     'price' => $item['unit_price'],
                     'amount' => $item['amount'],
+                    'transaction_date' => now(),
                 ]);
             }
 
