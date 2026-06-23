@@ -42,6 +42,10 @@
             background-color: #f8fafc !important;
         }
 
+        html[data-theme="light"] .bg-slate-950 {
+            background-color: #ffffff !important;
+        }
+
         html[data-theme="light"] .border-white\/10 {
             border-color: #dbe3ea !important;
         }
@@ -172,7 +176,7 @@
                     <div id="cartEmptyState" class="rounded-2xl border border-dashed border-white/10 bg-slate-950/50 px-4 py-8 text-center text-sm text-slate-400">
                         Keranjang masih kosong. Pilih produk atau scan barcode untuk mulai transaksi.
                     </div>
-                    <div class="overflow-hidden rounded-2xl border border-white/10">
+                    <div id="cartTableWrapper" class="hidden overflow-hidden rounded-2xl border border-white/10">
                         <table class="min-w-full text-left text-sm text-slate-200">
                             <thead class="bg-slate-900/90 text-slate-400">
                                 <tr>
@@ -192,7 +196,7 @@
                     <div class="mt-4 space-y-4">
                         <div>
                             <label class="text-sm text-slate-300" for="discountAmount">Diskon</label>
-                            <input id="discountAmount" type="number" min="0" value="0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
+                            <input id="discountAmount" type="text" inputmode="numeric" value="Rp 0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
                         </div>
                         <div>
                             <label class="text-sm text-slate-300" for="paymentMethod">Metode pembayaran</label>
@@ -241,9 +245,33 @@
                                 </button>
                             </div>
                         </div>
+
+                       <div id="cardForm" class="hidden mt-4 space-y-3">
+                        <div>
+                            <label class="text-sm text-slate-300">Nama Pemegang Kartu</label>
+                            <input id="cardHolder" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
+
+                        <div>
+                            <label class="text-sm text-slate-300">No Kartu (4 digit terakhir)</label>
+                            <input id="cardNumber" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
+
+                        <div>
+                            <label class="text-sm text-slate-300">Bank / Provider</label>
+                            <input id="cardBank" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
+
+                        <div>
+                            <label class="text-sm text-slate-300">Kode Approval</label>
+                            <input id="approvalCode" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
+                        </div>
+
+
                         <div id="cashTenderedWrapper">
                             <label class="text-sm text-slate-300" for="cashTendered">Uang dibayar</label>
-                            <input id="cashTendered" type="number" min="0" value="0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
+                            <input id="cashTendered" type="text" inputmode="numeric" value="Rp 0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
                         </div>
                         <div>
                             <label class="text-sm text-slate-300" for="notes">Catatan</label>
@@ -259,13 +287,23 @@
                     </div>
 
                     <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50" disabled>Checkout</button>
-                    <p id="checkoutStatus" class="mt-3 text-sm text-slate-400"></p>
+                    <div id="checkoutStatus" class="mt-3 hidden rounded-2xl border px-4 py-3 text-sm font-medium"></div>
                 </div>
 
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-                    <h2 class="text-lg font-semibold text-white">Struk Terakhir</h2>
-                    <div id="receiptBox" class="mt-4 rounded-2xl border border-dashed border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300">
-                        Belum ada transaksi.
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-lg font-semibold text-white">Riwayat Transaksi</h2>
+                            <span id="transactionsMeta" class="text-sm text-slate-400">0 transaksi</span>
+                        </div>
+                        <a href="{{ route('transactions.index') }}" class="rounded-full border border-white/10 bg-slate-950/60 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white">
+                            Lihat semua
+                        </a>
+                    </div>
+                    <div id="transactionHistory" class="space-y-3">
+                        <div class="rounded-2xl border border-dashed border-white/10 bg-slate-950/60 p-4 text-sm text-slate-400">
+                            Belum ada transaksi.
+                        </div>
                     </div>
                 </div>
             </aside>
@@ -337,6 +375,27 @@
         </div>
     </div>
 
+    <div id="transactionModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm">
+        <div class="w-full max-w-md rounded-3xl border border-white/10 bg-slate-950 p-5 text-slate-100 shadow-2xl shadow-black/40">
+            <div class="mb-4 flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">Detail Transaksi</p>
+                    <h2 id="transactionModalTitle" class="mt-1 text-xl font-semibold text-white">TRX-0000</h2>
+                    <p id="transactionModalDate" class="mt-1 text-sm text-slate-400">-</p>
+                </div>
+                <button id="closeTransactionModal" type="button" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300 transition hover:text-white">Tutup</button>
+            </div>
+            <div id="transactionModalItems" class="divide-y divide-white/5 rounded-2xl border border-white/10 bg-slate-950/60"></div>
+            <div id="transactionModalPayment" class="mt-4 grid gap-2 rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300"></div>
+            <div class="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div class="flex items-center justify-between text-sm text-slate-300">
+                    <span>Total Belanja</span>
+                    <span id="transactionModalTotal" class="text-lg font-semibold text-emerald-300">Rp0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
@@ -369,6 +428,7 @@
             subtotalLabel: document.getElementById('subtotalLabel'),
             totalLabel: document.getElementById('totalLabel'),
             cartEmptyState: document.getElementById('cartEmptyState'),
+            cartTableWrapper: document.getElementById('cartTableWrapper'),
             cartTable: document.getElementById('cartTable'),
             clearCart: document.getElementById('clearCart'),
             discountAmount: document.getElementById('discountAmount'),
@@ -381,7 +441,6 @@
             changeValue: document.getElementById('changeValue'),
             checkoutButton: document.getElementById('checkoutButton'),
             checkoutStatus: document.getElementById('checkoutStatus'),
-            receiptBox: document.getElementById('receiptBox'),
             ewalletPanel: document.getElementById('ewalletPanel'),
             cashTenderedWrapper: document.getElementById('cashTenderedWrapper'),
             changeRow: document.getElementById('changeRow'),
@@ -393,13 +452,65 @@
             qrisTimer: document.getElementById('qrisTimer'),
             checkQrisButton: document.getElementById('checkQrisButton'),
             cancelQrisButton: document.getElementById('cancelQrisButton'),
+            transactionsMeta: document.getElementById('transactionsMeta'),
+            transactionHistory: document.getElementById('transactionHistory'),
+            transactionModal: document.getElementById('transactionModal'),
+            transactionModalTitle: document.getElementById('transactionModalTitle'),
+            transactionModalDate: document.getElementById('transactionModalDate'),
+            transactionModalItems: document.getElementById('transactionModalItems'),
+            transactionModalPayment: document.getElementById('transactionModalPayment'),
+            transactionModalTotal: document.getElementById('transactionModalTotal'),
+            closeTransactionModal: document.getElementById('closeTransactionModal'),
+            cardForm: document.getElementById('cardForm'),
+            cardHolder: document.getElementById('cardHolder'),
+            cardNumber: document.getElementById('cardNumber'),
+            cardBank: document.getElementById('cardBank'),
+            approvalCode: document.getElementById('approvalCode'),
         };
 
         const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
-        const getDiscount = () => Math.max(0, Number(refs.discountAmount.value || 0));
-        const getCashTendered = () => Math.max(0, Number(refs.cashTendered.value || 0));
+        const parseCurrencyInput = (value) => Number(String(value || '').replace(/\D/g, '')) || 0;
+        const formatCurrencyInput = (value) => `Rp ${new Intl.NumberFormat('id-ID').format(Number(value || 0))}`;
+        const checkoutStatusClasses = {
+            info: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-100',
+            error: 'border-rose-400/30 bg-rose-400/10 text-rose-100',
+            success: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-100',
+        };
+        const setCheckoutStatus = (message = '', type = 'info') => {
+            refs.checkoutStatus.className = `mt-3 rounded-2xl border px-4 py-3 text-sm font-medium ${checkoutStatusClasses[type] || checkoutStatusClasses.info}`;
+            refs.checkoutStatus.textContent = message;
+            refs.checkoutStatus.classList.toggle('hidden', !message);
+        };
+        const setCurrencyInputValue = (input, value) => {
+            input.value = formatCurrencyInput(value);
+        };
+        const normalizeCurrencyInput = (input) => {
+            const digits = String(input.value || '').replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+            const value = Number(digits || 0);
+
+            input.value = digits ? formatCurrencyInput(value) : '';
+
+            return value;
+        };
+        const formatDateTime = (value) => {
+            if (!value) {
+                return '-';
+            }
+
+            return new Intl.DateTimeFormat('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            }).format(new Date(value));
+        };
+        const getDiscount = () => Math.max(0, parseCurrencyInput(refs.discountAmount.value));
+        const getCashTendered = () => Math.max(0, parseCurrencyInput(refs.cashTendered.value));
         const calculateSubtotal = () => state.cart.reduce((total, item) => total + (item.quantity * item.selling_price), 0);
-        const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getDiscount());
+        const getAppliedDiscount = () => Math.min(getDiscount(), calculateSubtotal());
+        const isDiscountTooHigh = () => calculateSubtotal() > 0 && getDiscount() >= calculateSubtotal();
+        const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getAppliedDiscount());
         const getStockBadge = (product) => {
             const stock = getRemainingStock(product);
             const minStock = Number(product.min_stock || 0);
@@ -496,12 +607,9 @@
             const paymentMethod = refs.paymentMethod.value;
             const isCashPayment = paymentMethod === 'cash';
             const isEwallet = paymentMethod === 'e_wallet';
+            const isInvalidDiscount = isDiscountTooHigh();
             const isCashInsufficient = isCashPayment && state.cart.length > 0 && getCashTendered() < grandTotal;
             const isEwalletNotSelected = isEwallet && !state.selectedEwallet;
-
-            if (getDiscount() > subtotal) {
-                refs.discountAmount.value = String(subtotal);
-            }
 
             refs.productCount.textContent = String(state.products.length);
             refs.cartCount.textContent = String(state.cart.reduce((total, item) => total + item.quantity, 0));
@@ -512,16 +620,32 @@
             refs.grandTotalValue.textContent = formatMoney(grandTotal);
             refs.changeValue.textContent = formatMoney(change);
             refs.ewalletPanel.classList.toggle('hidden', !isEwallet);
+            refs.cardForm.classList.toggle('hidden', paymentMethod !== 'card');
             refs.cashTenderedWrapper.style.display = isCashPayment ? '' : 'none';
             refs.changeRow.style.display = isCashPayment ? '' : 'none';
-            refs.checkoutButton.disabled = state.cart.length === 0 || isCashInsufficient || isEwalletNotSelected;
-            refs.checkoutStatus.textContent = state.cart.length === 0
-                ? 'Tambahkan produk ke keranjang terlebih dahulu.'
-                : isCashInsufficient
-                    ? 'Uang dibayar belum cukup.'
-                    : isEwalletNotSelected
-                        ? 'Pilih e-wallet terlebih dahulu.'
-                        : '';
+            refs.checkoutButton.disabled = state.cart.length === 0 || isInvalidDiscount || isCashInsufficient || isEwalletNotSelected;
+
+            if (state.cart.length === 0) {
+                setCheckoutStatus('Tambahkan produk ke keranjang terlebih dahulu.', 'info');
+                return;
+            }
+
+            if (isInvalidDiscount) {
+                setCheckoutStatus('Diskon harus lebih kecil dari subtotal.', 'error');
+                return;
+            }
+
+            if (isCashInsufficient) {
+                setCheckoutStatus('Uang dibayar belum cukup.', 'error');
+                return;
+            }
+
+            if (isEwalletNotSelected) {
+                setCheckoutStatus('Pilih e-wallet terlebih dahulu.', 'error');
+                return;
+            }
+
+            setCheckoutStatus();
         };
 
         const findCartItem = (productId) => state.cart.find((item) => item.id === productId);
@@ -567,7 +691,7 @@
             const nextQuantity = Math.max(1, Math.min(stock, Number(quantity || 1)));
 
             if (nextQuantity !== Number(quantity || 1)) {
-                refs.checkoutStatus.textContent = `Qty ${item.name} disesuaikan dengan stok tersedia.`;
+                setCheckoutStatus(`Qty ${item.name} disesuaikan dengan stok tersedia.`, 'info');
             }
 
             item.quantity = nextQuantity;
@@ -583,7 +707,7 @@
             }
 
             if (delta > 0 && item.quantity >= Number(item.stock_quantity || 0)) {
-                refs.checkoutStatus.textContent = 'Jumlah item sudah mencapai stok tersedia.';
+                setCheckoutStatus('Jumlah item sudah mencapai stok tersedia.', 'info');
                 return;
             }
 
@@ -654,11 +778,13 @@
 
             if (state.cart.length === 0) {
                 refs.cartEmptyState.classList.remove('hidden');
+                refs.cartTableWrapper.classList.add('hidden');
                 updateSummary();
                 return;
             }
 
             refs.cartEmptyState.classList.add('hidden');
+            refs.cartTableWrapper.classList.remove('hidden');
             refs.cartTable.innerHTML = state.cart.map((item) => `
                 <tr>
                     <td class="px-3 py-3 align-top">
@@ -727,47 +853,101 @@
             }
         };
 
-        const renderReceipt = (receipt) => {
-            refs.receiptBox.innerHTML = `
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <div class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">${receipt.transaction_number}</div>
-                            <div class="mt-1 text-base font-semibold text-white">${receipt.payment_status}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm text-slate-400">Total</div>
-                            <div class="text-lg font-semibold text-emerald-300">${formatMoney(receipt.total_amount)}</div>
-                        </div>
-                    </div>
-                    <div class="divide-y divide-white/5 rounded-2xl border border-white/10 bg-slate-950/60">
-                        ${receipt.details.map((item) => `
-                            <div class="flex items-center justify-between px-4 py-3 text-sm text-slate-300">
-                                <div>
-                                    <div class="font-medium text-white">${item.product.name}</div>
-                                    <div class="text-xs text-slate-400">${item.quantity} x ${formatMoney(item.unit_price)}</div>
-                                </div>
-                                <div class="font-semibold text-emerald-300">${formatMoney(item.total_price)}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300">
-                        <div>Metode: <span class="font-semibold text-white">${receipt.payment_method}</span></div>
-                        <div>Cash: <span class="font-semibold text-white">${formatMoney(receipt.cash_tendered)}</span></div>
-                        <div>Diskon: <span class="font-semibold text-white">${formatMoney(receipt.discount_amount)}</span></div>
-                        <div>Kembalian: <span class="font-semibold text-white">${formatMoney(receipt.change_amount)}</span></div>
-                    </div>
-                </div>
+        const openTransactionModal = (transaction) => {
+            const details = transaction.details ?? [];
+            const payments = transaction.payments ?? [];
+            const transactionCode = `TRX-${String(transaction.id).padStart(4, '0')}`;
+
+            refs.transactionModalTitle.textContent = transactionCode;
+            refs.transactionModalDate.textContent = formatDateTime(transaction.created_at);
+            refs.transactionModalTotal.textContent = formatMoney(transaction.total);
+            refs.transactionModalPayment.innerHTML = payments.length ? payments.map((payment) => `
+                <div>Metode: <span class="font-semibold text-white">${payment.payment_method}</span></div>
+                <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
+                <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
+                <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
+            `).join('') : `
+                <div>Metode: <span class="font-semibold text-white">cash</span></div>
+                <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
+                <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
+                <div>Kembalian: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
             `;
+            refs.transactionModalItems.innerHTML = details.length ? details.map((item) => `
+                <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm text-slate-300">
+                    <div>
+                        <div class="font-medium text-white">${item.product?.name || `Produk #${item.product_id}`}</div>
+                        <div class="text-xs text-slate-400">${item.quantity} x ${formatMoney(item.price)}</div>
+                    </div>
+                    <div class="font-semibold text-emerald-300">${formatMoney(item.amount)}</div>
+                </div>
+            `).join('') : `
+                <div class="px-4 py-4 text-sm text-slate-400">Detail item tidak tersedia.</div>
+            `;
+
+            refs.transactionModal.classList.remove('hidden');
+            refs.transactionModal.classList.add('flex');
+        };
+
+        const closeTransactionModal = () => {
+            refs.transactionModal.classList.add('hidden');
+            refs.transactionModal.classList.remove('flex');
+        };
+
+        const renderTransactionHistory = (transactions) => {
+            refs.transactionsMeta.textContent = transactions.length > 5 ? `5 terbaru dari ${transactions.length} transaksi` : `${transactions.length} transaksi`;
+
+            if (!transactions.length) {
+                refs.transactionHistory.innerHTML = `
+                    <div class="rounded-2xl border border-dashed border-white/10 bg-slate-950/60 p-4 text-sm text-slate-400">
+                        Belum ada transaksi.
+                    </div>
+                `;
+                return;
+            }
+
+            refs.transactionHistory.innerHTML = transactions.slice(0, 5).map((transaction) => {
+                const details = transaction.details ?? [];
+                const itemCount = details.reduce((total, item) => total + Number(item.quantity || 0), 0);
+                const transactionCode = `TRX-${String(transaction.id).padStart(4, '0')}`;
+
+                return `
+                    <div class="rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm">
+                        <button type="button" data-show-transaction="${transaction.id}" class="flex w-full items-start justify-between gap-3 text-left">
+                            <div>
+                                <div class="font-semibold text-white">${transactionCode}</div>
+                                <div class="mt-1 text-xs text-slate-400">${formatDateTime(transaction.created_at)}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-emerald-300">${formatMoney(transaction.total)}</div>
+                                <div class="mt-1 text-xs text-slate-400">${itemCount} item</div>
+                            </div>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            refs.transactionHistory.querySelectorAll('[data-show-transaction]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const transaction = transactions.find((item) => String(item.id) === button.dataset.showTransaction);
+
+                    if (transaction) {
+                        openTransactionModal(transaction);
+                    }
+                });
+            });
         };
 
         const checkout = async () => {
             if (state.cart.length === 0) {
-                refs.checkoutStatus.textContent = 'Keranjang masih kosong.';
+                setCheckoutStatus('Keranjang masih kosong.', 'info');
+                return;
+            }
+            if (isDiscountTooHigh()) {
+                setCheckoutStatus('Diskon harus lebih kecil dari subtotal.', 'error');
                 return;
             }
             if (refs.paymentMethod.value === 'cash' && getCashTendered() < calculateGrandTotal()) {
-                refs.checkoutStatus.textContent = 'Uang dibayar belum cukup.';
+                setCheckoutStatus('Uang dibayar belum cukup.', 'error');
                 return;
             }
 
@@ -778,7 +958,7 @@
                         quantity: item.quantity,
                         unit_price: item.selling_price,
                     })),
-                    discount_amount: getDiscount(),
+                    discount_amount: getAppliedDiscount(),
                     payment_method: 'qris',
                     cash_tendered: 0,
                     notes: refs.notes.value,
@@ -807,16 +987,24 @@
                     quantity: item.quantity,
                     unit_price: item.selling_price,
                 })),
-                discount_amount: getDiscount(),
+                discount_amount: getAppliedDiscount(),
                 payment_method: refs.paymentMethod.value,
                 cash_tendered: refs.paymentMethod.value === 'cash' ? getCashTendered() : 0,
                 notes: refs.paymentMethod.value === 'e_wallet' && state.selectedEwallet
                     ? `[${state.selectedEwallet.name}]${refs.notes.value ? ' - ' + refs.notes.value : ''}`
                     : refs.notes.value,
+                card_info: refs.paymentMethod.value === 'card'
+                    ? {
+                        card_holder: refs.cardHolder.value,
+                        card_number_last4: refs.cardNumber.value,
+                        bank: refs.cardBank.value,
+                        approval_code: refs.approvalCode.value,
+                    }
+                    : null,
             };
 
             refs.checkoutButton.disabled = true;
-            refs.checkoutStatus.textContent = 'Menyimpan transaksi...';
+            setCheckoutStatus('Menyimpan transaksi...', 'info');
 
             try {
                 const response = await fetchJson('/pos/checkout', {
@@ -825,7 +1013,6 @@
                 });
 
                 state.receipt = response.data;
-                renderReceipt(state.receipt);
                 state.cart = [];
                 state.selectedEwallet = null;
                 document.querySelectorAll('.ewallet-btn').forEach((b) => {
@@ -833,15 +1020,15 @@
                     b.classList.add('border-white/10', 'bg-slate-950/70');
                     b.querySelector('.ewallet-check').classList.add('hidden');
                 });
-                refs.discountAmount.value = '0';
-                refs.cashTendered.value = '0';
+                setCurrencyInputValue(refs.discountAmount, 0);
+                setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
                 renderCart();
                 await loadProducts(refs.productSearch.value.trim());
                 await loadTransactions();
-                refs.checkoutStatus.textContent = 'Transaksi berhasil disimpan.';
+                setCheckoutStatus('Transaksi berhasil disimpan.', 'success');
             } catch (error) {
-                refs.checkoutStatus.textContent = error.message || 'Checkout gagal.';
+                setCheckoutStatus(error.message || 'Checkout gagal.', 'error');
             } finally {
                 refs.checkoutButton.disabled = state.cart.length === 0;
             }
@@ -851,21 +1038,8 @@
             try {
                 const response = await fetchJson('/transactions');
                 const transactions = response.data ?? [];
+                renderTransactionHistory(transactions);
 
-                if (!transactions.length || state.receipt) {
-                    return;
-                }
-
-                const latest = transactions[0];
-                const itemCount = latest.details?.length ?? 0;
-
-                refs.receiptBox.innerHTML = `
-                    <div class="space-y-2">
-                        <div class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">Transaksi terakhir</div>
-                        <div class="text-base font-semibold text-white">Total ${formatMoney(latest.total)}</div>
-                        <div class="text-sm text-slate-400">${itemCount} item tersimpan di database.</div>
-                    </div>
-                `;
             } catch (error) {
                 console.error(error);
             }
@@ -892,7 +1066,7 @@
                 }
                 if (remaining <= 0) {
                     closeQrisModal();
-                    refs.checkoutStatus.textContent = 'Waktu pembayaran QRIS habis. Silakan coba lagi.';
+                    setCheckoutStatus('Waktu pembayaran QRIS habis. Silakan coba lagi.', 'error');
                 }
             }, 1000);
         };
@@ -919,17 +1093,16 @@
                 });
                 closeQrisModal();
                 state.receipt = response.data;
-                renderReceipt(state.receipt);
                 state.cart = [];
-                refs.discountAmount.value = '0';
-                refs.cashTendered.value = '0';
+                setCurrencyInputValue(refs.discountAmount, 0);
+                setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
                 renderCart();
                 await loadProducts(refs.productSearch.value.trim());
                 await loadTransactions();
-                refs.checkoutStatus.textContent = 'Transaksi QRIS berhasil disimpan.';
+                setCheckoutStatus('Transaksi QRIS berhasil disimpan.', 'success');
             } catch (error) {
-                refs.checkoutStatus.textContent = error.message || 'Checkout gagal.';
+                setCheckoutStatus(error.message || 'Checkout gagal.', 'error');
                 closeQrisModal();
             } finally {
                 refs.checkQrisButton.disabled = false;
@@ -983,8 +1156,18 @@
             renderCart();
             renderProducts();
         });
-        refs.discountAmount.addEventListener('input', updateSummary);
-        refs.cashTendered.addEventListener('input', updateSummary);
+        [refs.discountAmount, refs.cashTendered].forEach((input) => {
+            input.addEventListener('input', () => {
+                normalizeCurrencyInput(input);
+                updateSummary();
+            });
+            input.addEventListener('blur', () => {
+                if (!input.value) {
+                    setCurrencyInputValue(input, 0);
+                    updateSummary();
+                }
+            });
+        });
         refs.paymentMethod.addEventListener('change', () => {
             state.selectedEwallet = null;
             document.querySelectorAll('.ewallet-btn').forEach((b) => {
@@ -1009,12 +1192,25 @@
             });
         });
         refs.checkoutButton.addEventListener('click', checkout);
+        refs.closeTransactionModal.addEventListener('click', closeTransactionModal);
+        refs.transactionModal.addEventListener('click', (event) => {
+            if (event.target === refs.transactionModal) {
+                closeTransactionModal();
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeTransactionModal();
+            }
+        });
         refs.themeToggle.addEventListener('click', () => {
             const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
             applyTheme(currentTheme === 'light' ? 'dark' : 'light');
         });
 
         applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+        setCurrencyInputValue(refs.discountAmount, getDiscount());
+        setCurrencyInputValue(refs.cashTendered, getCashTendered());
         loadProducts();
         loadTransactions();
     </script>
