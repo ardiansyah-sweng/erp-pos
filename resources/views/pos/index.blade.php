@@ -91,6 +91,11 @@
             color: #047857 !important;
         }
 
+        html[data-theme="light"] #clockTime,
+        html[data-theme="light"] #clockIcon svg {
+            color: #0369a1 !important;
+        }
+
         html[data-theme="light"] input,
         html[data-theme="light"] select,
         html[data-theme="light"] textarea {
@@ -118,23 +123,45 @@
                         <span id="themeLabel">Mode terang</span>
                     </button>
                 </div>
+<<<<<<< HEAD
                 
                 <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                     <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
                         <div class="text-slate-400">Produk</div>
                         <div id="productCount" class="mt-1 text-xl font-semibold text-white">0</div>
+=======
+                <div class="flex flex-col items-end gap-3">
+                    <div class="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-sm">
+                        <div class="flex items-center gap-1.5 text-slate-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                            </svg>
+                            <span id="clockDate">-</span>
+                        </div>
+                        <div class="h-4 w-px bg-white/20"></div>
+                        <div class="flex items-center gap-1.5 text-cyan-300">
+                            <span id="clockIcon" class="inline-flex"></span>
+                            <span id="clockTime" class="font-mono font-semibold tracking-wide">--:--:--</span>
+                        </div>
+>>>>>>> develop
                     </div>
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
-                        <div class="text-slate-400">Keranjang</div>
-                        <div id="cartCount" class="mt-1 text-xl font-semibold text-white">0</div>
-                    </div>
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
-                        <div class="text-slate-400">Subtotal</div>
-                        <div id="subtotalLabel" class="mt-1 text-xl font-semibold text-white">Rp0</div>
-                    </div>
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
-                        <div class="text-slate-400">Total</div>
-                        <div id="totalLabel" class="mt-1 text-xl font-semibold text-emerald-300">Rp0</div>
+                    <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                            <div class="text-slate-400">Produk</div>
+                            <div id="productCount" class="mt-1 text-xl font-semibold text-white">0</div>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                            <div class="text-slate-400">Keranjang</div>
+                            <div id="cartCount" class="mt-1 text-xl font-semibold text-white">0</div>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                            <div class="text-slate-400">Subtotal</div>
+                            <div id="subtotalLabel" class="mt-1 text-xl font-semibold text-white">Rp0</div>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                            <div class="text-slate-400">Total</div>
+                            <div id="totalLabel" class="mt-1 text-xl font-semibold text-emerald-300">Rp0</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1028,6 +1055,29 @@
             const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
             applyTheme(currentTheme === 'light' ? 'dark' : 'light');
         });
+
+        const sunIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`;
+        const moonIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 7.5A9 9 0 1 1 12 3Z"/></svg>`;
+
+        const updateClock = () => {
+            const now = new Date();
+            const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+            const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+            const h = now.getHours();
+            const m = now.getMinutes();
+            const totalMinutes = h * 60 + m;
+            const isSunTime = totalMinutes >= 330 && totalMinutes < 1080; // 05:30 - 17:59
+
+            document.getElementById('clockDate').textContent =
+                `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+            document.getElementById('clockTime').textContent =
+                String(h).padStart(2,'0') + ':' +
+                String(m).padStart(2,'0') + ':' +
+                String(now.getSeconds()).padStart(2,'0');
+            document.getElementById('clockIcon').innerHTML = isSunTime ? sunIconSvg : moonIconSvg;
+        };
+        updateClock();
+        setInterval(updateClock, 1000);
 
         applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
         setCurrencyInputValue(refs.discountAmount, getDiscount());
