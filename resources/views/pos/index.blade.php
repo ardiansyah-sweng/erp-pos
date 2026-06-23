@@ -698,16 +698,22 @@
 
         const openTransactionModal = (transaction) => {
             const details = transaction.details ?? [];
+            const payments = transaction.payments ?? [];
             const transactionCode = `TRX-${String(transaction.id).padStart(4, '0')}`;
 
             refs.transactionModalTitle.textContent = transactionCode;
             refs.transactionModalDate.textContent = formatDateTime(transaction.created_at);
             refs.transactionModalTotal.textContent = formatMoney(transaction.total);
-            refs.transactionModalPayment.innerHTML = `
-                <div>Metode: <span class="font-semibold text-white">${transaction.payment_method || 'cash'}</span></div>
-                <div>Cash: <span class="font-semibold text-white">${formatMoney(transaction.cash_tendered)}</span></div>
-                <div>Diskon: <span class="font-semibold text-white">${formatMoney(transaction.discount_amount)}</span></div>
-                <div>Kembalian: <span class="font-semibold text-white">${formatMoney(transaction.change_amount)}</span></div>
+            refs.transactionModalPayment.innerHTML = payments.length ? payments.map((payment) => `
+                <div>Metode: <span class="font-semibold text-white">${payment.payment_method}</span></div>
+                <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
+                <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
+                <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
+            `).join('') : `
+                <div>Metode: <span class="font-semibold text-white">cash</span></div>
+                <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
+                <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
+                <div>Kembalian: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
             `;
             refs.transactionModalItems.innerHTML = details.length ? details.map((item) => `
                 <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm text-slate-300">

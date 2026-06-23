@@ -83,10 +83,12 @@
                 'code' => 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
                 'created_at' => $transaction->created_at?->translatedFormat('d M Y, H.i'),
                 'total' => $transaction->total,
-                'payment_method' => $transaction->payment_method ?? 'cash',
-                'discount_amount' => $transaction->discount_amount ?? 0,
-                'cash_tendered' => $transaction->cash_tendered ?? 0,
-                'change_amount' => $transaction->change_amount ?? 0,
+                'payments' => $transaction->payments->map(fn ($payment) => [
+                    'payment_method' => $payment->payment_method,
+                    'discount_amount' => $payment->discount_amount,
+                    'cash_tendered' => $payment->cash_tendered,
+                    'change_amount' => $payment->change_amount,
+                ])->values(),
                 'details' => $transaction->details->map(fn ($detail) => [
                     'name' => $detail->product?->name ?? 'Produk #' . $detail->product_id,
                     'quantity' => $detail->quantity,
@@ -234,11 +236,16 @@
             modalTitle.textContent = transaction.code;
             modalDate.textContent = transaction.created_at || '-';
             modalTotal.textContent = formatMoney(transaction.total);
-            modalPayment.innerHTML = `
-                <div>Metode: <span class="font-semibold text-white">${escapeHtml(transaction.payment_method || 'cash')}</span></div>
-                <div>Cash: <span class="font-semibold text-white">${formatMoney(transaction.cash_tendered)}</span></div>
-                <div>Diskon: <span class="font-semibold text-white">${formatMoney(transaction.discount_amount)}</span></div>
-                <div>Kembalian: <span class="font-semibold text-white">${formatMoney(transaction.change_amount)}</span></div>
+            modalPayment.innerHTML = transaction.payments.length ? transaction.payments.map((payment) => `
+                <div>Metode: <span class="font-semibold text-white">${escapeHtml(payment.payment_method || 'cash')}</span></div>
+                <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
+                <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
+                <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
+            `).join('') : `
+                <div>Metode: <span class="font-semibold text-white">cash</span></div>
+                <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
+                <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
+                <div>Kembalian: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
             `;
             modalItems.innerHTML = transaction.details.length ? transaction.details.map((detail) => `
                 <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm">

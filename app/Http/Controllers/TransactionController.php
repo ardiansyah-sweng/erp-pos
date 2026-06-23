@@ -17,7 +17,7 @@ class TransactionController extends Controller
             'date' => ['nullable', 'date'],
         ]);
 
-        $transactions = Transaction::with('details.product')
+        $transactions = Transaction::with(['details.product', 'payments'])
             ->when($validated['date'] ?? null, function ($query, $date) {
                 $query->whereDate('created_at', $date);
             })
@@ -86,7 +86,7 @@ class TransactionController extends Controller
         $changeAmount = $validated['payment_method'] === 'cash' ? max(0, $cashTendered - $totalAmount) : 0;
         $paymentStatus = $validated['payment_method'] === 'cash' && $cashTendered < $totalAmount ? 'pending' : 'paid';
 
-        $transaction = DB::transaction(function () use ($validated, $totalAmount, $discountAmount, $cashTendered, $changeAmount, $productQuantities) {
+        $transaction = DB::transaction(function () use ($validated, $totalAmount, $discountAmount, $cashTendered, $changeAmount, $paymentStatus, $productQuantities) {
             $lockedProducts = Product::query()
                 ->whereIn('id', $productQuantities->keys())
                 ->lockForUpdate()
@@ -108,7 +108,12 @@ class TransactionController extends Controller
 
             $transaction = Transaction::create([
                 'total' => $totalAmount,
+            ]);
+
+            $transaction->payments()->create([
                 'payment_method' => $validated['payment_method'],
+                'amount' => $totalAmount,
+                'payment_status' => $paymentStatus,
                 'discount_amount' => $discountAmount,
                 'cash_tendered' => $cashTendered,
                 'change_amount' => $changeAmount,
@@ -158,6 +163,11 @@ class TransactionController extends Controller
 
             $transaction = Transaction::create([
                 'total' => $request->total
+            ]);
+
+            $transaction->payments()->create([
+                'payment_method' => 'cash',
+                'amount' => $request->total,
             ]);
 
             foreach ($request->details as $detail) {

@@ -68,10 +68,17 @@ class TransactionSeeder extends Seeder
 
             $transaction->update([
                 'total' => $total,
+            ]);
+
+            $transaction->payments()->create([
                 'payment_method' => $paymentMethod,
+                'amount' => $total,
+                'payment_status' => 'success',
                 'discount_amount' => 0,
                 'cash_tendered' => $cashTendered,
                 'change_amount' => $paymentMethod === 'cash' ? max(0, $cashTendered - $total) : 0,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
             ]);
         }
     }

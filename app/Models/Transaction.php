@@ -7,17 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Transaction extends Model
 {
     protected $table = 'transaction';
-    protected $fillable = [
-        'total',
-        'payment_method',
-        'discount_amount',
-        'cash_tendered',
-        'change_amount',
-    ];
+    protected $fillable = ['total'];
 
     public function details()
     {
         return $this->hasMany(TransactionDetail::class, 'transaction_id');
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(PaymentDetail::class, 'transaction_id');
     }
 
     /**
