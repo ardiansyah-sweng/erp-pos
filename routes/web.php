@@ -6,6 +6,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\CustomerController;
+
 
 Route::get('/', function () {
     return redirect()->route('pos.index');
@@ -20,3 +22,8 @@ Route::get('/transactions', [TransactionController::class, 'getTransaction'])->n
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
 Route::post('/transaction/store', [TransactionController::class, 'store']);
+Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
+Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('customers.update');
+Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('customers.destroy');
