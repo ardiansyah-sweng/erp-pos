@@ -793,45 +793,6 @@
             }
         };
 
-<<<<<<< HEAD
-        const renderReceipt = (receipt) => {
-            refs.receiptBox.innerHTML = `
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <div class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">${receipt.transaction_number}</div>
-                            <div class="mt-1 text-base font-semibold text-white">${receipt.payment_status}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm text-slate-400">Total</div>
-                            <div class="text-lg font-semibold text-emerald-300">${formatMoney(receipt.total_amount)}</div>
-                        </div>
-                    </div>
-                    <div class="divide-y divide-white/5 rounded-2xl border border-white/10 bg-slate-950/60">
-                        ${receipt.details.map((item) => `
-                            <div class="flex items-center justify-between px-4 py-3 text-sm text-slate-300">
-                                <div>
-                                    <div class="font-medium text-white">${item.product.name}</div>
-                                    <div class="text-xs text-slate-400">${item.quantity} x ${formatMoney(item.unit_price)}</div>
-                                </div>
-                                <div class="font-semibold text-emerald-300">${formatMoney(item.total_price)}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300">
-                        <div>Metode: <span class="font-semibold text-white">${receipt.payment_method}</span></div>
-                        <div>Cash: <span class="font-semibold text-white">${formatMoney(receipt.cash_tendered)}</span></div>
-                        <div>Diskon: <span class="font-semibold text-white">${formatMoney(receipt.discount_amount)}</span></div>
-                        <div>Kembalian: <span class="font-semibold text-white">${formatMoney(receipt.change_amount)}</span></div>
-                    </div>
-                    <button
-                    id="viewInvoiceBtn"
-                    class="mt-4 w-full rounded-xl border border-cyan-400/40 bg-cyan-400/10 px-4 py-2 text-sm text-cyan-200 hover:bg-cyan-400/20">
-                    Lihat Invoice (PDF)
-                </button>
-
-                </div>
-=======
         const openTransactionModal = (transaction) => {
             const details = transaction.details ?? [];
             const payments = transaction.payments ?? [];
@@ -850,7 +811,6 @@
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
->>>>>>> develop
             `;
             refs.transactionModalItems.innerHTML = details.length ? details.map((item) => `
                 <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm text-slate-300">
@@ -901,20 +861,16 @@
                                 <div class="font-semibold text-emerald-300">${formatMoney(transaction.total)}</div>
                                 <div class="mt-1 text-xs text-slate-400">${itemCount} item</div>
                             </div>
-                        </button>
+                        `).join('')}
                     </div>
-                `;
-            }).join('');
-
-            refs.transactionHistory.querySelectorAll('[data-show-transaction]').forEach((button) => {
-                button.addEventListener('click', () => {
-                    const transaction = transactions.find((item) => String(item.id) === button.dataset.showTransaction);
-
-                    if (transaction) {
-                        openTransactionModal(transaction);
-                    }
-                });
-            });
+                    <div class="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300">
+                        <div>Metode: <span class="font-semibold text-white">${receipt.payment_method}</span></div>
+                        <div>Cash: <span class="font-semibold text-white">${formatMoney(receipt.cash_tendered)}</span></div>
+                        <div>Diskon: <span class="font-semibold text-white">${formatMoney(receipt.discount_amount)}</span></div>
+                        <div>Kembalian: <span class="font-semibold text-white">${formatMoney(receipt.change_amount)}</span></div>
+                    </div>
+                </div>
+            `;
         };
 
         document.addEventListener('click', (e) => {
@@ -977,12 +933,7 @@
                 renderCart();
                 await loadProducts(refs.productSearch.value.trim());
                 await loadTransactions();
-<<<<<<< HEAD
                 refs.checkoutStatus.textContent = 'Transaksi berhasil disimpan.';
-
-=======
-                setCheckoutStatus('Transaksi berhasil disimpan.', 'success');
->>>>>>> develop
             } catch (error) {
                 setCheckoutStatus(error.message || 'Checkout gagal.', 'error');
             } finally {
