@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Product;
 
 class TransactionDetail extends Model
 {
@@ -14,9 +15,20 @@ class TransactionDetail extends Model
         return $this->belongsTo(Transaction::class, 'transaction_id');
     }
 
+<<<<<<< HEAD
 /**
  * Ambil nama kolom tertentu dari $fillable
  */
+=======
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    /**
+     * Ambil nama kolom tertentu dari $fillable
+     */
+>>>>>>> develop
     public function getColumn($index)
     {
         $fillable = $this->getFillable();

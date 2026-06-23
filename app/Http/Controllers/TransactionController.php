@@ -5,17 +5,32 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransactionController extends Controller
 {
-    public function getTransaction()
+    public function getTransaction(Request $request)
     {
-        $transactions = Transaction::with('details')
+        $validated = $request->validate([
+            'date' => ['nullable', 'date'],
+        ]);
+
+        $transactions = Transaction::with(['details.product', 'payments'])
+            ->when($validated['date'] ?? null, function ($query, $date) {
+                $query->whereDate('created_at', $date);
+            })
             ->latest()
             ->get();
+
+        if (!$request->expectsJson() && !$request->ajax()) {
+            return view('transactions.index', [
+                'transactions' => $transactions,
+                'selectedDate' => $validated['date'] ?? null,
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -36,7 +51,11 @@ class TransactionController extends Controller
             'notes' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $productIds = collect($validated['items'])->pluck('product_id')->unique()->values();
+        $items = collect($validated['items']);
+        $productIds = $items->pluck('product_id')->unique()->values();
+        $productQuantities = $items->groupBy('product_id')->map(function ($productItems) {
+            return $productItems->sum(fn ($item) => (int) $item['quantity']);
+        });
         $products = Product::query()->whereIn('id', $productIds)->get()->keyBy('id');
 
         $subtotal = 0;
@@ -68,9 +87,37 @@ class TransactionController extends Controller
         $changeAmount = $validated['payment_method'] === 'cash' ? max(0, $cashTendered - $totalAmount) : 0;
         $paymentStatus = $validated['payment_method'] === 'cash' && $cashTendered < $totalAmount ? 'pending' : 'paid';
 
-        $transaction = DB::transaction(function () use ($validated, $totalAmount) {
+        $transaction = DB::transaction(function () use ($validated, $totalAmount, $discountAmount, $cashTendered, $changeAmount, $paymentStatus, $productQuantities) {
+            $lockedProducts = Product::query()
+                ->whereIn('id', $productQuantities->keys())
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            foreach ($productQuantities as $productId => $quantity) {
+                $product = $lockedProducts->get((int) $productId);
+
+                if (!$product || $product->stock_quantity < $quantity) {
+                    $productName = $product?->name ?? 'produk';
+                    $remainingStock = $product?->stock_quantity ?? 0;
+
+                    throw ValidationException::withMessages([
+                        'items' => "Stok {$productName} tidak cukup. Sisa stok {$remainingStock}.",
+                    ]);
+                }
+            }
+
             $transaction = Transaction::create([
                 'total' => $totalAmount,
+            ]);
+
+            $transaction->payments()->create([
+                'payment_method' => $validated['payment_method'],
+                'amount' => $totalAmount,
+                'payment_status' => $paymentStatus,
+                'discount_amount' => $discountAmount,
+                'cash_tendered' => $cashTendered,
+                'change_amount' => $changeAmount,
             ]);
 
             foreach ($validated['items'] as $item) {
@@ -88,6 +135,10 @@ class TransactionController extends Controller
                         'stock_quantity',
                         (int) $item['quantity']
                     );
+            }
+
+            foreach ($productQuantities as $productId => $quantity) {
+                $lockedProducts->get((int) $productId)->decrement('stock_quantity', (int) $quantity);
             }
 
             return $transaction;
@@ -154,6 +205,11 @@ class TransactionController extends Controller
 
             $transaction = Transaction::create([
                 'total' => $request->total
+            ]);
+
+            $transaction->payments()->create([
+                'payment_method' => 'cash',
+                'amount' => $request->total,
             ]);
 
             foreach ($request->details as $detail) {
