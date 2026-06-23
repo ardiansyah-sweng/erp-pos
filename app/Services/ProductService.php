@@ -12,6 +12,7 @@ class ProductService
 
         return $product;
     }
+<<<<<<< HEAD
 
     public function searchProduct($keyword)
     {
@@ -22,4 +23,6 @@ class ProductService
 
         return $products;
     }
+=======
+>>>>>>> 86fb96b7ab46dc498fd8d09d9f92d7bc066ddea3
 }

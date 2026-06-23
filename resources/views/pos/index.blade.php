@@ -42,6 +42,10 @@
             background-color: #f8fafc !important;
         }
 
+        html[data-theme="light"] .bg-slate-950 {
+            background-color: #ffffff !important;
+        }
+
         html[data-theme="light"] .border-white\/10 {
             border-color: #dbe3ea !important;
         }
@@ -87,6 +91,11 @@
             color: #047857 !important;
         }
 
+        html[data-theme="light"] #clockTime,
+        html[data-theme="light"] #clockIcon svg {
+            color: #0369a1 !important;
+        }
+
         html[data-theme="light"] input,
         html[data-theme="light"] select,
         html[data-theme="light"] textarea {
@@ -114,22 +123,37 @@
                         <span id="themeLabel">Mode terang</span>
                     </button>
                 </div>
-                <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
-                        <div class="text-slate-400">Produk</div>
-                        <div id="productCount" class="mt-1 text-xl font-semibold text-white">0</div>
+                <div class="flex flex-col items-end gap-3">
+                    <div class="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-sm">
+                        <div class="flex items-center gap-1.5 text-slate-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                            </svg>
+                            <span id="clockDate">-</span>
+                        </div>
+                        <div class="h-4 w-px bg-white/20"></div>
+                        <div class="flex items-center gap-1.5 text-cyan-300">
+                            <span id="clockIcon" class="inline-flex"></span>
+                            <span id="clockTime" class="font-mono font-semibold tracking-wide">--:--:--</span>
+                        </div>
                     </div>
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
-                        <div class="text-slate-400">Keranjang</div>
-                        <div id="cartCount" class="mt-1 text-xl font-semibold text-white">0</div>
-                    </div>
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
-                        <div class="text-slate-400">Subtotal</div>
-                        <div id="subtotalLabel" class="mt-1 text-xl font-semibold text-white">Rp0</div>
-                    </div>
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
-                        <div class="text-slate-400">Total</div>
-                        <div id="totalLabel" class="mt-1 text-xl font-semibold text-emerald-300">Rp0</div>
+                    <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                            <div class="text-slate-400">Produk</div>
+                            <div id="productCount" class="mt-1 text-xl font-semibold text-white">0</div>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                            <div class="text-slate-400">Keranjang</div>
+                            <div id="cartCount" class="mt-1 text-xl font-semibold text-white">0</div>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                            <div class="text-slate-400">Subtotal</div>
+                            <div id="subtotalLabel" class="mt-1 text-xl font-semibold text-white">Rp0</div>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                            <div class="text-slate-400">Total</div>
+                            <div id="totalLabel" class="mt-1 text-xl font-semibold text-emerald-300">Rp0</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -172,7 +196,7 @@
                     <div id="cartEmptyState" class="rounded-2xl border border-dashed border-white/10 bg-slate-950/50 px-4 py-8 text-center text-sm text-slate-400">
                         Keranjang masih kosong. Pilih produk atau scan barcode untuk mulai transaksi.
                     </div>
-                    <div class="overflow-hidden rounded-2xl border border-white/10">
+                    <div id="cartTableWrapper" class="hidden overflow-hidden rounded-2xl border border-white/10">
                         <table class="min-w-full text-left text-sm text-slate-200">
                             <thead class="bg-slate-900/90 text-slate-400">
                                 <tr>
@@ -192,7 +216,7 @@
                     <div class="mt-4 space-y-4">
                         <div>
                             <label class="text-sm text-slate-300" for="discountAmount">Diskon</label>
-                            <input id="discountAmount" type="number" min="0" value="0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
+                            <input id="discountAmount" type="text" inputmode="numeric" value="Rp 0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
                         </div>
                         <div>
                             <label class="text-sm text-slate-300" for="paymentMethod">Metode pembayaran</label>
@@ -201,11 +225,73 @@
                                 <option value="card">Card</option>
                                 <option value="e_wallet">E-wallet</option>
                                 <option value="bank_transfer">Bank Transfer</option>
+                                <option value="qris">QRIS</option>
                             </select>
                         </div>
+                        <div id="ewalletPanel" class="hidden">
+                            <label class="text-sm text-slate-300">Pilih E-Wallet</label>
+                            <div class="mt-2 grid grid-cols-2 gap-2">
+                                <button type="button" data-ewallet="dana" data-name="DANA"
+                                    class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
+                                    <img src="/images/dana.png" alt="DANA" class="h-8 w-8 object-contain">
+                                    <span class="text-sm font-medium text-white">DANA</span>
+                                    <span class="ewallet-check absolute right-2 top-2 hidden">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><path d="M20 6 9 17l-5-5"/></svg>
+                                    </span>
+                                </button>
+                                <button type="button" data-ewallet="gopay" data-name="GoPay"
+                                    class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
+                                    <img src="/images/gopay.png" alt="GoPay" class="h-8 w-8 object-contain">
+                                    <span class="text-sm font-medium text-white">GoPay</span>
+                                    <span class="ewallet-check absolute right-2 top-2 hidden">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><path d="M20 6 9 17l-5-5"/></svg>
+                                    </span>
+                                </button>
+                                <button type="button" data-ewallet="ovo" data-name="OVO"
+                                    class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
+                                    <img src="/images/ovo.png" alt="OVO" class="h-8 w-8 object-contain">
+                                    <span class="text-sm font-medium text-white">OVO</span>
+                                    <span class="ewallet-check absolute right-2 top-2 hidden">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><path d="M20 6 9 17l-5-5"/></svg>
+                                    </span>
+                                </button>
+                                <button type="button" data-ewallet="shopeepay" data-name="ShopeePay"
+                                    class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
+                                    <img src="/images/shopeepay.png" alt="ShopeePay" class="h-8 w-8 object-contain">
+                                    <span class="text-sm font-medium text-white">ShopeePay</span>
+                                    <span class="ewallet-check absolute right-2 top-2 hidden">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><path d="M20 6 9 17l-5-5"/></svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                       <div id="cardForm" class="hidden mt-4 space-y-3">
                         <div>
+                            <label class="text-sm text-slate-300">Nama Pemegang Kartu</label>
+                            <input id="cardHolder" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
+
+                        <div>
+                            <label class="text-sm text-slate-300">No Kartu (4 digit terakhir)</label>
+                            <input id="cardNumber" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
+
+                        <div>
+                            <label class="text-sm text-slate-300">Bank / Provider</label>
+                            <input id="cardBank" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
+
+                        <div>
+                            <label class="text-sm text-slate-300">Kode Approval</label>
+                            <input id="approvalCode" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
+                        </div>
+
+
+                        <div id="cashTenderedWrapper">
                             <label class="text-sm text-slate-300" for="cashTendered">Uang dibayar</label>
-                            <input id="cashTendered" type="number" min="0" value="0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
+                            <input id="cashTendered" type="text" inputmode="numeric" value="Rp 0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
                         </div>
                         <div>
                             <label class="text-sm text-slate-300" for="notes">Catatan</label>
@@ -217,22 +303,118 @@
                         <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
                         <div class="flex items-center justify-between"><span>Diskon</span><span id="discountValue" class="font-semibold text-white">Rp0</span></div>
                         <div class="flex items-center justify-between"><span>Total</span><span id="grandTotalValue" class="font-semibold text-emerald-300">Rp0</span></div>
-                        <div class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
+                        <div id="changeRow" class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
                     </div>
 
                     <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50" disabled>Checkout</button>
-                    <p id="checkoutStatus" class="mt-3 text-sm text-slate-400"></p>
+                    <div id="checkoutStatus" class="mt-3 hidden rounded-2xl border px-4 py-3 text-sm font-medium"></div>
                 </div>
 
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-                    <h2 class="text-lg font-semibold text-white">Struk Terakhir</h2>
-                    <div id="receiptBox" class="mt-4 rounded-2xl border border-dashed border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300">
-                        Belum ada transaksi.
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-lg font-semibold text-white">Riwayat Transaksi</h2>
+                            <span id="transactionsMeta" class="text-sm text-slate-400">0 transaksi</span>
+                        </div>
+                        <a href="{{ route('transactions.index') }}" class="rounded-full border border-white/10 bg-slate-950/60 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white">
+                            Lihat semua
+                        </a>
+                    </div>
+                    <div id="transactionHistory" class="space-y-3">
+                        <div class="rounded-2xl border border-dashed border-white/10 bg-slate-950/60 p-4 text-sm text-slate-400">
+                            Belum ada transaksi.
+                        </div>
                     </div>
                 </div>
             </aside>
         </section>
     </main>
+
+    <!-- QRIS Payment Modal -->
+    <div id="qrisModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div class="relative mx-auto w-full max-w-sm rounded-3xl border border-white/10 bg-slate-900 shadow-2xl shadow-black/60 overflow-hidden max-h-[92vh] flex flex-col">
+            <!-- Header -->
+            <div class="flex-shrink-0 bg-gradient-to-r from-emerald-500/20 via-cyan-500/15 to-transparent px-6 py-4 text-center border-b border-white/10">
+                <p class="text-xs uppercase tracking-[0.35em] text-cyan-300/80">Pembayaran</p>
+                <h2 class="mt-0.5 text-2xl font-bold text-white">QRIS</h2>
+            </div>
+
+            <!-- Scrollable body -->
+            <div class="overflow-y-auto flex-1 px-6 py-4 space-y-3">
+                <!-- QR Image -->
+                <div class="flex justify-center">
+                    <div class="rounded-2xl border-2 border-white/20 bg-white p-3 shadow-xl w-60">
+                        <img id="qrisImage" src="/images/qris.png" alt="QRIS Payment Code"
+                             class="w-full aspect-[3/4] object-contain"
+                             onerror="this.style.display='none';document.getElementById('qrisFallback').style.display='flex'">
+                        <div id="qrisFallback" style="display:none"
+                             class="w-full aspect-[3/4] flex-col items-center justify-center rounded-xl bg-slate-100 text-slate-500 text-xs text-center gap-2 px-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-slate-400">
+                                <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+                                <rect x="14" y="14" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/>
+                            </svg>
+                            <span>Simpan gambar QRIS<br>di <b>public/images/qris.png</b></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item list -->
+                <div id="qrisItemsList" class="divide-y divide-white/5 rounded-2xl border border-white/10 bg-slate-950/60 text-sm text-slate-300 overflow-hidden"></div>
+
+                <!-- Summary -->
+                <div class="grid gap-1.5 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-slate-300">
+                    <div class="flex justify-between"><span>Subtotal</span><span id="qrisSubtotal" class="font-semibold text-white">Rp0</span></div>
+                    <div class="flex justify-between"><span>Diskon</span><span id="qrisDiscount" class="font-semibold text-white">Rp0</span></div>
+                    <div class="flex justify-between border-t border-white/10 pt-1.5 mt-0.5">
+                        <span class="font-semibold text-white">Total</span>
+                        <span id="qrisAmount" class="text-lg font-bold text-emerald-300">Rp0</span>
+                    </div>
+                </div>
+
+                <!-- Timer -->
+                <div class="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-center">
+                    <p class="text-sm text-slate-400">Menunggu pembayaran</p>
+                    <p id="qrisTimer" class="mt-1 text-3xl font-bold tabular-nums tracking-wider text-white">01:00</p>
+                    <p class="mt-1 text-xs text-slate-500">Selesaikan pembayaran sebelum waktu habis</p>
+                </div>
+            </div>
+
+            <!-- Fixed footer buttons -->
+            <div class="flex-shrink-0 px-6 pb-5 pt-3 space-y-2 border-t border-white/10 bg-slate-900">
+                <button id="checkQrisButton" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>
+                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/>
+                    </svg>
+                    Cek Pembayaran
+                </button>
+                <button id="cancelQrisButton" class="w-full rounded-2xl px-4 py-2.5 text-sm text-slate-400 transition hover:text-white">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="transactionModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm">
+        <div class="w-full max-w-md rounded-3xl border border-white/10 bg-slate-950 p-5 text-slate-100 shadow-2xl shadow-black/40">
+            <div class="mb-4 flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">Detail Transaksi</p>
+                    <h2 id="transactionModalTitle" class="mt-1 text-xl font-semibold text-white">TRX-0000</h2>
+                    <p id="transactionModalDate" class="mt-1 text-sm text-slate-400">-</p>
+                </div>
+                <button id="closeTransactionModal" type="button" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300 transition hover:text-white">Tutup</button>
+            </div>
+            <div id="transactionModalItems" class="divide-y divide-white/5 rounded-2xl border border-white/10 bg-slate-950/60"></div>
+            <div id="transactionModalPayment" class="mt-4 grid gap-2 rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300"></div>
+            <div class="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div class="flex items-center justify-between text-sm text-slate-300">
+                    <span>Total Belanja</span>
+                    <span id="transactionModalTotal" class="text-lg font-semibold text-emerald-300">Rp0</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
@@ -247,6 +429,8 @@
             products: [],
             cart: [],
             receipt: null,
+            selectedEwallet: null,
+            pendingQrisPayload: null,
         };
 
         const refs = {
@@ -264,6 +448,7 @@
             subtotalLabel: document.getElementById('subtotalLabel'),
             totalLabel: document.getElementById('totalLabel'),
             cartEmptyState: document.getElementById('cartEmptyState'),
+            cartTableWrapper: document.getElementById('cartTableWrapper'),
             cartTable: document.getElementById('cartTable'),
             clearCart: document.getElementById('clearCart'),
             discountAmount: document.getElementById('discountAmount'),
@@ -276,14 +461,76 @@
             changeValue: document.getElementById('changeValue'),
             checkoutButton: document.getElementById('checkoutButton'),
             checkoutStatus: document.getElementById('checkoutStatus'),
-            receiptBox: document.getElementById('receiptBox'),
+            ewalletPanel: document.getElementById('ewalletPanel'),
+            cashTenderedWrapper: document.getElementById('cashTenderedWrapper'),
+            changeRow: document.getElementById('changeRow'),
+            qrisModal: document.getElementById('qrisModal'),
+            qrisItemsList: document.getElementById('qrisItemsList'),
+            qrisSubtotal: document.getElementById('qrisSubtotal'),
+            qrisDiscount: document.getElementById('qrisDiscount'),
+            qrisAmount: document.getElementById('qrisAmount'),
+            qrisTimer: document.getElementById('qrisTimer'),
+            checkQrisButton: document.getElementById('checkQrisButton'),
+            cancelQrisButton: document.getElementById('cancelQrisButton'),
+            transactionsMeta: document.getElementById('transactionsMeta'),
+            transactionHistory: document.getElementById('transactionHistory'),
+            transactionModal: document.getElementById('transactionModal'),
+            transactionModalTitle: document.getElementById('transactionModalTitle'),
+            transactionModalDate: document.getElementById('transactionModalDate'),
+            transactionModalItems: document.getElementById('transactionModalItems'),
+            transactionModalPayment: document.getElementById('transactionModalPayment'),
+            transactionModalTotal: document.getElementById('transactionModalTotal'),
+            closeTransactionModal: document.getElementById('closeTransactionModal'),
+            cardForm: document.getElementById('cardForm'),
+            cardHolder: document.getElementById('cardHolder'),
+            cardNumber: document.getElementById('cardNumber'),
+            cardBank: document.getElementById('cardBank'),
+            approvalCode: document.getElementById('approvalCode'),
         };
 
         const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
-        const getDiscount = () => Math.max(0, Number(refs.discountAmount.value || 0));
-        const getCashTendered = () => Math.max(0, Number(refs.cashTendered.value || 0));
+        const parseCurrencyInput = (value) => Number(String(value || '').replace(/\D/g, '')) || 0;
+        const formatCurrencyInput = (value) => `Rp ${new Intl.NumberFormat('id-ID').format(Number(value || 0))}`;
+        const checkoutStatusClasses = {
+            info: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-100',
+            error: 'border-rose-400/30 bg-rose-400/10 text-rose-100',
+            success: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-100',
+        };
+        const setCheckoutStatus = (message = '', type = 'info') => {
+            refs.checkoutStatus.className = `mt-3 rounded-2xl border px-4 py-3 text-sm font-medium ${checkoutStatusClasses[type] || checkoutStatusClasses.info}`;
+            refs.checkoutStatus.textContent = message;
+            refs.checkoutStatus.classList.toggle('hidden', !message);
+        };
+        const setCurrencyInputValue = (input, value) => {
+            input.value = formatCurrencyInput(value);
+        };
+        const normalizeCurrencyInput = (input) => {
+            const digits = String(input.value || '').replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+            const value = Number(digits || 0);
+
+            input.value = digits ? formatCurrencyInput(value) : '';
+
+            return value;
+        };
+        const formatDateTime = (value) => {
+            if (!value) {
+                return '-';
+            }
+
+            return new Intl.DateTimeFormat('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            }).format(new Date(value));
+        };
+        const getDiscount = () => Math.max(0, parseCurrencyInput(refs.discountAmount.value));
+        const getCashTendered = () => Math.max(0, parseCurrencyInput(refs.cashTendered.value));
         const calculateSubtotal = () => state.cart.reduce((total, item) => total + (item.quantity * item.selling_price), 0);
-        const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getDiscount());
+        const getAppliedDiscount = () => Math.min(getDiscount(), calculateSubtotal());
+        const isDiscountTooHigh = () => calculateSubtotal() > 0 && getDiscount() >= calculateSubtotal();
+        const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getAppliedDiscount());
         const getStockBadge = (product) => {
             const stock = getRemainingStock(product);
             const minStock = Number(product.min_stock || 0);
@@ -377,12 +624,12 @@
             const discount = Math.min(getDiscount(), subtotal);
             const grandTotal = Math.max(0, subtotal - discount);
             const change = calculateChange();
-            const isCashPayment = refs.paymentMethod.value === 'cash';
+            const paymentMethod = refs.paymentMethod.value;
+            const isCashPayment = paymentMethod === 'cash';
+            const isEwallet = paymentMethod === 'e_wallet';
+            const isInvalidDiscount = isDiscountTooHigh();
             const isCashInsufficient = isCashPayment && state.cart.length > 0 && getCashTendered() < grandTotal;
-
-            if (getDiscount() > subtotal) {
-                refs.discountAmount.value = String(subtotal);
-            }
+            const isEwalletNotSelected = isEwallet && !state.selectedEwallet;
 
             refs.productCount.textContent = String(state.products.length);
             refs.cartCount.textContent = String(state.cart.reduce((total, item) => total + item.quantity, 0));
@@ -392,12 +639,33 @@
             refs.discountValue.textContent = formatMoney(discount);
             refs.grandTotalValue.textContent = formatMoney(grandTotal);
             refs.changeValue.textContent = formatMoney(change);
-            refs.checkoutButton.disabled = state.cart.length === 0 || isCashInsufficient;
-            refs.checkoutStatus.textContent = state.cart.length === 0
-                ? 'Tambahkan produk ke keranjang terlebih dahulu.'
-                : isCashInsufficient
-                    ? 'Uang dibayar belum cukup.'
-                    : '';
+            refs.ewalletPanel.classList.toggle('hidden', !isEwallet);
+            refs.cardForm.classList.toggle('hidden', paymentMethod !== 'card');
+            refs.cashTenderedWrapper.style.display = isCashPayment ? '' : 'none';
+            refs.changeRow.style.display = isCashPayment ? '' : 'none';
+            refs.checkoutButton.disabled = state.cart.length === 0 || isInvalidDiscount || isCashInsufficient || isEwalletNotSelected;
+
+            if (state.cart.length === 0) {
+                setCheckoutStatus('Tambahkan produk ke keranjang terlebih dahulu.', 'info');
+                return;
+            }
+
+            if (isInvalidDiscount) {
+                setCheckoutStatus('Diskon harus lebih kecil dari subtotal.', 'error');
+                return;
+            }
+
+            if (isCashInsufficient) {
+                setCheckoutStatus('Uang dibayar belum cukup.', 'error');
+                return;
+            }
+
+            if (isEwalletNotSelected) {
+                setCheckoutStatus('Pilih e-wallet terlebih dahulu.', 'error');
+                return;
+            }
+
+            setCheckoutStatus();
         };
 
         const findCartItem = (productId) => state.cart.find((item) => item.id === productId);
@@ -443,7 +711,7 @@
             const nextQuantity = Math.max(1, Math.min(stock, Number(quantity || 1)));
 
             if (nextQuantity !== Number(quantity || 1)) {
-                refs.checkoutStatus.textContent = `Qty ${item.name} disesuaikan dengan stok tersedia.`;
+                setCheckoutStatus(`Qty ${item.name} disesuaikan dengan stok tersedia.`, 'info');
             }
 
             item.quantity = nextQuantity;
@@ -459,7 +727,7 @@
             }
 
             if (delta > 0 && item.quantity >= Number(item.stock_quantity || 0)) {
-                refs.checkoutStatus.textContent = 'Jumlah item sudah mencapai stok tersedia.';
+                setCheckoutStatus('Jumlah item sudah mencapai stok tersedia.', 'info');
                 return;
             }
 
@@ -530,11 +798,13 @@
 
             if (state.cart.length === 0) {
                 refs.cartEmptyState.classList.remove('hidden');
+                refs.cartTableWrapper.classList.add('hidden');
                 updateSummary();
                 return;
             }
 
             refs.cartEmptyState.classList.add('hidden');
+            refs.cartTableWrapper.classList.remove('hidden');
             refs.cartTable.innerHTML = state.cart.map((item) => `
                 <tr>
                     <td class="px-3 py-3 align-top">
@@ -603,47 +873,131 @@
             }
         };
 
-        const renderReceipt = (receipt) => {
-            refs.receiptBox.innerHTML = `
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <div class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">${receipt.transaction_number}</div>
-                            <div class="mt-1 text-base font-semibold text-white">${receipt.payment_status}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm text-slate-400">Total</div>
-                            <div class="text-lg font-semibold text-emerald-300">${formatMoney(receipt.total_amount)}</div>
-                        </div>
-                    </div>
-                    <div class="divide-y divide-white/5 rounded-2xl border border-white/10 bg-slate-950/60">
-                        ${receipt.details.map((item) => `
-                            <div class="flex items-center justify-between px-4 py-3 text-sm text-slate-300">
-                                <div>
-                                    <div class="font-medium text-white">${item.product.name}</div>
-                                    <div class="text-xs text-slate-400">${item.quantity} x ${formatMoney(item.unit_price)}</div>
-                                </div>
-                                <div class="font-semibold text-emerald-300">${formatMoney(item.total_price)}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300">
-                        <div>Metode: <span class="font-semibold text-white">${receipt.payment_method}</span></div>
-                        <div>Cash: <span class="font-semibold text-white">${formatMoney(receipt.cash_tendered)}</span></div>
-                        <div>Diskon: <span class="font-semibold text-white">${formatMoney(receipt.discount_amount)}</span></div>
-                        <div>Kembalian: <span class="font-semibold text-white">${formatMoney(receipt.change_amount)}</span></div>
-                    </div>
-                </div>
+        const openTransactionModal = (transaction) => {
+            const details = transaction.details ?? [];
+            const payments = transaction.payments ?? [];
+            const transactionCode = `TRX-${String(transaction.id).padStart(4, '0')}`;
+
+            refs.transactionModalTitle.textContent = transactionCode;
+            refs.transactionModalDate.textContent = formatDateTime(transaction.created_at);
+            refs.transactionModalTotal.textContent = formatMoney(transaction.total);
+            refs.transactionModalPayment.innerHTML = payments.length ? payments.map((payment) => `
+                <div>Metode: <span class="font-semibold text-white">${payment.payment_method}</span></div>
+                <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
+                <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
+                <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
+            `).join('') : `
+                <div>Metode: <span class="font-semibold text-white">cash</span></div>
+                <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
+                <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
+                <div>Kembalian: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
             `;
+            refs.transactionModalItems.innerHTML = details.length ? details.map((item) => `
+                <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm text-slate-300">
+                    <div>
+                        <div class="font-medium text-white">${item.product?.name || `Produk #${item.product_id}`}</div>
+                        <div class="text-xs text-slate-400">${item.quantity} x ${formatMoney(item.price)}</div>
+                    </div>
+                    <div class="font-semibold text-emerald-300">${formatMoney(item.amount)}</div>
+                </div>
+            `).join('') : `
+                <div class="px-4 py-4 text-sm text-slate-400">Detail item tidak tersedia.</div>
+            `;
+
+            refs.transactionModal.classList.remove('hidden');
+            refs.transactionModal.classList.add('flex');
+        };
+
+        const closeTransactionModal = () => {
+            refs.transactionModal.classList.add('hidden');
+            refs.transactionModal.classList.remove('flex');
+        };
+
+        const renderTransactionHistory = (transactions) => {
+            refs.transactionsMeta.textContent = transactions.length > 5 ? `5 terbaru dari ${transactions.length} transaksi` : `${transactions.length} transaksi`;
+
+            if (!transactions.length) {
+                refs.transactionHistory.innerHTML = `
+                    <div class="rounded-2xl border border-dashed border-white/10 bg-slate-950/60 p-4 text-sm text-slate-400">
+                        Belum ada transaksi.
+                    </div>
+                `;
+                return;
+            }
+
+            refs.transactionHistory.innerHTML = transactions.slice(0, 5).map((transaction) => {
+                const details = transaction.details ?? [];
+                const itemCount = details.reduce((total, item) => total + Number(item.quantity || 0), 0);
+                const transactionCode = `TRX-${String(transaction.id).padStart(4, '0')}`;
+
+                return `
+                    <div class="rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm">
+                        <button type="button" data-show-transaction="${transaction.id}" class="flex w-full items-start justify-between gap-3 text-left">
+                            <div>
+                                <div class="font-semibold text-white">${transactionCode}</div>
+                                <div class="mt-1 text-xs text-slate-400">${formatDateTime(transaction.created_at)}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-emerald-300">${formatMoney(transaction.total)}</div>
+                                <div class="mt-1 text-xs text-slate-400">${itemCount} item</div>
+                            </div>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            refs.transactionHistory.querySelectorAll('[data-show-transaction]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const transaction = transactions.find((item) => String(item.id) === button.dataset.showTransaction);
+
+                    if (transaction) {
+                        openTransactionModal(transaction);
+                    }
+                });
+            });
         };
 
         const checkout = async () => {
             if (state.cart.length === 0) {
-                refs.checkoutStatus.textContent = 'Keranjang masih kosong.';
+                setCheckoutStatus('Keranjang masih kosong.', 'info');
+                return;
+            }
+            if (isDiscountTooHigh()) {
+                setCheckoutStatus('Diskon harus lebih kecil dari subtotal.', 'error');
                 return;
             }
             if (refs.paymentMethod.value === 'cash' && getCashTendered() < calculateGrandTotal()) {
-                refs.checkoutStatus.textContent = 'Uang dibayar belum cukup.';
+                setCheckoutStatus('Uang dibayar belum cukup.', 'error');
+                return;
+            }
+
+            if (refs.paymentMethod.value === 'qris') {
+                state.pendingQrisPayload = {
+                    items: state.cart.map((item) => ({
+                        product_id: item.id,
+                        quantity: item.quantity,
+                        unit_price: item.selling_price,
+                    })),
+                    discount_amount: getAppliedDiscount(),
+                    payment_method: 'qris',
+                    cash_tendered: 0,
+                    notes: refs.notes.value,
+                };
+                const subtotal = calculateSubtotal();
+                const discount = Math.min(getDiscount(), subtotal);
+                refs.qrisSubtotal.textContent = formatMoney(subtotal);
+                refs.qrisDiscount.textContent = formatMoney(discount);
+                refs.qrisAmount.textContent = formatMoney(Math.max(0, subtotal - discount));
+                refs.qrisItemsList.innerHTML = state.cart.map((item) => `
+                    <div class="flex items-center justify-between px-4 py-2.5">
+                        <div>
+                            <div class="font-medium text-white">${item.name}</div>
+                            <div class="text-xs text-slate-400">${item.quantity} × ${formatMoney(item.selling_price)}</div>
+                        </div>
+                        <div class="font-semibold text-emerald-300">${formatMoney(item.quantity * item.selling_price)}</div>
+                    </div>
+                `).join('');
+                openQrisModal();
                 return;
             }
 
@@ -653,14 +1007,24 @@
                     quantity: item.quantity,
                     unit_price: item.selling_price,
                 })),
-                discount_amount: getDiscount(),
+                discount_amount: getAppliedDiscount(),
                 payment_method: refs.paymentMethod.value,
                 cash_tendered: refs.paymentMethod.value === 'cash' ? getCashTendered() : 0,
-                notes: refs.notes.value,
+                notes: refs.paymentMethod.value === 'e_wallet' && state.selectedEwallet
+                    ? `[${state.selectedEwallet.name}]${refs.notes.value ? ' - ' + refs.notes.value : ''}`
+                    : refs.notes.value,
+                card_info: refs.paymentMethod.value === 'card'
+                    ? {
+                        card_holder: refs.cardHolder.value,
+                        card_number_last4: refs.cardNumber.value,
+                        bank: refs.cardBank.value,
+                        approval_code: refs.approvalCode.value,
+                    }
+                    : null,
             };
 
             refs.checkoutButton.disabled = true;
-            refs.checkoutStatus.textContent = 'Menyimpan transaksi...';
+            setCheckoutStatus('Menyimpan transaksi...', 'info');
 
             try {
                 const response = await fetchJson('/pos/checkout', {
@@ -669,17 +1033,22 @@
                 });
 
                 state.receipt = response.data;
-                renderReceipt(state.receipt);
                 state.cart = [];
-                refs.discountAmount.value = '0';
-                refs.cashTendered.value = '0';
+                state.selectedEwallet = null;
+                document.querySelectorAll('.ewallet-btn').forEach((b) => {
+                    b.classList.remove('border-cyan-400/70', 'bg-cyan-400/10');
+                    b.classList.add('border-white/10', 'bg-slate-950/70');
+                    b.querySelector('.ewallet-check').classList.add('hidden');
+                });
+                setCurrencyInputValue(refs.discountAmount, 0);
+                setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
                 renderCart();
                 await loadProducts(refs.productSearch.value.trim());
                 await loadTransactions();
-                refs.checkoutStatus.textContent = 'Transaksi berhasil disimpan.';
+                setCheckoutStatus('Transaksi berhasil disimpan.', 'success');
             } catch (error) {
-                refs.checkoutStatus.textContent = error.message || 'Checkout gagal.';
+                setCheckoutStatus(error.message || 'Checkout gagal.', 'error');
             } finally {
                 refs.checkoutButton.disabled = state.cart.length === 0;
             }
@@ -689,25 +1058,79 @@
             try {
                 const response = await fetchJson('/transactions');
                 const transactions = response.data ?? [];
+                renderTransactionHistory(transactions);
 
-                if (!transactions.length || state.receipt) {
-                    return;
-                }
-
-                const latest = transactions[0];
-                const itemCount = latest.details?.length ?? 0;
-
-                refs.receiptBox.innerHTML = `
-                    <div class="space-y-2">
-                        <div class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">Transaksi terakhir</div>
-                        <div class="text-base font-semibold text-white">Total ${formatMoney(latest.total)}</div>
-                        <div class="text-sm text-slate-400">${itemCount} item tersimpan di database.</div>
-                    </div>
-                `;
             } catch (error) {
                 console.error(error);
             }
         };
+
+        let qrisTimerInterval = null;
+
+        const openQrisModal = () => {
+            refs.qrisModal.classList.remove('hidden');
+            refs.qrisModal.classList.add('flex');
+            let remaining = 60;
+            refs.qrisTimer.textContent = '01:00';
+            refs.qrisTimer.classList.remove('text-rose-400');
+            refs.qrisTimer.classList.add('text-white');
+            clearInterval(qrisTimerInterval);
+            qrisTimerInterval = setInterval(() => {
+                remaining--;
+                const m = Math.floor(remaining / 60);
+                const s = remaining % 60;
+                refs.qrisTimer.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+                if (remaining <= 10) {
+                    refs.qrisTimer.classList.remove('text-white');
+                    refs.qrisTimer.classList.add('text-rose-400');
+                }
+                if (remaining <= 0) {
+                    closeQrisModal();
+                    setCheckoutStatus('Waktu pembayaran QRIS habis. Silakan coba lagi.', 'error');
+                }
+            }, 1000);
+        };
+
+        const closeQrisModal = () => {
+            refs.qrisModal.classList.add('hidden');
+            refs.qrisModal.classList.remove('flex');
+            clearInterval(qrisTimerInterval);
+            refs.qrisTimer.textContent = '01:00';
+            refs.qrisTimer.classList.remove('text-rose-400');
+            refs.qrisTimer.classList.add('text-white');
+            state.pendingQrisPayload = null;
+        };
+
+        refs.checkQrisButton.addEventListener('click', async () => {
+            if (!state.pendingQrisPayload) return;
+            const originalHTML = refs.checkQrisButton.innerHTML;
+            refs.checkQrisButton.disabled = true;
+            refs.checkQrisButton.textContent = 'Memeriksa...';
+            try {
+                const response = await fetchJson('/pos/checkout', {
+                    method: 'POST',
+                    body: JSON.stringify(state.pendingQrisPayload),
+                });
+                closeQrisModal();
+                state.receipt = response.data;
+                state.cart = [];
+                setCurrencyInputValue(refs.discountAmount, 0);
+                setCurrencyInputValue(refs.cashTendered, 0);
+                refs.notes.value = '';
+                renderCart();
+                await loadProducts(refs.productSearch.value.trim());
+                await loadTransactions();
+                setCheckoutStatus('Transaksi QRIS berhasil disimpan.', 'success');
+            } catch (error) {
+                setCheckoutStatus(error.message || 'Checkout gagal.', 'error');
+                closeQrisModal();
+            } finally {
+                refs.checkQrisButton.disabled = false;
+                refs.checkQrisButton.innerHTML = originalHTML;
+            }
+        });
+
+        refs.cancelQrisButton.addEventListener('click', closeQrisModal);
 
         let searchTimer = null;
 
@@ -753,16 +1176,84 @@
             renderCart();
             renderProducts();
         });
-        refs.discountAmount.addEventListener('input', updateSummary);
-        refs.cashTendered.addEventListener('input', updateSummary);
-        refs.paymentMethod.addEventListener('change', updateSummary);
+        [refs.discountAmount, refs.cashTendered].forEach((input) => {
+            input.addEventListener('input', () => {
+                normalizeCurrencyInput(input);
+                updateSummary();
+            });
+            input.addEventListener('blur', () => {
+                if (!input.value) {
+                    setCurrencyInputValue(input, 0);
+                    updateSummary();
+                }
+            });
+        });
+        refs.paymentMethod.addEventListener('change', () => {
+            state.selectedEwallet = null;
+            document.querySelectorAll('.ewallet-btn').forEach((b) => {
+                b.classList.remove('border-cyan-400/70', 'bg-cyan-400/10');
+                b.classList.add('border-white/10', 'bg-slate-950/70');
+                b.querySelector('.ewallet-check').classList.add('hidden');
+            });
+            updateSummary();
+        });
+        document.querySelectorAll('.ewallet-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.ewallet-btn').forEach((b) => {
+                    b.classList.remove('border-cyan-400/70', 'bg-cyan-400/10');
+                    b.classList.add('border-white/10', 'bg-slate-950/70');
+                    b.querySelector('.ewallet-check').classList.add('hidden');
+                });
+                btn.classList.remove('border-white/10', 'bg-slate-950/70');
+                btn.classList.add('border-cyan-400/70', 'bg-cyan-400/10');
+                btn.querySelector('.ewallet-check').classList.remove('hidden');
+                state.selectedEwallet = { id: btn.dataset.ewallet, name: btn.dataset.name };
+                updateSummary();
+            });
+        });
         refs.checkoutButton.addEventListener('click', checkout);
+        refs.closeTransactionModal.addEventListener('click', closeTransactionModal);
+        refs.transactionModal.addEventListener('click', (event) => {
+            if (event.target === refs.transactionModal) {
+                closeTransactionModal();
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeTransactionModal();
+            }
+        });
         refs.themeToggle.addEventListener('click', () => {
             const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
             applyTheme(currentTheme === 'light' ? 'dark' : 'light');
         });
 
+        const sunIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`;
+        const moonIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 7.5A9 9 0 1 1 12 3Z"/></svg>`;
+
+        const updateClock = () => {
+            const now = new Date();
+            const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+            const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+            const h = now.getHours();
+            const m = now.getMinutes();
+            const totalMinutes = h * 60 + m;
+            const isSunTime = totalMinutes >= 330 && totalMinutes < 1080; // 05:30 - 17:59
+
+            document.getElementById('clockDate').textContent =
+                `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+            document.getElementById('clockTime').textContent =
+                String(h).padStart(2,'0') + ':' +
+                String(m).padStart(2,'0') + ':' +
+                String(now.getSeconds()).padStart(2,'0');
+            document.getElementById('clockIcon').innerHTML = isSunTime ? sunIconSvg : moonIconSvg;
+        };
+        updateClock();
+        setInterval(updateClock, 1000);
+
         applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+        setCurrencyInputValue(refs.discountAmount, getDiscount());
+        setCurrencyInputValue(refs.cashTendered, getCashTendered());
         loadProducts();
         loadTransactions();
     </script>
