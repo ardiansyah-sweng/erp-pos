@@ -204,6 +204,43 @@
                                 <option value="qris">QRIS</option>
                             </select>
                         </div>
+                        <div id="ewalletPanel" class="hidden">
+                            <label class="text-sm text-slate-300">Pilih E-Wallet</label>
+                            <div class="mt-2 grid grid-cols-2 gap-2">
+                                <button type="button" data-ewallet="dana" data-name="DANA"
+                                    class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
+                                    <img src="/images/dana.png" alt="DANA" class="h-8 w-8 object-contain">
+                                    <span class="text-sm font-medium text-white">DANA</span>
+                                    <span class="ewallet-check absolute right-2 top-2 hidden">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><path d="M20 6 9 17l-5-5"/></svg>
+                                    </span>
+                                </button>
+                                <button type="button" data-ewallet="gopay" data-name="GoPay"
+                                    class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
+                                    <img src="/images/gopay.png" alt="GoPay" class="h-8 w-8 object-contain">
+                                    <span class="text-sm font-medium text-white">GoPay</span>
+                                    <span class="ewallet-check absolute right-2 top-2 hidden">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><path d="M20 6 9 17l-5-5"/></svg>
+                                    </span>
+                                </button>
+                                <button type="button" data-ewallet="ovo" data-name="OVO"
+                                    class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
+                                    <img src="/images/ovo.png" alt="OVO" class="h-8 w-8 object-contain">
+                                    <span class="text-sm font-medium text-white">OVO</span>
+                                    <span class="ewallet-check absolute right-2 top-2 hidden">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><path d="M20 6 9 17l-5-5"/></svg>
+                                    </span>
+                                </button>
+                                <button type="button" data-ewallet="shopeepay" data-name="ShopeePay"
+                                    class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
+                                    <img src="/images/shopeepay.png" alt="ShopeePay" class="h-8 w-8 object-contain">
+                                    <span class="text-sm font-medium text-white">ShopeePay</span>
+                                    <span class="ewallet-check absolute right-2 top-2 hidden">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><path d="M20 6 9 17l-5-5"/></svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
                         <div id="cashTenderedWrapper">
                             <label class="text-sm text-slate-300" for="cashTendered">Uang dibayar</label>
                             <input id="cashTendered" type="number" min="0" value="0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
@@ -313,6 +350,7 @@
             products: [],
             cart: [],
             receipt: null,
+            selectedEwallet: null,
             pendingQrisPayload: null,
         };
 
@@ -344,6 +382,7 @@
             checkoutButton: document.getElementById('checkoutButton'),
             checkoutStatus: document.getElementById('checkoutStatus'),
             receiptBox: document.getElementById('receiptBox'),
+            ewalletPanel: document.getElementById('ewalletPanel'),
             cashTenderedWrapper: document.getElementById('cashTenderedWrapper'),
             changeRow: document.getElementById('changeRow'),
             qrisModal: document.getElementById('qrisModal'),
@@ -454,8 +493,11 @@
             const discount = Math.min(getDiscount(), subtotal);
             const grandTotal = Math.max(0, subtotal - discount);
             const change = calculateChange();
-            const isCashPayment = refs.paymentMethod.value === 'cash';
+            const paymentMethod = refs.paymentMethod.value;
+            const isCashPayment = paymentMethod === 'cash';
+            const isEwallet = paymentMethod === 'e_wallet';
             const isCashInsufficient = isCashPayment && state.cart.length > 0 && getCashTendered() < grandTotal;
+            const isEwalletNotSelected = isEwallet && !state.selectedEwallet;
 
             if (getDiscount() > subtotal) {
                 refs.discountAmount.value = String(subtotal);
@@ -469,15 +511,17 @@
             refs.discountValue.textContent = formatMoney(discount);
             refs.grandTotalValue.textContent = formatMoney(grandTotal);
             refs.changeValue.textContent = formatMoney(change);
-            const showCashFields = refs.paymentMethod.value === 'cash';
-            refs.cashTenderedWrapper.style.display = showCashFields ? '' : 'none';
-            refs.changeRow.style.display = showCashFields ? '' : 'none';
-            refs.checkoutButton.disabled = state.cart.length === 0 || isCashInsufficient;
+            refs.ewalletPanel.classList.toggle('hidden', !isEwallet);
+            refs.cashTenderedWrapper.style.display = isCashPayment ? '' : 'none';
+            refs.changeRow.style.display = isCashPayment ? '' : 'none';
+            refs.checkoutButton.disabled = state.cart.length === 0 || isCashInsufficient || isEwalletNotSelected;
             refs.checkoutStatus.textContent = state.cart.length === 0
                 ? 'Tambahkan produk ke keranjang terlebih dahulu.'
                 : isCashInsufficient
                     ? 'Uang dibayar belum cukup.'
-                    : '';
+                    : isEwalletNotSelected
+                        ? 'Pilih e-wallet terlebih dahulu.'
+                        : '';
         };
 
         const findCartItem = (productId) => state.cart.find((item) => item.id === productId);
@@ -766,7 +810,9 @@
                 discount_amount: getDiscount(),
                 payment_method: refs.paymentMethod.value,
                 cash_tendered: refs.paymentMethod.value === 'cash' ? getCashTendered() : 0,
-                notes: refs.notes.value,
+                notes: refs.paymentMethod.value === 'e_wallet' && state.selectedEwallet
+                    ? `[${state.selectedEwallet.name}]${refs.notes.value ? ' - ' + refs.notes.value : ''}`
+                    : refs.notes.value,
             };
 
             refs.checkoutButton.disabled = true;
@@ -781,6 +827,12 @@
                 state.receipt = response.data;
                 renderReceipt(state.receipt);
                 state.cart = [];
+                state.selectedEwallet = null;
+                document.querySelectorAll('.ewallet-btn').forEach((b) => {
+                    b.classList.remove('border-cyan-400/70', 'bg-cyan-400/10');
+                    b.classList.add('border-white/10', 'bg-slate-950/70');
+                    b.querySelector('.ewallet-check').classList.add('hidden');
+                });
                 refs.discountAmount.value = '0';
                 refs.cashTendered.value = '0';
                 refs.notes.value = '';
@@ -933,7 +985,29 @@
         });
         refs.discountAmount.addEventListener('input', updateSummary);
         refs.cashTendered.addEventListener('input', updateSummary);
-        refs.paymentMethod.addEventListener('change', updateSummary);
+        refs.paymentMethod.addEventListener('change', () => {
+            state.selectedEwallet = null;
+            document.querySelectorAll('.ewallet-btn').forEach((b) => {
+                b.classList.remove('border-cyan-400/70', 'bg-cyan-400/10');
+                b.classList.add('border-white/10', 'bg-slate-950/70');
+                b.querySelector('.ewallet-check').classList.add('hidden');
+            });
+            updateSummary();
+        });
+        document.querySelectorAll('.ewallet-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.ewallet-btn').forEach((b) => {
+                    b.classList.remove('border-cyan-400/70', 'bg-cyan-400/10');
+                    b.classList.add('border-white/10', 'bg-slate-950/70');
+                    b.querySelector('.ewallet-check').classList.add('hidden');
+                });
+                btn.classList.remove('border-white/10', 'bg-slate-950/70');
+                btn.classList.add('border-cyan-400/70', 'bg-cyan-400/10');
+                btn.querySelector('.ewallet-check').classList.remove('hidden');
+                state.selectedEwallet = { id: btn.dataset.ewallet, name: btn.dataset.name };
+                updateSummary();
+            });
+        });
         refs.checkoutButton.addEventListener('click', checkout);
         refs.themeToggle.addEventListener('click', () => {
             const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
