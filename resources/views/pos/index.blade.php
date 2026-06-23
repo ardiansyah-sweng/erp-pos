@@ -201,8 +201,32 @@
                                 <option value="card">Card</option>
                                 <option value="e_wallet">E-wallet</option>
                                 <option value="bank_transfer">Bank Transfer</option>
-                            </select>
+                            </select>    
                         </div>
+
+                       <div id="cardForm" class="hidden mt-4 space-y-3">
+                        <div>
+                            <label class="text-sm text-slate-300">Nama Pemegang Kartu</label>
+                            <input id="cardHolder" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
+
+                        <div>
+                            <label class="text-sm text-slate-300">No Kartu (4 digit terakhir)</label>
+                            <input id="cardNumber" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
+
+                        <div>
+                            <label class="text-sm text-slate-300">Bank / Provider</label>
+                            <input id="cardBank" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
+
+                        <div>
+                            <label class="text-sm text-slate-300">Kode Approval</label>
+                            <input id="approvalCode" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                        </div>
+                        </div>
+
+
                         <div>
                             <label class="text-sm text-slate-300" for="cashTendered">Uang dibayar</label>
                             <input id="cashTendered" type="number" min="0" value="0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
@@ -277,6 +301,12 @@
             checkoutButton: document.getElementById('checkoutButton'),
             checkoutStatus: document.getElementById('checkoutStatus'),
             receiptBox: document.getElementById('receiptBox'),
+            cardFields: document.getElementById('cardFields'),
+            cardForm: document.getElementById('cardForm'),
+            cardHolder: document.getElementById('cardHolder'),
+            cardNumber: document.getElementById('cardNumber'),
+            cardBank: document.getElementById('cardBank'),
+            approvalCode: document.getElementById('approvalCode'),
         };
 
         const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
@@ -657,6 +687,16 @@
                 payment_method: refs.paymentMethod.value,
                 cash_tendered: refs.paymentMethod.value === 'cash' ? getCashTendered() : 0,
                 notes: refs.notes.value,
+
+            card_info: refs.paymentMethod.value === 'card'
+    ? {
+        card_holder: refs.cardHolder.value,
+        card_number_last4: refs.cardNumber.value,
+        bank: refs.cardBank.value,
+        card_type: refs.cardType.value,
+        approval_code: refs.approvalCode.value,
+    }
+    : null,   
             };
 
             refs.checkoutButton.disabled = true;
@@ -755,7 +795,15 @@
         });
         refs.discountAmount.addEventListener('input', updateSummary);
         refs.cashTendered.addEventListener('input', updateSummary);
-        refs.paymentMethod.addEventListener('change', updateSummary);
+        refs.paymentMethod.addEventListener('change', () => {
+    updateSummary();
+
+    if (refs.paymentMethod.value === 'card') {
+        refs.cardForm.classList.remove('hidden');
+    } else {
+        refs.cardForm.classList.add('hidden');
+    }
+});
         refs.checkoutButton.addEventListener('click', checkout);
         refs.themeToggle.addEventListener('click', () => {
             const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
