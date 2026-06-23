@@ -29,15 +29,26 @@ class TransactionSeeder extends Seeder
             return;
         }
 
-        for ($index = 0; $index < $this->faker->numberBetween(3, 8); $index++) {
+        $transactionDates = [
+            Carbon::now()->setTime(15, 10),
+            Carbon::now()->subDay()->setTime(10, 30),
+            Carbon::now()->subDays(2)->setTime(19, 15),
+            Carbon::now()->subDays(5)->setTime(8, 45),
+            Carbon::now()->subDays(10)->setTime(13, 5),
+        ];
+
+        foreach ($transactionDates as $timestamp) {
             $selectedProducts = $products->random($this->faker->numberBetween(1, min(4, $products->count())));
-            $transaction = Transaction::create(['total' => 0]);
+            $transaction = Transaction::create([
+                'total' => 0,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ]);
             $total = 0;
 
             foreach ($selectedProducts as $product) {
                 $quantity = $this->faker->numberBetween(1, 5);
                 $amount = $product->selling_price * $quantity;
-                $timestamp = Carbon::now()->subDays($this->faker->numberBetween(0, 14));
 
                 TransactionDetail::create([
                     'transaction_id' => $transaction->id,
@@ -52,8 +63,22 @@ class TransactionSeeder extends Seeder
                 $total += $amount;
             }
 
+            $paymentMethod = $this->faker->randomElement(['cash', 'card', 'e_wallet', 'bank_transfer']);
+            $cashTendered = $paymentMethod === 'cash' ? $total + $this->faker->randomElement([0, 5000, 10000, 20000]) : 0;
+
             $transaction->update([
                 'total' => $total,
+            ]);
+
+            $transaction->payments()->create([
+                'payment_method' => $paymentMethod,
+                'amount' => $total,
+                'payment_status' => 'success',
+                'discount_amount' => 0,
+                'cash_tendered' => $cashTendered,
+                'change_amount' => $paymentMethod === 'cash' ? max(0, $cashTendered - $total) : 0,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
             ]);
         }
     }
