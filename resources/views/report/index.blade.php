@@ -18,8 +18,11 @@
                     <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Laporan Penjualan</h1>
                     <p class="mt-2 max-w-2xl text-sm text-slate-300">Ringkasan transaksi yang tersimpan di database, dihitung langsung dari data kasir.</p>
                 </div>
+                {{-- Kumpulan tombol: navigasi ke kasir dan aksi muat ulang data --}}
                 <div class="flex gap-3">
+                    {{-- Navigasi kembali ke halaman kasir --}}
                     <a href="{{ route('pos.index') }}" class="rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white">Ke Kasir</a>
+                    {{-- Aksi: ambil ulang data laporan dari server --}}
                     <button id="refreshButton" class="rounded-2xl border border-cyan-400/40 bg-cyan-400/15 px-4 py-3 text-sm font-medium text-cyan-200 transition hover:bg-cyan-400/25">Muat Ulang</button>
                 </div>
             </div>
