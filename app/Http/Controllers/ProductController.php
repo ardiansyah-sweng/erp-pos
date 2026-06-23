@@ -12,7 +12,7 @@ class ProductController extends Controller
         $search = trim((string) $request->query('search', ''));
 
         $products = Product::query()
-            ->where('is_active', true)
+
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($innerQuery) use ($search) {
                     $innerQuery->where('name', 'like', '%' . $search . '%')
