@@ -43,7 +43,6 @@ class TransactionService
                     'quantity' => $item['quantity'],
                     'price' => $item['unit_price'],
                     'amount' => $item['amount'],
-                    'transaction_date' => now(),
                 ]);
             }
 
