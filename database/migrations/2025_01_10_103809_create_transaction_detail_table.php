@@ -18,7 +18,6 @@ return new class extends Migration
             $table->integer('quantity');
             $table->integer('price');
             $table->integer('amount');
-            $table->timestamp('transaction_date')->nullable();
             $table->timestamps();
         });
     }
