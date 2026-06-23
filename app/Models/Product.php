@@ -16,6 +16,7 @@ class Product extends Model
         'stock_quantity',
         'min_stock',
         'is_active',
+        'category_id',
     ];
 
     protected $casts = [
@@ -24,6 +25,11 @@ class Product extends Model
         'stock_quantity' => 'integer',
         'min_stock' => 'integer',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 
     public static function getItemBySKU(string $sku): ?self
     {
