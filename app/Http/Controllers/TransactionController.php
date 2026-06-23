@@ -74,6 +74,7 @@ class TransactionController extends Controller
             ]);
 
             foreach ($validated['items'] as $item) {
+
                 TransactionDetail::create([
                     'transaction_id' => $transaction->id,
                     'product_id' => (string) $item['product_id'],
@@ -81,6 +82,12 @@ class TransactionController extends Controller
                     'price' => (int) $item['unit_price'],
                     'amount' => (int) $item['quantity'] * (int) $item['unit_price'],
                 ]);
+
+                Product::where('id', $item['product_id'])
+                    ->decrement(
+                        'stock_quantity',
+                        (int) $item['quantity']
+                    );
             }
 
             return $transaction;

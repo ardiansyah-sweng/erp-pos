@@ -36,4 +36,53 @@ class ProductController extends Controller
         return view('products.index', compact('products'));
     }
 
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'sku' => 'required|unique:products,sku',
+            'barcode' => 'nullable|string|max:100',
+            'name' => 'required|string|max:255',
+            'unit' => 'required|string|max:50',
+            'selling_price' => 'required|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+            'min_stock' => 'required|integer|min:0',
+        ]);
+
+        Product::create([
+            ...$validated,
+            'is_active' => true,
+        ]);
+
+        return redirect()->route('products.list')
+            ->with('success', 'Produk berhasil ditambahkan');
+    }
+
+    public function update(Request $request, Product $product)
+    {
+
+        $validated = $request->validate([
+            'sku' => 'required|unique:products,sku,' . $product->id,
+            'barcode' => 'nullable|string|max:100',
+            'name' => 'required|string|max:255',
+            'unit' => 'required|string|max:50',
+            'selling_price' => 'required|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+            'min_stock' => 'required|integer|min:0',
+            'is_active' => 'required|boolean',
+        ]);
+        
+        $product->update($validated);
+
+        return redirect()->route('products.list')
+            ->with('success', 'Produk berhasil diupdate');
+    }
+
+    public function destroy(Product $product)
+    {
+        $product->delete();
+
+        return redirect()->route('products.list')
+            ->with('success', 'Produk berhasil dihapus');
+    }
 }

@@ -18,6 +18,10 @@ Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])->name('jal
 
 Route::get('/products', [ProductController::class, 'getProducts'])->name('products.index');
 Route::get('/product-list', [ProductController::class, 'index'])->name('products.list');
+Route::post('/product-list', [ProductController::class, 'store'])->name('products.store');
+Route::put('/product-list/{product}', [ProductController::class, 'update'])->name('products.update');
+Route::delete('/product-list/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+
 Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
 Route::get('/transaction-list',[TransactionController::class, 'index'])->name('transactions.list');
 
