@@ -216,7 +216,19 @@
                     <div class="mt-4 space-y-4">
                         <div>
                             <label class="text-sm text-slate-300" for="discountAmount">Diskon</label>
-                            <input id="discountAmount" type="text" inputmode="numeric" value="Rp 0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
+                            <div class="mt-2 flex overflow-hidden rounded-2xl border border-white/10 bg-slate-950/70 focus-within:border-cyan-400">
+                                <input id="discountAmount" type="text" inputmode="numeric" value="Rp 0"
+                                    class="min-w-0 flex-1 bg-transparent px-4 py-3 text-white outline-none placeholder:text-slate-500"
+                                    aria-label="Jumlah diskon">
+                                <div class="flex-shrink-0 border-l border-white/10">
+                                    <select id="discountType"
+                                        class="h-full appearance-none bg-slate-900/80 px-3 py-3 text-sm font-medium text-slate-200 outline-none cursor-pointer hover:bg-slate-800/80 focus:bg-slate-800/80 transition-colors"
+                                        aria-label="Tipe diskon">
+                                        <option value="nominal">Rp</option>
+                                        <option value="percent">%</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label class="text-sm text-slate-300" for="paymentMethod">Metode pembayaran</label>
@@ -452,6 +464,7 @@
             cartTable: document.getElementById('cartTable'),
             clearCart: document.getElementById('clearCart'),
             discountAmount: document.getElementById('discountAmount'),
+            discountType: document.getElementById('discountType'),
             paymentMethod: document.getElementById('paymentMethod'),
             cashTendered: document.getElementById('cashTendered'),
             notes: document.getElementById('notes'),
@@ -525,7 +538,14 @@
                 minute: '2-digit',
             }).format(new Date(value));
         };
-        const getDiscount = () => Math.max(0, parseCurrencyInput(refs.discountAmount.value));
+        const getDiscount = () => {
+            const raw = Math.max(0, parseCurrencyInput(refs.discountAmount.value));
+            if (refs.discountType.value === 'percent') {
+                const pct = Math.min(100, raw);
+                return Math.round(calculateSubtotal() * pct / 100);
+            }
+            return raw;
+        };
         const getCashTendered = () => Math.max(0, parseCurrencyInput(refs.cashTendered.value));
         const calculateSubtotal = () => state.cart.reduce((total, item) => total + (item.quantity * item.selling_price), 0);
         const getAppliedDiscount = () => Math.min(getDiscount(), calculateSubtotal());
@@ -636,7 +656,16 @@
             refs.subtotalLabel.textContent = formatMoney(subtotal);
             refs.totalLabel.textContent = formatMoney(grandTotal);
             refs.subtotalValue.textContent = formatMoney(subtotal);
-            refs.discountValue.textContent = formatMoney(discount);
+            // Show discount as "Rp X (Y%)" 
+            if (refs.discountType.value === 'percent') {
+                const pct = Math.min(100, Math.max(0, parseCurrencyInput(refs.discountAmount.value)));
+                refs.discountValue.textContent = pct > 0
+                    ? `${formatMoney(discount)} (${pct}%)`
+                    : formatMoney(0);
+            } else {
+                refs.discountValue.textContent = formatMoney(discount);
+            }
+
             refs.grandTotalValue.textContent = formatMoney(grandTotal);
             refs.changeValue.textContent = formatMoney(change);
             refs.ewalletPanel.classList.toggle('hidden', !isEwallet);
@@ -1178,16 +1207,57 @@
         });
         [refs.discountAmount, refs.cashTendered].forEach((input) => {
             input.addEventListener('input', () => {
+                // Skip currency normalization for discount when in percent mode
+                if (input === refs.discountAmount && refs.discountType.value === 'percent') {
+                    // Allow only digits, clamp to 0-100
+                    const digits = input.value.replace(/\D/g, '');
+                    const pct = Math.min(100, Number(digits || 0));
+                    input.value = digits ? String(pct) : '';
+                    updateSummary();
+                    return;
+                }
                 normalizeCurrencyInput(input);
                 updateSummary();
             });
             input.addEventListener('blur', () => {
+                if (input === refs.discountAmount && refs.discountType.value === 'percent') {
+                    // Clamp and clean up on blur in percent mode
+                    const digits = input.value.replace(/\D/g, '');
+                    const pct = Math.min(100, Number(digits || 0));
+                    input.value = pct > 0 ? String(pct) : '';
+                    updateSummary();
+                    return;
+                }
                 if (!input.value) {
                     setCurrencyInputValue(input, 0);
                     updateSummary();
                 }
             });
         });
+
+        // Handle discount type toggle (Rp / %)
+        const syncDiscountInputMode = () => {
+            const isPercent = refs.discountType.value === 'percent';
+            // Extract raw numeric value before switching mode
+            const currentRaw = parseCurrencyInput(refs.discountAmount.value);
+
+            if (isPercent) {
+                // Clamp to 0-100 and display as plain number
+                const pct = Math.min(100, currentRaw);
+                refs.discountAmount.value = pct > 0 ? String(pct) : '';
+                refs.discountAmount.placeholder = '0 – 100';
+                refs.discountAmount.inputMode = 'numeric';
+            } else {
+                // Switch back to currency format
+                setCurrencyInputValue(refs.discountAmount, currentRaw);
+                refs.discountAmount.placeholder = '';
+                refs.discountAmount.inputMode = 'numeric';
+            }
+            updateSummary();
+        };
+
+        refs.discountType.addEventListener('change', syncDiscountInputMode);
+
         refs.paymentMethod.addEventListener('change', () => {
             state.selectedEwallet = null;
             document.querySelectorAll('.ewallet-btn').forEach((b) => {
