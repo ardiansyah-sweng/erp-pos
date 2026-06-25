@@ -6,14 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    protected $table      = 'products';
-    protected $primaryKey = 'id';
-    public $incrementing  = true;
-    protected $keyType    = 'int';
-
     protected $fillable = [
-        'sku',
         'barcode',
+        'sku',
         'name',
         'description',
         'unit',
@@ -24,10 +19,10 @@ class Product extends Model
     ];
 
     protected $casts = [
-        'is_active'      => 'boolean',
-        'selling_price'  => 'integer',
+        'is_active' => 'boolean',
+        'selling_price' => 'integer',
         'stock_quantity' => 'integer',
-        'min_stock'      => 'integer',
+        'min_stock' => 'integer',
     ];
 
     public function transactionDetails()
