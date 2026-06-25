@@ -122,6 +122,15 @@
                         <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
                         <span id="themeLabel">Mode terang</span>
                     </button>
+                    {{-- Tombol menuju dashboard laporan penjualan --}}
+                    <a href="{{ route('report.index') }}" class="mt-4 ml-3 inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/15 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:bg-cyan-400/25 hover:text-white">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+                            <path d="M3 3v18h18"></path>
+                            <rect x="7" y="11" width="3" height="6" rx="0.5"></rect>
+                            <rect x="13" y="7" width="3" height="10" rx="0.5"></rect>
+                        </svg>
+                        Laporan Penjualan
+                    </a>
                 </div>
                 <div class="flex flex-col items-end gap-3">
                     <div class="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-sm">

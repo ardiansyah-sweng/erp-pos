@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ReportController;
 
 Route::get('/', function () {
     return redirect()->route('pos.index');
@@ -23,3 +24,4 @@ Route::get('/transactions', [TransactionController::class, 'getTransaction'])->n
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
 Route::post('/transaction/store', [TransactionController::class, 'store']);
+Route::get('/report', [ReportController::class, 'index'])->name('report.index');
