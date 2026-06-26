@@ -298,6 +298,33 @@
                             <textarea id="notes" rows="3" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400" placeholder="Opsional"></textarea>
                         </div>
                     </div>
+                    
+                    <div class="mt-5">
+
+                        <label class="mb-2 block text-sm font-medium text-white">
+                            Member
+                        </label>
+
+                        <input
+                            type="text"
+                            id="memberSearch"
+                            placeholder="Masukkan nomor HP member"
+                            class="w-full rounded-xl border border-white/10 bg-slate-950/70 p-3 text-white">
+
+                        <div
+                            id="memberResult"
+                            class="mt-3">
+                        </div>
+
+                        <a
+                            href="{{ route('members.index') }}"
+                            class="mt-3 inline-block rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700">
+
+                            + Tambah Member Baru
+
+                        </a>
+
+                    </div>
 
                     <div class="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
                         <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
@@ -1002,6 +1029,7 @@
             }
 
             const payload = {
+                customer_id: selectedCustomer,
                 items: state.cart.map((item) => ({
                     product_id: item.id,
                     quantity: item.quantity,
@@ -1043,6 +1071,9 @@
                 setCurrencyInputValue(refs.discountAmount, 0);
                 setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
+                selectedCustomer = null;
+                document.getElementById("memberSearch").value = "";
+                document.getElementById("memberResult").innerHTML = "";
                 renderCart();
                 await loadProducts(refs.productSearch.value.trim());
                 await loadTransactions();
@@ -1256,6 +1287,76 @@
         setCurrencyInputValue(refs.cashTendered, getCashTendered());
         loadProducts();
         loadTransactions();
+
+        let selectedCustomer = null;
+        
+        document
+        .getElementById("memberSearch")
+        .addEventListener("keyup", async function () {
+
+            let keyword = this.value.trim();
+
+            if (keyword.length < 4) {
+
+                document.getElementById("memberResult").innerHTML = "";
+
+                return;
+            }
+
+            const response = await fetch(
+                "/customers/search?keyword=" + keyword
+            );
+
+            const result = await response.json();
+
+            let html = "";
+
+            result.data.forEach(customer => {
+
+                html += `
+                <div
+                    onclick="chooseMember(${customer.id},'${customer.name}','${customer.phone}')"
+                    class="cursor-pointer rounded-lg border border-cyan-500 bg-slate-800 p-3 hover:bg-cyan-700">
+
+                    <div class="font-semibold">
+                        ${customer.name}
+                    </div>
+
+                    <div class="text-sm text-gray-300">
+                        ${customer.phone}
+                    </div>
+
+                    <div class="text-xs text-yellow-400">
+                        ${customer.member_level} • ${customer.points} poin
+                    </div>
+
+                </div>
+                `;
+
+            });
+
+            document.getElementById("memberResult").innerHTML = html;
+
+        });
+
+        function chooseMember(id, name, phone) {
+
+            selectedCustomer = id;
+
+            document.getElementById("memberSearch").value =
+                name + " (" + phone + ")";
+
+            document.getElementById("memberResult").innerHTML = `
+                <div class="rounded-lg bg-green-700 p-3 text-white">
+
+                    <b>${name}</b><br>
+
+                    ${phone}
+
+                </div>
+            `;
+
+        }
     </script>
 </body>
 </html>
