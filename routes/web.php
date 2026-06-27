@@ -23,9 +23,9 @@ Route::get('/products/sku/{sku}', [ProductController::class, 'getItemBySKU']);
 
 Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-<<<<<<< HEAD
+
 Route::post('/pos/checkout', [TransactionController::class, 'checkout']);
-=======
+
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
 Route::post('/transaction/store', [TransactionController::class, 'store']);
 
@@ -44,4 +44,4 @@ Route::delete('/customers/{id}', [CustomerController::class,'destroy']);
 
 Route::get('/members', [CustomerController::class, 'index'])->name('members.index');
 Route::post('/members/store', [CustomerController::class, 'store'])->name('members.store');
->>>>>>> develop
+
