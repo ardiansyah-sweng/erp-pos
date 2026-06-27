@@ -3,15 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Customer;
 
 class Transaction extends Model
 {
     protected $table = 'transaction';
-    protected $fillable = ['total'];
+    protected $fillable = ['customer_id', 'total', 'transaction_date'];
 
     public function details()
     {
         return $this->hasMany(TransactionDetail::class, 'transaction_id');
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(PaymentDetail::class, 'transaction_id');
     }
 
     /**
@@ -21,5 +27,10 @@ class Transaction extends Model
     {
         $fillable = $this->getFillable();
         return $fillable[$index] ?? null;
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 }

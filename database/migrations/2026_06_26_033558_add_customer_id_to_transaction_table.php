@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transaction', function (Blueprint $table) {
-            $table->id();
-            $table->bigInteger('total');
-            $table->timestamp('transaction_date')->nullable();
-            $table->timestamps();
+        Schema::table('transaction', function (Blueprint $table) {
+
+            $table->unsignedBigInteger('customer_id')
+                ->nullable()
+                ->after('id');
+
         });
     }
 
@@ -24,6 +25,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transaction');
+        Schema::table('transaction', function (Blueprint $table) {
+
+            $table->dropColumn('customer_id');
+
+        });
     }
 };
