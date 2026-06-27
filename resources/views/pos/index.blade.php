@@ -5,9 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>ERP POS</title>
+    <script>
+        try {
+            document.documentElement.dataset.theme = localStorage.getItem('erp-pos-theme') || 'dark';
+        } catch (error) {
+            document.documentElement.dataset.theme = 'dark';
+        }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
-
-
     <style>
         html[data-theme="light"] body {
             background: #f6f8fb !important;
@@ -103,7 +108,6 @@
             color: #94a3b8 !important;
         }
     </style>
-
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100">
     <div class="absolute inset-x-0 top-0 h-72 bg-gradient-to-r from-emerald-500/30 via-cyan-500/20 to-transparent blur-3xl"></div>
@@ -112,8 +116,12 @@
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/80">Point of Sales</p>
-                    <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat, pencarian produk, dan checkout AJAX.</h1>
-                    <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari produk, masukkan ke keranjang, hitung total otomatis, lalu simpan transaksi tanpa reload halaman.</p>
+                    <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat untuk transaksi harian.</h1>
+                    <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari atau scan produk, cek isi keranjang, lalu selesaikan pembayaran tanpa reload halaman.</p>
+                    <button id="themeToggle" type="button" class="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white" aria-pressed="false">
+                        <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
+                        <span id="themeLabel">Mode terang</span>
+                    </button>
                 </div>
                 <div class="flex flex-col items-end gap-3">
                     <div class="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-sm">
@@ -179,21 +187,16 @@
                 </div>
             </div>
 
-            <aside class="space-y-6">
+            <aside class="space-y-6 lg:sticky lg:top-6 lg:self-start">
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
                     <div class="mb-4 flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-white">Keranjang</h2>
                         <button id="clearCart" class="text-sm text-rose-300 transition hover:text-rose-200">Kosongkan</button>
                     </div>
-
-                    <div id="cartEmptyState" class="rounded-2xl border border-dashed border-white/10 bg-slate-950/50 px-4 py-8 text-center text-sm text-slate-400">Keranjang masih kosong.</div>
-                    <div class="overflow-hidden rounded-2xl border border-white/10">
-
                     <div id="cartEmptyState" class="rounded-2xl border border-dashed border-white/10 bg-slate-950/50 px-4 py-8 text-center text-sm text-slate-400">
                         Keranjang masih kosong. Pilih produk atau scan barcode untuk mulai transaksi.
                     </div>
                     <div id="cartTableWrapper" class="hidden overflow-hidden rounded-2xl border border-white/10">
-
                         <table class="min-w-full text-left text-sm text-slate-200">
                             <thead class="bg-slate-900/90 text-slate-400">
                                 <tr>
@@ -299,18 +302,18 @@
                     <div class="mt-5">
 
                         <label class="mb-2 block text-sm font-medium text-white">
-                            Member
+                            Cari Member
                         </label>
 
                         <input
                             type="text"
                             id="memberSearch"
-                            placeholder="Masukkan nomor HP member"
-                            class="w-full rounded-xl border border-white/10 bg-slate-950/70 p-3 text-white">
+                            placeholder="Cari nomor HP / 4 digit terakhir"
+                            class="w-full rounded-xl border border-white/10 bg-slate-950/70 p-3 text-white placeholder:text-slate-400">
 
                         <div
                             id="memberResult"
-                            class="mt-3">
+                            class="mt-3 space-y-2">
                         </div>
 
                         <a
@@ -330,13 +333,8 @@
                         <div id="changeRow" class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
                     </div>
 
-
-                    <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">Checkout</button>
-                    <p id="checkoutStatus" class="mt-3 text-sm text-slate-400"></p>
-
                     <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50" disabled>Checkout</button>
                     <div id="checkoutStatus" class="mt-3 hidden rounded-2xl border px-4 py-3 text-sm font-medium"></div>
-
                 </div>
 
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
@@ -463,7 +461,10 @@
         };
 
         const refs = {
+            themeToggle: document.getElementById('themeToggle'),
             productSearch: document.getElementById('productSearch'),
+            themeIcon: document.getElementById('themeIcon'),
+            themeLabel: document.getElementById('themeLabel'),
             barcodeSearch: document.getElementById('barcodeSearch'),
             refreshProducts: document.getElementById('refreshProducts'),
             productsStatus: document.getElementById('productsStatus'),
@@ -554,7 +555,6 @@
         const getDiscount = () => Math.max(0, parseCurrencyInput(refs.discountAmount.value));
         const getCashTendered = () => Math.max(0, parseCurrencyInput(refs.cashTendered.value));
         const calculateSubtotal = () => state.cart.reduce((total, item) => total + (item.quantity * item.selling_price), 0);
-
         const getAppliedDiscount = () => Math.min(getDiscount(), calculateSubtotal());
         const isDiscountTooHigh = () => calculateSubtotal() > 0 && getDiscount() >= calculateSubtotal();
         const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getAppliedDiscount());
@@ -616,7 +616,6 @@
             }
         };
 
-
         const calculateChange = () => {
             if (refs.paymentMethod.value !== 'cash') {
                 return 0;
@@ -649,11 +648,9 @@
 
         const updateSummary = () => {
             const subtotal = calculateSubtotal();
-            const discount = getDiscount();
-            const grandTotal = calculateGrandTotal();
+            const discount = Math.min(getDiscount(), subtotal);
+            const grandTotal = Math.max(0, subtotal - discount);
             const change = calculateChange();
-
-
             const paymentMethod = refs.paymentMethod.value;
             const isCashPayment = paymentMethod === 'cash';
             const isEwallet = paymentMethod === 'e_wallet';
@@ -662,17 +659,13 @@
             const isEwalletNotSelected = isEwallet && !state.selectedEwallet;
 
             refs.productCount.textContent = String(state.products.length);
-            refs.cartCount.textContent = String(state.cart.length);
+            refs.cartCount.textContent = String(state.cart.reduce((total, item) => total + item.quantity, 0));
             refs.subtotalLabel.textContent = formatMoney(subtotal);
             refs.totalLabel.textContent = formatMoney(grandTotal);
             refs.subtotalValue.textContent = formatMoney(subtotal);
             refs.discountValue.textContent = formatMoney(discount);
             refs.grandTotalValue.textContent = formatMoney(grandTotal);
             refs.changeValue.textContent = formatMoney(change);
-
-            refs.checkoutButton.disabled = state.cart.length === 0;
-            refs.checkoutStatus.textContent = state.cart.length === 0 ? 'Tambahkan produk ke keranjang terlebih dahulu.' : '';
-
             refs.ewalletPanel.classList.toggle('hidden', !isEwallet);
             refs.cardForm.classList.toggle('hidden', paymentMethod !== 'card');
             refs.cashTenderedWrapper.style.display = isCashPayment ? '' : 'none';
@@ -700,12 +693,18 @@
             }
 
             setCheckoutStatus();
-
         };
 
         const findCartItem = (productId) => state.cart.find((item) => item.id === productId);
+        const getCartQuantity = (productId) => findCartItem(productId)?.quantity || 0;
+        const getRemainingStock = (product) => Math.max(0, Number(product.stock_quantity || 0) - getCartQuantity(product.id));
 
         const addToCart = (product) => {
+            if (getRemainingStock(product) <= 0) {
+                refs.productsStatus.textContent = `${product.name} sudah mencapai batas stok.`;
+                return;
+            }
+
             const existingItem = findCartItem(product.id);
 
             if (existingItem) {
@@ -717,14 +716,14 @@
                 });
             }
 
+            refs.productsStatus.textContent = `${product.name} ditambahkan ke keranjang.`;
             renderCart();
+            renderProducts();
         };
 
         const removeFromCart = (productId) => {
             state.cart = state.cart.filter((item) => item.id !== productId);
             renderCart();
-
-
             renderProducts();
         };
 
@@ -767,6 +766,7 @@
             }
 
             renderCart();
+            renderProducts();
         };
 
         const renderProducts = () => {
@@ -775,7 +775,7 @@
             if (state.products.length === 0) {
                 refs.productGrid.innerHTML = `
                     <div class="rounded-2xl border border-dashed border-white/10 bg-slate-950/60 px-4 py-10 text-center text-sm text-slate-400 md:col-span-2 xl:col-span-3">
-                        Produk tidak ditemukan.
+                        Produk tidak ditemukan. Coba kata kunci lain atau muat ulang daftar produk.
                     </div>
                 `;
                 refs.productsMeta.textContent = '0 item';
@@ -784,22 +784,30 @@
 
             refs.productsMeta.textContent = `${state.products.length} item`;
 
-            refs.productGrid.innerHTML = state.products.map((product) => `
-                <button type="button" data-product-id="${product.id}" class="group rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-slate-900/90">
-                    <div class="flex items-start justify-between gap-3">
+            refs.productGrid.innerHTML = state.products.map((product) => {
+                const stockBadge = getStockBadge(product);
+
+                return `
+                    <button type="button" data-product-id="${product.id}" class="group flex min-h-44 flex-col justify-between rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-slate-900/90 hover:shadow-xl hover:shadow-cyan-950/30">
                         <div>
-                            <div class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">${product.sku || '-'}</div>
-                            <h3 class="mt-2 text-base font-semibold text-white">${product.name}</h3>
-                            <p class="mt-1 line-clamp-2 text-sm text-slate-400">${product.description || 'Tanpa deskripsi'}</p>
+                            <div class="flex items-start justify-between gap-3">
+                                <span class="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">${product.sku || '-'}</span>
+                            </div>
+                            <h3 class="mt-4 line-clamp-2 text-lg font-semibold leading-snug text-white">${product.name}</h3>
+                            <p class="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-400">${product.description || 'Tanpa deskripsi'}</p>
                         </div>
-                        <span class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">Stok ${product.stock_quantity}</span>
-                    </div>
-                    <div class="mt-4 flex items-center justify-between text-sm">
-                        <span class="font-semibold text-emerald-300">${formatMoney(product.selling_price)}</span>
-                        <span class="text-slate-500 group-hover:text-slate-300">Klik untuk tambah</span>
-                    </div>
-                </button>
-            `).join('');
+                        <div class="mt-5 space-y-3 border-t border-white/10 pt-4">
+                            <div class="flex items-center justify-between gap-3 text-sm">
+                                <span class="text-lg font-semibold text-emerald-300">${formatMoney(product.selling_price)}</span>
+                                <span class="rounded-full bg-white/10 px-3 py-1.5 font-medium text-slate-300 transition group-hover:bg-cyan-400/20 group-hover:text-cyan-100">Tambah</span>
+                            </div>
+                            <div>
+                                <span class="block w-full rounded-xl border px-3 py-2 text-center text-xs font-semibold ${stockBadge.className}">${stockBadge.label}</span>
+                            </div>
+                        </div>
+                    </button>
+                `;
+            }).join('');
 
             refs.productGrid.querySelectorAll('[data-product-id]').forEach((button) => {
                 button.addEventListener('click', () => {
@@ -833,7 +841,7 @@
                     <td class="px-3 py-3 align-top">
                         <div class="inline-flex items-center rounded-full border border-white/10 bg-slate-950/70">
                             <button type="button" data-decrease="${item.id}" class="px-2 py-1 text-slate-300 hover:text-white">-</button>
-                            <span class="min-w-10 px-3 py-1 text-center">${item.quantity}</span>
+                            <input type="number" min="1" max="${item.stock_quantity}" value="${item.quantity}" data-quantity="${item.id}" class="w-14 border-x border-white/10 bg-transparent px-2 py-1 text-center text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none">
                             <button type="button" data-increase="${item.id}" class="px-2 py-1 text-slate-300 hover:text-white">+</button>
                         </div>
                     </td>
@@ -852,6 +860,17 @@
                 button.addEventListener('click', () => changeQuantity(Number(button.dataset.increase), 1));
             });
 
+            refs.cartTable.querySelectorAll('[data-quantity]').forEach((input) => {
+                input.addEventListener('change', () => setQuantity(Number(input.dataset.quantity), input.value));
+                input.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        setQuantity(Number(input.dataset.quantity), input.value);
+                        input.blur();
+                    }
+                });
+            });
+
             refs.cartTable.querySelectorAll('[data-remove]').forEach((button) => {
                 button.addEventListener('click', () => removeFromCart(Number(button.dataset.remove)));
             });
@@ -867,7 +886,10 @@
                 const response = await fetchJson(`/products${queryString}`);
                 state.products = response.data ?? [];
                 renderProducts();
-                refs.productsStatus.textContent = 'Pilih produk untuk dimasukkan ke keranjang.';
+                updateSummary();
+                refs.productsStatus.textContent = search
+                    ? `Menampilkan hasil untuk "${search}".`
+                    : 'Pilih produk untuk dimasukkan ke keranjang.';
             } catch (error) {
                 refs.productsStatus.textContent = error.message || 'Gagal memuat produk.';
                 refs.productGrid.innerHTML = `
@@ -971,7 +993,6 @@
                 setCheckoutStatus('Diskon harus lebih kecil dari subtotal.', 'error');
                 return;
             }
-
             if (refs.paymentMethod.value === 'cash' && getCashTendered() < calculateGrandTotal()) {
                 setCheckoutStatus('Uang dibayar belum cukup.', 'error');
                 return;
@@ -1041,6 +1062,10 @@
 
                 state.receipt = response.data;
                 state.cart = [];
+                selectedCustomer = null;
+
+                document.getElementById("memberSearch").value = "";
+                document.getElementById("memberResult").innerHTML = "";
                 state.selectedEwallet = null;
                 document.querySelectorAll('.ewallet-btn').forEach((b) => {
                     b.classList.remove('border-cyan-400/70', 'bg-cyan-400/10');
@@ -1050,9 +1075,6 @@
                 setCurrencyInputValue(refs.discountAmount, 0);
                 setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
-                selectedCustomer = null;
-                document.getElementById("memberSearch").value = "";
-                document.getElementById("memberResult").innerHTML = "";
                 renderCart();
                 await loadProducts(refs.productSearch.value.trim());
                 await loadTransactions();
@@ -1184,6 +1206,7 @@
         refs.clearCart.addEventListener('click', () => {
             state.cart = [];
             renderCart();
+            renderProducts();
         });
         [refs.discountAmount, refs.cashTendered].forEach((input) => {
             input.addEventListener('input', () => {
@@ -1263,75 +1286,88 @@
         applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
         setCurrencyInputValue(refs.discountAmount, getDiscount());
         setCurrencyInputValue(refs.cashTendered, getCashTendered());
-
         loadProducts();
         loadTransactions();
-
         let selectedCustomer = null;
-        
+
         document
         .getElementById("memberSearch")
         .addEventListener("keyup", async function () {
 
-            let keyword = this.value.trim();
+            const keyword = this.value.trim();
 
             if (keyword.length < 4) {
 
                 document.getElementById("memberResult").innerHTML = "";
 
                 return;
+
             }
 
-            const response = await fetch(
-                "/customers/search?keyword=" + keyword
-            );
+            try{
 
-            const result = await response.json();
+                const response = await fetch(
+                    "/customers/search?keyword=" + encodeURIComponent(keyword)
+                );
 
-            let html = "";
+                const result = await response.json();
 
-            result.data.forEach(customer => {
+                let html = "";
 
-                html += `
-                <div
-                    onclick="chooseMember(${customer.id},'${customer.name}','${customer.phone}')"
-                    class="cursor-pointer rounded-lg border border-cyan-500 bg-slate-800 p-3 hover:bg-cyan-700">
+                result.data.forEach(customer => {
 
-                    <div class="font-semibold">
-                        ${customer.name}
+                    html += `
+                    <div
+                        onclick="chooseMember(${customer.id},'${customer.name}','${customer.phone}')"
+                        class="cursor-pointer rounded-xl border border-cyan-500/30 bg-slate-900 p-3 hover:bg-cyan-700/30 transition">
+
+                        <div class="font-semibold text-white">
+                            ${customer.name}
+                        </div>
+
+                        <div class="text-sm text-slate-300">
+                            ${customer.phone}
+                        </div>
+
+                        <div class="text-xs text-cyan-300">
+                            ${customer.member_level} • ${customer.points} poin
+                        </div>
+
                     </div>
+                    `;
 
-                    <div class="text-sm text-gray-300">
-                        ${customer.phone}
-                    </div>
+                });
 
-                    <div class="text-xs text-yellow-400">
-                        ${customer.member_level} • ${customer.points} poin
-                    </div>
+                if(result.data.length===0){
 
-                </div>
-                `;
+                    html = `
+                        <div class="rounded-lg bg-slate-900 p-3 text-slate-400">
+                            Member tidak ditemukan
+                        </div>
+                    `;
 
-            });
+                }
 
-            document.getElementById("memberResult").innerHTML = html;
+                document.getElementById("memberResult").innerHTML = html;
+
+            }catch(error){
+
+                console.error(error);
+
+            }
 
         });
 
-        function chooseMember(id, name, phone) {
+        function chooseMember(id,name,phone){
 
-            selectedCustomer = id;
+            selectedCustomer=id;
 
             document.getElementById("memberSearch").value =
-                name + " (" + phone + ")";
+                name+" ("+phone+")";
 
-            document.getElementById("memberResult").innerHTML = `
-                <div class="rounded-lg bg-green-700 p-3 text-white">
-
-                    <b>${name}</b><br>
-
-                    ${phone}
-
+            document.getElementById("memberResult").innerHTML=`
+                <div class="rounded-xl border border-green-500 bg-green-500/20 p-3 text-green-300">
+                    ✓ ${name}
                 </div>
             `;
 
