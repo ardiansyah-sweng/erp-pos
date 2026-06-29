@@ -157,6 +157,20 @@
                     </div>
                 </div>
             </div>
+            <div class="mt-6 grid grid-cols-3 gap-3 text-sm">
+                <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                    <div class="text-slate-400">Penjualan Hari Ini</div>
+                    <div id="dailyRevenue" class="mt-1 text-xl font-semibold text-emerald-300">{{ number_format($todayStats->total_revenue, 0, ',', '.') }}</div>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                    <div class="text-slate-400">Produk Terjual</div>
+                    <div id="dailyProductsSold" class="mt-1 text-xl font-semibold text-white">{{ number_format($todayStats->total_products, 0, ',', '.') }}</div>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                    <div class="text-slate-400">Transaksi Hari Ini</div>
+                    <div id="dailyTransactions" class="mt-1 text-xl font-semibold text-white">{{ $todayStats->total_transactions }}</div>
+                </div>
+            </div>
         </section>
 
         <section class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
@@ -431,6 +445,9 @@
             receipt: null,
             selectedEwallet: null,
             pendingQrisPayload: null,
+            dailyRevenue: {{ $todayStats->total_revenue }},
+            dailyProductsSold: {{ $todayStats->total_products }},
+            dailyTransactions: {{ $todayStats->total_transactions }},
         };
 
         const refs = {
@@ -486,6 +503,9 @@
             cardNumber: document.getElementById('cardNumber'),
             cardBank: document.getElementById('cardBank'),
             approvalCode: document.getElementById('approvalCode'),
+            dailyRevenue: document.getElementById('dailyRevenue'),
+            dailyProductsSold: document.getElementById('dailyProductsSold'),
+            dailyTransactions: document.getElementById('dailyTransactions'),
         };
 
         const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
@@ -1047,6 +1067,14 @@
                 await loadProducts(refs.productSearch.value.trim());
                 await loadTransactions();
                 setCheckoutStatus('Transaksi berhasil disimpan.', 'success');
+
+                const qtySold = response.data.details.reduce((sum, d) => sum + d.quantity, 0);
+                state.dailyRevenue += response.data.total_amount;
+                state.dailyProductsSold += qtySold;
+                state.dailyTransactions += 1;
+                refs.dailyRevenue.textContent = formatMoney(state.dailyRevenue);
+                refs.dailyProductsSold.textContent = new Intl.NumberFormat('id-ID').format(state.dailyProductsSold);
+                refs.dailyTransactions.textContent = state.dailyTransactions;
             } catch (error) {
                 setCheckoutStatus(error.message || 'Checkout gagal.', 'error');
             } finally {
