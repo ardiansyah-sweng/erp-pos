@@ -1047,6 +1047,7 @@
                 await loadProducts(refs.productSearch.value.trim());
                 await loadTransactions();
                 setCheckoutStatus('Transaksi berhasil disimpan.', 'success');
+                showPrintReceiptButton(response.data.id);
             } catch (error) {
                 setCheckoutStatus(error.message || 'Checkout gagal.', 'error');
             } finally {
@@ -1121,6 +1122,7 @@
                 await loadProducts(refs.productSearch.value.trim());
                 await loadTransactions();
                 setCheckoutStatus('Transaksi QRIS berhasil disimpan.', 'success');
+                showPrintReceiptButton(response.data.id);
             } catch (error) {
                 setCheckoutStatus(error.message || 'Checkout gagal.', 'error');
                 closeQrisModal();
@@ -1256,6 +1258,18 @@
         setCurrencyInputValue(refs.cashTendered, getCashTendered());
         loadProducts();
         loadTransactions();
+
+        const showPrintReceiptButton = (transactionId) => {
+            const existing = document.getElementById('printReceiptBtn');
+            if (existing) existing.remove();
+            const btn = document.createElement('a');
+            btn.id = 'printReceiptBtn';
+            btn.href = '/transactions/' + transactionId + '/receipt';
+            btn.target = '_blank';
+            btn.className = 'ml-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-xs font-medium text-emerald-200 transition hover:bg-emerald-400/20';
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg> Cetak Struk';
+            refs.checkoutStatus.after(btn);
+        };
     </script>
 </body>
 </html>
