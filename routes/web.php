@@ -9,6 +9,7 @@ use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -35,6 +36,18 @@ Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index'])
 
 Route::put('/stock-adjustments/{product}', [StockAdjustmentController::class, 'update'])
     ->name('stock-adjustments.update');
+
+Route::get('/tasks', [TaskController::class, 'index'])
+    ->name('tasks.index');
+
+Route::post('/tasks', [TaskController::class, 'store'])
+    ->name('tasks.store');
+
+Route::put('/tasks/{task}', [TaskController::class, 'update'])
+    ->name('tasks.update');
+
+Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])
+    ->name('tasks.destroy');
 
 Route::get('/transactions/export/csv', [TransactionController::class, 'exportCsv'])->name('transactions.export');
 Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
