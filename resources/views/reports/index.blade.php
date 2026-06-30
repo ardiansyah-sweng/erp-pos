@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Penjualan - ERP POS</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -63,6 +65,36 @@
 
         /* ── MAIN ── */
         .main { padding: 28px 32px; max-width: 1200px; margin: 0 auto; }
+
+        /* ── FLATPICKR DARK THEME OVERRIDE ── */
+        .flatpickr-calendar {
+            background: #161b22 !important;
+            border: 1px solid #21262d !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
+        }
+        .flatpickr-months .flatpickr-month,
+        .flatpickr-current-month .flatpickr-monthDropdown-months,
+        .flatpickr-weekdays { background: #161b22 !important; color: #e6edf3 !important; }
+        .flatpickr-weekday { color: #8b949e !important; }
+        .flatpickr-day { color: #e6edf3 !important; }
+        .flatpickr-day.flatpickr-disabled,
+        .flatpickr-day.prevMonthDay,
+        .flatpickr-day.nextMonthDay { color: #484f58 !important; }
+        .flatpickr-day:hover { background: #21262d !important; }
+        .flatpickr-day.selected,
+        .flatpickr-day.selected:hover {
+            background: #2dd4bf !important;
+            border-color: #2dd4bf !important;
+            color: #0d1117 !important;
+        }
+        .flatpickr-day.inRange {
+            background: #2dd4bf22 !important;
+            border-color: #2dd4bf22 !important;
+            box-shadow: -5px 0 0 #2dd4bf22, 5px 0 0 #2dd4bf22 !important;
+        }
+        .flatpickr-current-month input.cur-year { color: #e6edf3 !important; }
+        .flatpickr-prev-month, .flatpickr-next-month { color: #8b949e !important; fill: #8b949e !important; }
+        span.flatpickr-weekday { color: #8b949e !important; }
 
         /* ── FILTER BAR ── */
         .filter-bar {
@@ -372,13 +404,13 @@
 
             <div class="filter-custom">
                 <input type="hidden" name="filter" value="custom">
-                <input type="date" name="start_date" class="filter-input"
+                <input type="text" id="start_date" name="start_date" class="filter-input datepicker"
                        value="{{ $filter === 'custom' ? $startDate : '' }}"
-                       placeholder="Dari">
+                       placeholder="Dari tanggal" autocomplete="off" readonly>
                 <span style="color:#8b949e; font-size:12px;">—</span>
-                <input type="date" name="end_date" class="filter-input"
+                <input type="text" id="end_date" name="end_date" class="filter-input datepicker"
                        value="{{ $filter === 'custom' ? $endDate : '' }}"
-                       placeholder="Sampai">
+                       placeholder="Sampai tanggal" autocomplete="off" readonly>
                 <button type="submit" class="btn-apply">Terapkan</button>
             </div>
         </div>
@@ -498,6 +530,25 @@
 
 {{-- CHART JS --}}
 <script>
+    flatpickr('#start_date', {
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd M Y',
+        maxDate: 'today',
+        locale: {
+            firstDayOfWeek: 1
+        }
+    });
+    flatpickr('#end_date', {
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd M Y',
+        maxDate: 'today',
+        locale: {
+            firstDayOfWeek: 1
+        }
+    });
+
     const ctx = document.getElementById('revenueChart').getContext('2d');
     new Chart(ctx, {
         type: 'bar',
