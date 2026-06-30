@@ -37,7 +37,6 @@ class ProductController extends Controller
         ]);
     }
 
-<<<<<<< HEAD
     function searchProduct(Request $request)
     {
         $keyword = $request->query('q', '');
@@ -45,7 +44,7 @@ class ProductController extends Controller
         $products = Product::where('is_active', true)
             ->where(function ($query) use ($keyword) {
                 $query->where('name', 'like', '%' . $keyword . '%')
-                      ->orWhere('sku', 'like', '%' . $keyword . '%');
+                    ->orWhere('sku', 'like', '%' . $keyword . '%');
             })
             ->orderBy('name')
             ->get();
@@ -53,7 +52,9 @@ class ProductController extends Controller
         return response()->json([
             'success' => true,
             'data'    => $products,
-=======
+        ], 200);
+    }
+
     function getItemBySKU($sku)
     {
         $product = $this->productService->getItemBySKU($sku);
@@ -70,7 +71,6 @@ class ProductController extends Controller
             'success' => true,
             'message' => 'Produk berhasil ditemukan.',
             'data'    => $product,
->>>>>>> 86fb96b7ab46dc498fd8d09d9f92d7bc066ddea3
         ], 200);
     }
 }
