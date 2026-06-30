@@ -423,7 +423,8 @@
                 </div>
             </div>
             <div class="flex flex-col gap-3 border-t border-white/10 bg-slate-900 px-5 py-4">
-                <button id="confirmCheckoutButton" type="button" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110">Konfirmasi & Bayar</button>
+                <button id="confirmCheckoutButton" type="button" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110">Konfirmasi</button>
+                <button id="confirmCheckoutAndPrintButton" type="button" class="flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 font-semibold text-emerald-200 transition hover:bg-emerald-400/20">Konfirmasi & Cetak Struk</button>
                 <button id="cancelCheckoutButton" type="button" class="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-slate-300 transition hover:text-white">Kembali</button>
             </div>
         </div>
@@ -466,6 +467,7 @@
             selectedEwallet: null,
             pendingQrisPayload: null,
             checkoutConfirmed: false,
+            printAfterCheckout: false,
         };
 
         const refs = {
@@ -503,6 +505,7 @@
             checkoutConfirmTotal: document.getElementById('checkoutConfirmTotal'),
             checkoutConfirmPayment: document.getElementById('checkoutConfirmPayment'),
             confirmCheckoutButton: document.getElementById('confirmCheckoutButton'),
+            confirmCheckoutAndPrintButton: document.getElementById('confirmCheckoutAndPrintButton'),
             cancelCheckoutButton: document.getElementById('cancelCheckoutButton'),
             closeCheckoutConfirmModal: document.getElementById('closeCheckoutConfirmModal'),
             ewalletPanel: document.getElementById('ewalletPanel'),
@@ -624,8 +627,9 @@
             event.stopImmediatePropagation();
             openCheckoutConfirmModal();
         };
-        const confirmCheckout = async () => {
+        const confirmCheckout = async (showPrint = false) => {
             state.checkoutConfirmed = true;
+            state.printAfterCheckout = showPrint;
             closeCheckoutConfirmModal();
 
             try {
@@ -1150,6 +1154,9 @@
                 await loadProducts(refs.productSearch.value.trim());
                 await loadTransactions();
                 setCheckoutStatus('Transaksi berhasil disimpan.', 'success');
+                if (state.printAfterCheckout) {
+                    window.open('/transactions/' + response.data.id + '/receipt', '_blank');
+                }
             } catch (error) {
                 setCheckoutStatus(error.message || 'Checkout gagal.', 'error');
             } finally {
@@ -1224,6 +1231,9 @@
                 await loadProducts(refs.productSearch.value.trim());
                 await loadTransactions();
                 setCheckoutStatus('Transaksi QRIS berhasil disimpan.', 'success');
+                if (state.printAfterCheckout) {
+                    window.open('/transactions/' + response.data.id + '/receipt', '_blank');
+                }
             } catch (error) {
                 setCheckoutStatus(error.message || 'Checkout gagal.', 'error');
                 closeQrisModal();
@@ -1234,7 +1244,8 @@
         });
 
         refs.cancelQrisButton.addEventListener('click', closeQrisModal);
-        refs.confirmCheckoutButton.addEventListener('click', confirmCheckout);
+        refs.confirmCheckoutButton.addEventListener('click', () => confirmCheckout(false));
+        refs.confirmCheckoutAndPrintButton.addEventListener('click', () => confirmCheckout(true));
         refs.cancelCheckoutButton.addEventListener('click', closeCheckoutConfirmModal);
         refs.closeCheckoutConfirmModal.addEventListener('click', closeCheckoutConfirmModal);
         refs.checkoutButton.addEventListener('click', handleCheckoutClick, true);
@@ -1363,6 +1374,18 @@
         setCurrencyInputValue(refs.cashTendered, getCashTendered());
         loadProducts();
         loadTransactions();
+
+        const showPrintReceiptButton = (transactionId) => {
+            const existing = document.getElementById('printReceiptBtn');
+            if (existing) existing.remove();
+            const btn = document.createElement('a');
+            btn.id = 'printReceiptBtn';
+            btn.href = '/transactions/' + transactionId + '/receipt';
+            btn.target = '_blank';
+            btn.className = 'mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 font-medium text-emerald-200 transition hover:bg-emerald-400/20';
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg> Cetak Struk';
+            refs.checkoutButton.after(btn);
+        };
     </script>
 </body>
 </html>
