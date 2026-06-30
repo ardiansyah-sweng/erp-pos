@@ -12,4 +12,14 @@ class ProductService
 
         return $product;
     }
+
+    public function searchProduct($keyword)
+    {
+        $products = Product::where('name', 'like', '%' . $keyword . '%')
+            ->orWhere('sku', 'like', '%' . $keyword . '%')
+            ->where('is_active', true)
+            ->get();
+
+        return $products;
+    }
 }

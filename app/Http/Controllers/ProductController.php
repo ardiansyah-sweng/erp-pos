@@ -37,6 +37,24 @@ class ProductController extends Controller
         ]);
     }
 
+    function searchProduct(Request $request)
+    {
+        $keyword = $request->query('q', '');
+
+        $products = Product::where('is_active', true)
+            ->where(function ($query) use ($keyword) {
+                $query->where('name', 'like', '%' . $keyword . '%')
+                    ->orWhere('sku', 'like', '%' . $keyword . '%');
+            })
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $products,
+        ], 200);
+    }
+
     function getItemBySKU($sku)
     {
         $product = $this->productService->getItemBySKU($sku);
