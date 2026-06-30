@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Cashiers;
 
-class ProfilController extends Controller
+class ProfileController extends Controller
 {
     /**
      * Ambil data kasir dari session (tanpa Auth facade)
