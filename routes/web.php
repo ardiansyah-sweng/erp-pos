@@ -7,6 +7,9 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ProfileController;
+
 
 Route::get('/', function () {
     return redirect()->route('pos.index');
@@ -19,7 +22,7 @@ Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])->name('jal
 
 Route::get('/products', [ProductController::class, 'getProducts'])->name('products.index');
 Route::get('/products/sku/{sku}', [ProductController::class, 'getItemBySKU']);
-
+Route::get('/transactions/export/csv', [TransactionController::class, 'exportCsv'])->name('transactions.export');
 Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
@@ -29,3 +32,7 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('categorie
 Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
 Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
 Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
+Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
+Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
