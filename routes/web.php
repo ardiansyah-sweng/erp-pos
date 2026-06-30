@@ -6,8 +6,14 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\LoginController;
+<<<<<<< HEAD
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\CustomerController;
+=======
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ProfileController;
+
+>>>>>>> 5ee8fb570f6cf77470299c50901a7877f051c30f
 
 Route::get('/', function () {
     return redirect()->route('pos.index');
@@ -20,7 +26,7 @@ Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])->name('jal
 
 Route::get('/products', [ProductController::class, 'getProducts'])->name('products.index');
 Route::get('/products/sku/{sku}', [ProductController::class, 'getItemBySKU']);
-
+Route::get('/transactions/export/csv', [TransactionController::class, 'exportCsv'])->name('transactions.export');
 Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 
@@ -28,7 +34,6 @@ Route::post('/pos/checkout', [TransactionController::class, 'checkout']);
 
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
 Route::post('/transaction/store', [TransactionController::class, 'store']);
-
 
 Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.index');
 Route::post('/cashier/add', [CashierController::class, 'add'])->name('cashier.add');
@@ -45,3 +50,7 @@ Route::delete('/customers/{id}', [CustomerController::class,'destroy']);
 Route::get('/members', [CustomerController::class, 'index'])->name('members.index');
 Route::post('/members/store', [CustomerController::class, 'store'])->name('members.store');
 
+Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
+Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
+Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');

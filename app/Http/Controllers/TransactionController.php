@@ -46,6 +46,90 @@ class TransactionController extends Controller
         ]);
     }
 
+    public function exportCsv(Request $request)
+    {
+        $validated = $request->validate([
+            'date' => ['nullable', 'date'],
+        ]);
+
+        $transactions = Transaction::with(['details.product', 'payments'])
+            ->when($validated['date'] ?? null, function ($query, $date) {
+                $query->whereDate('created_at', $date);
+            })
+            ->latest()
+            ->get();
+
+        $fileName = 'detail-transaksi';
+
+        if (!empty($validated['date'])) {
+            $fileName .= '-' . $validated['date'];
+        }
+
+        return response()->streamDownload(function () use ($transactions) {
+            $handle = fopen('php://output', 'w');
+
+            echo "\xEF\xBB\xBF";
+
+            fputcsv($handle, [
+                'Kode Transaksi',
+                'Tanggal',
+                'Jam',
+                'Metode Pembayaran',
+                'SKU Produk',
+                'Nama Produk',
+                'Qty',
+                'Harga Satuan',
+                'Subtotal Item',
+                'Diskon Item',
+                'Total Item Setelah Diskon',
+                'Cash Transaksi',
+                'Kembalian Transaksi',
+            ]);
+
+            foreach ($transactions as $transaction) {
+                $payment = $transaction->payments->first();
+                $transactionCode = 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT);
+                $subtotal = $transaction->details->sum('amount');
+                $discount = min((int) ($payment?->discount_amount ?? 0), (int) $subtotal);
+                $allocatedDiscount = 0;
+                $lastDetailIndex = max(0, $transaction->details->count() - 1);
+
+                foreach ($transaction->details->values() as $index => $detail) {
+                    $itemSubtotal = (int) $detail->amount;
+                    $itemDiscount = 0;
+
+                    if ($subtotal > 0 && $discount > 0) {
+                        $itemDiscount = $index === $lastDetailIndex
+                            ? $discount - $allocatedDiscount
+                            : (int) floor(($itemSubtotal / $subtotal) * $discount);
+                    }
+
+                    $allocatedDiscount += $itemDiscount;
+
+                    fputcsv($handle, [
+                        $transactionCode,
+                        $transaction->created_at?->format('d/m/Y'),
+                        $transaction->created_at?->format('H:i'),
+                        $payment?->payment_method ?? 'cash',
+                        $detail->product?->sku ?? '-',
+                        $detail->product?->name ?? 'Produk #' . $detail->product_id,
+                        $detail->quantity,
+                        $detail->price,
+                        $itemSubtotal,
+                        $itemDiscount,
+                        max(0, $itemSubtotal - $itemDiscount),
+                        $payment?->cash_tendered ?? 0,
+                        $payment?->change_amount ?? 0,
+                    ]);
+                }
+            }
+
+            fclose($handle);
+        }, $fileName . '.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
     public function checkout(Request $request)
     {
         $validated = $request->validate([
