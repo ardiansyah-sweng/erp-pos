@@ -193,6 +193,7 @@ class TransactionController extends Controller
             ]);
 
             $transaction = Transaction::create([
+                'customer_id' => $request->customer_id,
                 'total' => $request->total
             ]);
 
