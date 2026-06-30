@@ -6,14 +6,12 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\LoginController;
-<<<<<<< HEAD
+
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\CustomerController;
-=======
+
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProfileController;
-
->>>>>>> 5ee8fb570f6cf77470299c50901a7877f051c30f
 
 Route::get('/', function () {
     return redirect()->route('pos.index');
