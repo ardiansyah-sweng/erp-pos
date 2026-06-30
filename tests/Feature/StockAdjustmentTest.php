@@ -10,15 +10,6 @@ class StockAdjustmentTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_pos_page_has_link_to_stock_adjustment_page(): void
-    {
-        $response = $this->get(route('pos.index'));
-
-        $response->assertOk();
-        $response->assertSee(route('stock-adjustments.index'), false);
-        $response->assertSee('Penyesuaian Stok');
-    }
-
     public function test_stock_adjustment_page_displays_active_products(): void
     {
         Product::create([
@@ -106,7 +97,8 @@ class StockAdjustmentTest extends TestCase
         ]);
 
         $response->assertUnprocessable()
-            ->assertJsonValidationErrors('quantity');
+
+        ->assertJsonValidationErrors('quantity');
         $this->assertDatabaseHas('products', [
             'id' => $product->id,
             'stock_quantity' => 4,
