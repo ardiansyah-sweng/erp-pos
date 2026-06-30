@@ -140,6 +140,9 @@
                         <span class="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/70">Tanggal</span>
                         <input id="date" name="date" type="date" value="{{ $selectedDate }}" class="w-36 border-0 bg-transparent p-0 text-sm text-white outline-none">
                     </label>
+                    <a href="{{ route('transactions.export', array_filter(['date' => $selectedDate])) }}" class="inline-flex items-center justify-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:border-emerald-300 hover:text-white">
+                        Export Detail CSV
+                    </a>
                     @if ($selectedDate)
                         <a href="{{ route('transactions.index') }}" class="inline-flex items-center justify-center rounded-full border border-white/10 bg-cyan-400/10 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:border-cyan-300 hover:text-white">
                             Reset filter
