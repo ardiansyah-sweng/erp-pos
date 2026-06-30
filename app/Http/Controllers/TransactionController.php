@@ -43,7 +43,7 @@ class TransactionController extends Controller
             'date' => ['nullable', 'date'],
         ]);
 
-        $transactions = Transaction::with('details.product')
+        $transactions = Transaction::with(['details.product', 'payments'])
             ->when($validated['date'] ?? null, function ($query, $date) {
                 $query->whereDate('created_at', $date);
             })
@@ -78,9 +78,10 @@ class TransactionController extends Controller
             ]);
 
             foreach ($transactions as $transaction) {
+                $payment = $transaction->payments->first();
                 $transactionCode = 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT);
                 $subtotal = $transaction->details->sum('amount');
-                $discount = min((int) ($transaction->discount_amount ?? 0), (int) $subtotal);
+                $discount = min((int) ($payment?->discount_amount ?? 0), (int) $subtotal);
                 $allocatedDiscount = 0;
                 $lastDetailIndex = max(0, $transaction->details->count() - 1);
 
@@ -100,7 +101,7 @@ class TransactionController extends Controller
                         $transactionCode,
                         $transaction->created_at?->format('d/m/Y'),
                         $transaction->created_at?->format('H:i'),
-                        $transaction->payment_method ?? 'cash',
+                        $payment?->payment_method ?? 'cash',
                         $detail->product?->sku ?? '-',
                         $detail->product?->name ?? 'Produk #' . $detail->product_id,
                         $detail->quantity,
@@ -108,8 +109,8 @@ class TransactionController extends Controller
                         $itemSubtotal,
                         $itemDiscount,
                         max(0, $itemSubtotal - $itemDiscount),
-                        $transaction->cash_tendered ?? 0,
-                        $transaction->change_amount ?? 0,
+                        $payment?->cash_tendered ?? 0,
+                        $payment?->change_amount ?? 0,
                     ]);
                 }
             }
