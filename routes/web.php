@@ -1,20 +1,15 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\ScheduleController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\StockAdjustmentController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
-
 
 
 Route::get('/', function () {
