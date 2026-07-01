@@ -132,23 +132,7 @@
             font-weight: 700;
         }
 
-        .theme-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            min-height: 38px;
-            padding: 9px 12px;
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            background: var(--surface);
-            color: var(--primary-dark);
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        html[data-theme="dark"] .back,
-        html[data-theme="dark"] .theme-toggle {
+        html[data-theme="dark"] .back {
             background: rgba(2, 6, 23, 0.72);
             color: #cbd5e1;
         }
@@ -406,10 +390,6 @@
             </div>
             <div class="actions">
                 <a class="download" href="{{ route('sales-notes.pdf') }}">Download PDF</a>
-                <button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false">
-                    <span id="themeIcon" aria-hidden="true"></span>
-                    <span id="themeLabel">Mode terang</span>
-                </button>
                 <a class="back" href="{{ route('pos.index') }}">Kembali POS</a>
             </div>
         </section>
@@ -490,51 +470,5 @@
             </section>
         @endif
     </main>
-    <script>
-        const themeStorageKey = 'erp-pos-theme';
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
-        const themeLabel = document.getElementById('themeLabel');
-        const themeIcons = {
-            sun: `
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="4"></circle>
-                    <path d="M12 2v2"></path>
-                    <path d="M12 20v2"></path>
-                    <path d="m4.93 4.93 1.41 1.41"></path>
-                    <path d="m17.66 17.66 1.41 1.41"></path>
-                    <path d="M2 12h2"></path>
-                    <path d="M20 12h2"></path>
-                    <path d="m6.34 17.66-1.41 1.41"></path>
-                    <path d="m19.07 4.93-1.41 1.41"></path>
-                </svg>
-            `,
-            moon: `
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 3a6 6 0 0 0 9 7.5A9 9 0 1 1 12 3Z"></path>
-                </svg>
-            `,
-        };
-
-        const applyTheme = (theme) => {
-            document.documentElement.dataset.theme = theme;
-            themeIcon.innerHTML = theme === 'light' ? themeIcons.moon : themeIcons.sun;
-            themeLabel.textContent = theme === 'light' ? 'Mode gelap' : 'Mode terang';
-            themeToggle.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
-
-            try {
-                localStorage.setItem(themeStorageKey, theme);
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
-            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
-        });
-
-        applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
-    </script>
 </body>
 </html>
