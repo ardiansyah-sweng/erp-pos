@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Transaction extends Model
 {
     protected $table = 'transaction';
-    protected $fillable = ['total', 'transaction_date'];
+
+    protected $fillable = ['total', 'transaction_date', 'customer_name', 'customer_phone'];
 
     public function details()
     {
@@ -25,6 +26,7 @@ class Transaction extends Model
     public function getColumn($index)
     {
         $fillable = $this->getFillable();
+
         return $fillable[$index] ?? null;
     }
 }
