@@ -7,6 +7,7 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReturnTransactionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockAdjustmentController;
 use Illuminate\Support\Facades\Route;
@@ -46,6 +47,8 @@ Route::post('/transaction/store', [TransactionController::class, 'store']);
 Route::get('/transactions/{id}/receipt', [ReceiptController::class, 'generate'])->name('transactions.receipt');
 Route::get('/sales-notes', [TransactionController::class, 'salesNotes'])->name('sales-notes');
 Route::get('/sales-notes/pdf', [TransactionController::class, 'downloadSalesReportPdf'])->name('sales-notes.pdf');
+Route::get('/returns', [ReturnTransactionController::class, 'index'])->name('returns.index');
+Route::post('/returns/{transaction}', [ReturnTransactionController::class, 'store'])->name('returns.store');
 
 
 
