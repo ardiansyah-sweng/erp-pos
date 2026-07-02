@@ -198,10 +198,16 @@
 
             <aside class="space-y-6 lg:sticky lg:top-6 lg:self-start">
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-                    <div class="mb-4 flex items-center justify-between">
+                    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
                         <h2 class="text-lg font-semibold text-white">Keranjang</h2>
-                        <button id="clearCart" class="text-sm text-rose-300 transition hover:text-rose-200">Kosongkan</button>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button id="holdCart" type="button" class="rounded-full border border-cyan-400/40 bg-cyan-400/10 px-3 py-1.5 text-xs font-medium text-cyan-200 transition hover:bg-cyan-400/20 disabled:cursor-not-allowed disabled:opacity-40">Simpan</button>
+                            <button id="loadHeldCart" type="button" class="rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1.5 text-xs font-medium text-emerald-200 transition hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-40">Muat</button>
+                            <button id="clearHeldCart" type="button" class="rounded-full border border-white/10 bg-slate-950/60 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40">Hapus Hold</button>
+                            <button id="clearCart" class="text-sm text-rose-300 transition hover:text-rose-200">Kosongkan</button>
+                        </div>
                     </div>
+                    <p id="heldCartStatus" class="mb-3 text-xs text-slate-400"></p>
                     <div id="cartEmptyState" class="rounded-2xl border border-dashed border-white/10 bg-slate-950/50 px-4 py-8 text-center text-sm text-slate-400">
                         Keranjang masih kosong. Pilih produk atau scan barcode untuk mulai transaksi.
                     </div>
@@ -500,6 +506,10 @@
             cartTableWrapper: document.getElementById('cartTableWrapper'),
             cartTable: document.getElementById('cartTable'),
             clearCart: document.getElementById('clearCart'),
+            holdCart: document.getElementById('holdCart'),
+            loadHeldCart: document.getElementById('loadHeldCart'),
+            clearHeldCart: document.getElementById('clearHeldCart'),
+            heldCartStatus: document.getElementById('heldCartStatus'),
             discountAmount: document.getElementById('discountAmount'),
             discountType: document.getElementById('discountType'),
             paymentMethod: document.getElementById('paymentMethod'),
@@ -682,6 +692,7 @@
             };
         };
         const themeStorageKey = 'erp-pos-theme';
+        const heldCartStorageKey = 'erp-pos-held-cart';
         const themeIcons = {
             sun: `
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
@@ -746,6 +757,105 @@
             return payload;
         };
 
+        const readHeldCart = () => {
+            try {
+                const raw = localStorage.getItem(heldCartStorageKey);
+                return raw ? JSON.parse(raw) : null;
+            } catch (error) {
+                console.error(error);
+                return null;
+            }
+        };
+
+        const getHeldCartItemCount = (heldCart) => (heldCart?.cart ?? [])
+            .reduce((total, item) => total + Number(item.quantity || 0), 0);
+
+        const syncHeldCartActions = () => {
+            const heldCart = readHeldCart();
+            const itemCount = getHeldCartItemCount(heldCart);
+
+            refs.holdCart.disabled = state.cart.length === 0;
+            refs.loadHeldCart.disabled = itemCount === 0;
+            refs.clearHeldCart.disabled = itemCount === 0;
+            refs.heldCartStatus.textContent = itemCount > 0
+                ? `Hold tersimpan: ${itemCount} item${heldCart.saved_at ? ' pada ' + formatDateTime(heldCart.saved_at) : ''}.`
+                : 'Belum ada hold keranjang.';
+        };
+
+        const getCurrentCartDraft = () => ({
+            cart: state.cart,
+            discount_amount: refs.discountAmount.value,
+            discount_type: refs.discountType.value,
+            payment_method: refs.paymentMethod.value,
+            cash_tendered: refs.cashTendered.value,
+            notes: refs.notes.value,
+            selected_ewallet: state.selectedEwallet,
+            saved_at: new Date().toISOString(),
+        });
+
+        const saveHeldCart = () => {
+            if (state.cart.length === 0) {
+                setCheckoutStatus('Keranjang masih kosong, belum bisa di-hold.', 'info');
+                return;
+            }
+
+            try {
+                localStorage.setItem(heldCartStorageKey, JSON.stringify(getCurrentCartDraft()));
+                setCheckoutStatus('Keranjang berhasil disimpan sementara.', 'success');
+                syncHeldCartActions();
+            } catch (error) {
+                console.error(error);
+                setCheckoutStatus('Gagal menyimpan hold keranjang.', 'error');
+            }
+        };
+
+        const restoreHeldCartItems = (heldCart) => (heldCart.cart ?? [])
+            .map((item) => {
+                const latestProduct = state.products.find((product) => Number(product.id) === Number(item.id));
+                const product = latestProduct ? { ...latestProduct } : { ...item };
+                const stock = Number(product.stock_quantity || item.stock_quantity || 0);
+                const quantity = Number(item.quantity || 1);
+
+                return {
+                    ...product,
+                    quantity: Math.max(1, Math.min(stock || quantity, quantity)),
+                };
+            })
+            .filter((item) => Number(item.quantity || 0) > 0);
+
+        const loadHeldCart = () => {
+            const heldCart = readHeldCart();
+
+            if (!heldCart || getHeldCartItemCount(heldCart) === 0) {
+                setCheckoutStatus('Belum ada keranjang yang di-hold.', 'info');
+                syncHeldCartActions();
+                return;
+            }
+
+            state.cart = restoreHeldCartItems(heldCart);
+            state.selectedEwallet = heldCart.selected_ewallet ?? null;
+            refs.discountType.value = heldCart.discount_type ?? 'nominal';
+            refs.discountAmount.value = heldCart.discount_amount ?? 'Rp 0';
+            refs.paymentMethod.value = heldCart.payment_method ?? 'cash';
+            refs.cashTendered.value = heldCart.cash_tendered ?? 'Rp 0';
+            refs.notes.value = heldCart.notes ?? '';
+
+            renderCart();
+            renderProducts();
+            setCheckoutStatus('Hold keranjang berhasil dimuat.', 'success');
+        };
+
+        const clearHeldCart = () => {
+            try {
+                localStorage.removeItem(heldCartStorageKey);
+                syncHeldCartActions();
+                setCheckoutStatus('Hold keranjang dihapus.', 'info');
+            } catch (error) {
+                console.error(error);
+                setCheckoutStatus('Gagal menghapus hold keranjang.', 'error');
+            }
+        };
+
         const updateSummary = () => {
             const subtotal = calculateSubtotal();
             const discount = Math.min(getDiscount(), subtotal);
@@ -780,6 +890,7 @@
             refs.cashTenderedWrapper.style.display = isCashPayment ? '' : 'none';
             refs.changeRow.style.display = isCashPayment ? '' : 'none';
             refs.checkoutButton.disabled = state.cart.length === 0 || isInvalidDiscount || isCashInsufficient || isEwalletNotSelected;
+            syncHeldCartActions();
 
             if (state.cart.length === 0) {
                 setCheckoutStatus('Tambahkan produk ke keranjang terlebih dahulu.', 'info');
@@ -1170,6 +1281,7 @@
 
                 state.receipt = response.data;
                 state.cart = [];
+                localStorage.removeItem(heldCartStorageKey);
                 state.selectedEwallet = null;
                 document.querySelectorAll('.ewallet-btn').forEach((b) => {
                     b.classList.remove('border-cyan-400/70', 'bg-cyan-400/10');
@@ -1253,6 +1365,7 @@
                 closeQrisModal();
                 state.receipt = response.data;
                 state.cart = [];
+                localStorage.removeItem(heldCartStorageKey);
                 setCurrencyInputValue(refs.discountAmount, 0);
                 setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
@@ -1323,6 +1436,9 @@
             renderCart();
             renderProducts();
         });
+        refs.holdCart.addEventListener('click', saveHeldCart);
+        refs.loadHeldCart.addEventListener('click', loadHeldCart);
+        refs.clearHeldCart.addEventListener('click', clearHeldCart);
         [refs.discountAmount, refs.cashTendered].forEach((input) => {
             input.addEventListener('input', () => {
                 // Skip currency normalization for discount when in percent mode
