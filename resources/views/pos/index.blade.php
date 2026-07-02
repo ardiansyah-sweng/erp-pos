@@ -130,6 +130,13 @@
                             <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
                             <span id="themeLabel">Mode terang</span>
                         </button>
+                        <a href="{{ route('sales-notes') }}" class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/15 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-400/25 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M3 3v18h18"/>
+                                <path d="m19 9-5 5-4-4-3 3"/>
+                            </svg>
+                            Laporan Penjualan
+                        </a>
                     </div>
                 </div>
                 <div class="flex flex-col items-end gap-3">
