@@ -17,7 +17,7 @@ class TransactionController extends Controller
             'date' => ['nullable', 'date'],
         ]);
 
-        $transactions = Transaction::with(['details.product', 'payments'])
+        $transactions = Transaction::with(['details.product', 'details.returnDetails', 'payments'])
             ->when($validated['date'] ?? null, function ($query, $date) {
                 $query->whereDate('created_at', $date);
             })

@@ -137,6 +137,13 @@
                             </svg>
                             Laporan Penjualan
                         </a>
+                        <a href="{{ route('returns.index') }}" class="inline-flex items-center gap-2 rounded-full border border-rose-400/40 bg-rose-400/15 px-4 py-2 text-sm font-medium text-rose-200 transition hover:border-rose-300 hover:bg-rose-400/25 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="m9 14-4-4 4-4"/>
+                                <path d="M5 10h11a4 4 0 0 1 0 8h-1"/>
+                            </svg>
+                            Retur Transaksi
+                        </a>
                     </div>
                 </div>
                 <div class="flex flex-col items-end gap-3">
