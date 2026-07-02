@@ -106,7 +106,8 @@
                                         <tr>
                                             <th class="px-4 py-3">Produk</th>
                                             <th class="px-4 py-3 text-right">Terjual</th>
-                                            <th class="px-4 py-3 text-right">Sisa Retur</th>
+                                            <th class="px-4 py-3 text-right">Sudah Retur</th>
+                                            <th class="px-4 py-3 text-right">Sisa Barang</th>
                                             <th class="px-4 py-3 text-right">Qty Retur</th>
                                         </tr>
                                     </thead>
@@ -122,7 +123,8 @@
                                                     <div class="mt-1 text-xs text-slate-400">Rp{{ number_format($detail->price, 0, ',', '.') }} / item</div>
                                                 </td>
                                                 <td class="px-4 py-3 text-right text-slate-200">{{ $detail->quantity }}</td>
-                                                <td class="px-4 py-3 text-right text-slate-200">{{ $available }}</td>
+                                                <td class="px-4 py-3 text-right text-rose-300">{{ $returned }}</td>
+                                                <td class="px-4 py-3 text-right font-semibold text-emerald-300">{{ $available }}</td>
                                                 <td class="px-4 py-3 text-right">
                                                     <input name="items[{{ $detail->id }}]" type="number" min="0" max="{{ $available }}" value="0" {{ $available === 0 ? 'disabled' : '' }} class="w-24 rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2 text-right text-white outline-none focus:border-cyan-400 disabled:opacity-40">
                                                 </td>
@@ -131,6 +133,7 @@
                                     </tbody>
                                 </table>
                             </div>
+                            <p class="text-xs text-slate-400">Kolom Terjual tetap mengikuti transaksi asli. Barang yang sudah dikembalikan terlihat di kolom Sudah Retur, sedangkan Sisa Barang adalah jumlah yang masih bisa diretur.</p>
                             <div>
                                 <label class="text-sm text-slate-300" for="reason-{{ $transaction->id }}">Alasan retur</label>
                                 <textarea id="reason-{{ $transaction->id }}" name="reason" rows="2" maxlength="255" placeholder="Contoh: barang rusak / salah input" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"></textarea>
