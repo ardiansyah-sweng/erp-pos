@@ -118,10 +118,19 @@
                     <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/80">Point of Sales</p>
                     <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat untuk transaksi harian.</h1>
                     <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari atau scan produk, cek isi keranjang, lalu selesaikan pembayaran tanpa reload halaman.</p>
-                    <button id="themeToggle" type="button" class="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white" aria-pressed="false">
-                        <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
-                        <span id="themeLabel">Mode terang</span>
-                    </button>
+                    <div class="mt-4 flex flex-wrap items-center gap-3">
+                        <a href="{{ route('stock-adjustments.index') }}" class="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/15 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:border-emerald-300 hover:bg-emerald-400/25 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                                <path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>
+                            </svg>
+                            Penyesuaian Stok
+                        </a>
+                        <button id="themeToggle" type="button" class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white" aria-pressed="false">
+                            <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
+                            <span id="themeLabel">Mode terang</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="flex flex-col items-end gap-3">
                     <div class="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-sm">
@@ -395,6 +404,31 @@
         </div>
     </div>
 
+    <div id="checkoutConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm">
+        <div class="w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-slate-950 text-slate-100 shadow-2xl shadow-black/40">
+            <div class="flex items-center justify-between gap-4 border-b border-white/10 px-5 py-4">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">Konfirmasi Checkout</p>
+                    <h2 class="mt-1 text-xl font-semibold text-white">Periksa kembali pesanan</h2>
+                </div>
+                <button id="closeCheckoutConfirmModal" type="button" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300 transition hover:text-white">Batal</button>
+            </div>
+            <div class="max-h-[60vh] overflow-y-auto px-5 py-4">
+                <div id="checkoutConfirmItems" class="space-y-3"></div>
+                <div class="mt-4 rounded-3xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300">
+                    <div class="flex items-center justify-between"><span>Subtotal</span><span id="checkoutConfirmSubtotal" class="font-semibold text-white">Rp0</span></div>
+                    <div class="mt-2 flex items-center justify-between"><span>Diskon</span><span id="checkoutConfirmDiscount" class="font-semibold text-white">Rp0</span></div>
+                    <div class="mt-2 border-t border-white/10 pt-3 flex items-center justify-between text-base font-semibold text-emerald-300"><span>Total</span><span id="checkoutConfirmTotal">Rp0</span></div>
+                    <div class="mt-2 text-sm text-slate-400"><span>Metode: </span><span id="checkoutConfirmPayment">-</span></div>
+                </div>
+            </div>
+            <div class="flex flex-col gap-3 border-t border-white/10 bg-slate-900 px-5 py-4">
+                <button id="confirmCheckoutButton" type="button" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110">Konfirmasi & Bayar</button>
+                <button id="cancelCheckoutButton" type="button" class="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-slate-300 transition hover:text-white">Kembali</button>
+            </div>
+        </div>
+    </div>
+
     <div id="transactionModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm">
         <div class="w-full max-w-md rounded-3xl border border-white/10 bg-slate-950 p-5 text-slate-100 shadow-2xl shadow-black/40">
             <div class="mb-4 flex items-start justify-between gap-4">
@@ -431,6 +465,7 @@
             receipt: null,
             selectedEwallet: null,
             pendingQrisPayload: null,
+            checkoutConfirmed: false,
         };
 
         const refs = {
@@ -461,6 +496,15 @@
             changeValue: document.getElementById('changeValue'),
             checkoutButton: document.getElementById('checkoutButton'),
             checkoutStatus: document.getElementById('checkoutStatus'),
+            checkoutConfirmModal: document.getElementById('checkoutConfirmModal'),
+            checkoutConfirmItems: document.getElementById('checkoutConfirmItems'),
+            checkoutConfirmSubtotal: document.getElementById('checkoutConfirmSubtotal'),
+            checkoutConfirmDiscount: document.getElementById('checkoutConfirmDiscount'),
+            checkoutConfirmTotal: document.getElementById('checkoutConfirmTotal'),
+            checkoutConfirmPayment: document.getElementById('checkoutConfirmPayment'),
+            confirmCheckoutButton: document.getElementById('confirmCheckoutButton'),
+            cancelCheckoutButton: document.getElementById('cancelCheckoutButton'),
+            closeCheckoutConfirmModal: document.getElementById('closeCheckoutConfirmModal'),
             ewalletPanel: document.getElementById('ewalletPanel'),
             cashTenderedWrapper: document.getElementById('cashTenderedWrapper'),
             changeRow: document.getElementById('changeRow'),
@@ -531,6 +575,65 @@
         const getAppliedDiscount = () => Math.min(getDiscount(), calculateSubtotal());
         const isDiscountTooHigh = () => calculateSubtotal() > 0 && getDiscount() >= calculateSubtotal();
         const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getAppliedDiscount());
+        const getPaymentMethodLabel = () => {
+            const method = refs.paymentMethod.value;
+            if (method === 'cash') return 'Cash';
+            if (method === 'card') return 'Kartu';
+            if (method === 'e_wallet') return state.selectedEwallet ? `E-wallet (${state.selectedEwallet.name})` : 'E-wallet';
+            if (method === 'bank_transfer') return 'Transfer Bank';
+            if (method === 'qris') return 'QRIS';
+            return 'Lainnya';
+        };
+        const renderCheckoutConfirmDetails = () => {
+            const subtotal = calculateSubtotal();
+            const discount = Math.min(getDiscount(), subtotal);
+            const grandTotal = Math.max(0, subtotal - discount);
+
+            refs.checkoutConfirmItems.innerHTML = state.cart.map((item) => `
+                <div class="grid gap-2 rounded-3xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-200 md:grid-cols-[1fr_auto]">
+                    <div>
+                        <div class="font-semibold text-white">${item.name}</div>
+                        <div class="mt-1 text-xs text-slate-400">${item.quantity} × ${formatMoney(item.selling_price)}</div>
+                    </div>
+                    <div class="text-right font-semibold text-emerald-300">${formatMoney(item.quantity * item.selling_price)}</div>
+                </div>
+            `).join('');
+
+            refs.checkoutConfirmSubtotal.textContent = formatMoney(subtotal);
+            refs.checkoutConfirmDiscount.textContent = formatMoney(discount);
+            refs.checkoutConfirmTotal.textContent = formatMoney(grandTotal);
+            refs.checkoutConfirmPayment.textContent = getPaymentMethodLabel();
+        };
+        const openCheckoutConfirmModal = () => {
+            renderCheckoutConfirmDetails();
+            refs.checkoutConfirmModal.classList.remove('hidden');
+            refs.checkoutConfirmModal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        };
+        const closeCheckoutConfirmModal = () => {
+            refs.checkoutConfirmModal.classList.add('hidden');
+            refs.checkoutConfirmModal.classList.remove('flex');
+            document.body.style.overflow = '';
+        };
+        const handleCheckoutClick = (event) => {
+            if (state.checkoutConfirmed) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            openCheckoutConfirmModal();
+        };
+        const confirmCheckout = async () => {
+            state.checkoutConfirmed = true;
+            closeCheckoutConfirmModal();
+
+            try {
+                await checkout();
+            } finally {
+                state.checkoutConfirmed = false;
+            }
+        };
         const getStockBadge = (product) => {
             const stock = getRemainingStock(product);
             const minStock = Number(product.min_stock || 0);
@@ -1131,6 +1234,10 @@
         });
 
         refs.cancelQrisButton.addEventListener('click', closeQrisModal);
+        refs.confirmCheckoutButton.addEventListener('click', confirmCheckout);
+        refs.cancelCheckoutButton.addEventListener('click', closeCheckoutConfirmModal);
+        refs.closeCheckoutConfirmModal.addEventListener('click', closeCheckoutConfirmModal);
+        refs.checkoutButton.addEventListener('click', handleCheckoutClick, true);
 
         let searchTimer = null;
 
