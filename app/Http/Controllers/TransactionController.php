@@ -17,7 +17,7 @@ class TransactionController extends Controller
             'date' => ['nullable', 'date'],
         ]);
 
-        $transactions = Transaction::with(['details.product', 'payments'])
+        $transactions = Transaction::with(['details.product', 'details.returnDetails', 'payments'])
             ->when($validated['date'] ?? null, function ($query, $date) {
                 $query->whereDate('created_at', $date);
             })
@@ -269,4 +269,34 @@ class TransactionController extends Controller
                 'data' => $transaction
             ], 201);
         }
+
+    public function salesNotes()
+    {
+        $transactions = $this->buildSalesData();
+
+        return view('transactions.sales-notes', compact('transactions'));
+    }
+
+    public function downloadSalesReportPdf()
+    {
+        $transactions = $this->buildSalesData();
+
+        return view('transactions.sales-notes', compact('transactions'));
+    }
+
+    private function buildSalesData()
+    {
+        return Transaction::with('details')
+            ->latest()
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'transaction_code' => 'TRX-' . $transaction->created_at->format('YmdHis') . '-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
+                    'date' => $transaction->created_at,
+                    'item_count' => $transaction->details->sum('quantity'),
+                    'total' => $transaction->total,
+                    'details' => $transaction->details,
+                ];
+            });
+    }
 }
