@@ -169,13 +169,6 @@
                     <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/80">Point of Sales</p>
                     <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat untuk transaksi harian.</h1>
                     <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari atau scan produk, cek isi keranjang, lalu selesaikan pembayaran tanpa reload halaman.</p>
-<<<<<<< HEAD
-                    <div class="mt-4 flex flex-wrap gap-2">                        <button id="themeToggle" type="button" class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white" aria-pressed="false">
-                            <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
-                            <span id="themeLabel">Mode terang</span>
-                        </button>
-
-=======
                     <div class="mt-4 flex flex-wrap items-center gap-3">
                         <a href="{{ route('stock-adjustments.index') }}" class="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/15 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:border-emerald-300 hover:bg-emerald-400/25 hover:text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -202,7 +195,6 @@
                             </svg>
                             Retur Transaksi
                         </a>
->>>>>>> origin/develop
                     </div>
                 </div>
                 <div class="flex flex-col items-end gap-3">
