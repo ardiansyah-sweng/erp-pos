@@ -144,6 +144,15 @@
                             </svg>
                             Retur Transaksi
                         </a>
+                        <a href="{{ route('cashier.index') }}" class="inline-flex items-center gap-2 rounded-full border border-violet-400/40 bg-violet-400/15 px-4 py-2 text-sm font-medium text-violet-200 transition hover:border-violet-300 hover:bg-violet-400/25 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                            Daftar Cashier
+                        </a>
                     </div>
                 </div>
                 <div class="flex flex-col items-end gap-3">
