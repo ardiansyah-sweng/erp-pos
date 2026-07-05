@@ -911,7 +911,7 @@
                 const stockBadge = getStockBadge(product);
 
                 return `
-                    <button type="button" data-product-id="${product.id}" class="group flex min-h-44 flex-col justify-between rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-slate-900/90 hover:shadow-xl hover:shadow-cyan-950/30">
+                    <div class="group flex min-h-44 flex-col justify-between rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-slate-900/90 hover:shadow-xl hover:shadow-cyan-950/30">
                         <div>
                             <div class="flex items-start justify-between gap-3">
                                 <span class="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">${product.sku || '-'}</span>
@@ -922,19 +922,19 @@
                         <div class="mt-5 space-y-3 border-t border-white/10 pt-4">
                             <div class="flex items-center justify-between gap-3 text-sm">
                                 <span class="text-lg font-semibold text-emerald-300">${formatMoney(product.selling_price)}</span>
-                                <span class="rounded-full bg-white/10 px-3 py-1.5 font-medium text-slate-300 transition group-hover:bg-cyan-400/20 group-hover:text-cyan-100">Tambah</span>
+                                <button type="button" data-add-to-cart="${product.id}" class="rounded-full bg-white/10 px-3 py-1.5 font-medium text-slate-300 transition hover:bg-cyan-400/20 hover:text-cyan-100 active:scale-95">Tambah</button>
                             </div>
                             <div>
                                 <span class="block w-full rounded-xl border px-3 py-2 text-center text-xs font-semibold ${stockBadge.className}">${stockBadge.label}</span>
                             </div>
                         </div>
-                    </button>
+                    </div>
                 `;
             }).join('');
 
-            refs.productGrid.querySelectorAll('[data-product-id]').forEach((button) => {
+            refs.productGrid.querySelectorAll('[data-add-to-cart]').forEach((button) => {
                 button.addEventListener('click', () => {
-                    const product = state.products.find((item) => String(item.id) === button.dataset.productId);
+                    const product = state.products.find((item) => String(item.id) === button.dataset.addToCart);
 
                     if (product) {
                         addToCart(product);
