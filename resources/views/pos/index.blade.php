@@ -771,6 +771,12 @@
             const isInvalidDiscount = isDiscountTooHigh();
             const isCashInsufficient = isCashPayment && state.cart.length > 0 && getCashTendered() < grandTotal;
             const isEwalletNotSelected = isEwallet && !state.selectedEwallet;
+            const isCardIncomplete = paymentMethod === 'card' && (
+                !refs.cardHolder.value.trim() || 
+                !refs.cardNumber.value.trim() || 
+                !refs.cardBank.value.trim() || 
+                !refs.approvalCode.value.trim()
+            );
 
             refs.productCount.textContent = String(state.products.length);
             refs.cartCount.textContent = String(state.cart.reduce((total, item) => total + item.quantity, 0));
@@ -793,7 +799,7 @@
             refs.cardForm.classList.toggle('hidden', paymentMethod !== 'card');
             refs.cashTenderedWrapper.style.display = isCashPayment ? '' : 'none';
             refs.changeRow.style.display = isCashPayment ? '' : 'none';
-            refs.checkoutButton.disabled = state.cart.length === 0 || isInvalidDiscount || isCashInsufficient || isEwalletNotSelected;
+            refs.checkoutButton.disabled = state.cart.length === 0 || isInvalidDiscount || isCashInsufficient || isEwalletNotSelected || isCardIncomplete;
 
             if (state.cart.length === 0) {
                 setCheckoutStatus('Tambahkan produk ke keranjang terlebih dahulu.', 'info');
@@ -812,6 +818,11 @@
 
             if (isEwalletNotSelected) {
                 setCheckoutStatus('Pilih e-wallet terlebih dahulu.', 'error');
+                return;
+            }
+
+            if (isCardIncomplete) {
+                setCheckoutStatus('Lengkapi data kartu (Nama, No Kartu, Bank, Kode) terlebih dahulu.', 'error');
                 return;
             }
 
