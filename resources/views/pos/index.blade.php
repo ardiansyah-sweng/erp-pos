@@ -1424,6 +1424,11 @@
                 updateSummary();
             });
         });
+        
+        [refs.cardHolder, refs.cardNumber, refs.cardBank, refs.approvalCode].forEach((input) => {
+            input.addEventListener('input', updateSummary);
+        });
+
         refs.checkoutButton.addEventListener('click', checkout);
         refs.closeTransactionModal.addEventListener('click', closeTransactionModal);
         refs.transactionModal.addEventListener('click', (event) => {
