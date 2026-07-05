@@ -10,6 +10,7 @@ class Product extends Model
         'barcode',
         'sku',
         'name',
+        'jenis',
         'description',
         'unit',
         'selling_price',
