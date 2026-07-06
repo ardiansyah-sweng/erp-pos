@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Services\ProductService;
 use App\Services\StockAdjustmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -11,22 +12,14 @@ use Illuminate\View\View;
 
 class StockAdjustmentController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, ProductService $productService): View
     {
         $search = trim((string) $request->query('search', ''));
 
-        $products = Product::query()
-            ->where('is_active', true)
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($innerQuery) use ($search) {
-                    $innerQuery->where('name', 'like', "%{$search}%")
-                        ->orWhere('sku', 'like', "%{$search}%")
-                        ->orWhere('barcode', 'like', "%{$search}%");
-                });
-            })
-            ->orderBy('name')
-            ->paginate(15)
-            ->withQueryString();
+        $products = $productService->searchPaginated($search, 15, (int) $request->query('page', 1), [
+            'path' => $request->url(),
+            'query' => $request->query(),
+        ]);
 
         return view('stock-adjustments.index', compact('products', 'search'));
     }
