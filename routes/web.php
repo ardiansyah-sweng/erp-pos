@@ -13,6 +13,7 @@ use App\Http\Controllers\StockAdjustmentController;
 use Illuminate\Support\Facades\Route;
 
 
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return redirect()->route('pos.index');
@@ -56,3 +57,21 @@ Route::get('/reports', [ReportController::class, 'index'])->name('reports.index'
 Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
 Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
 Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
