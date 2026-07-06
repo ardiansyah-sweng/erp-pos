@@ -126,6 +126,15 @@
                             </svg>
                             Penyesuaian Stok
                         </a>
+                        <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/15 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-400/25 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="3" y="3" width="7" height="7"/>
+                                <rect x="14" y="3" width="7" height="7"/>
+                                <rect x="14" y="14" width="7" height="7"/>
+                                <rect x="3" y="14" width="7" height="7"/>
+                            </svg>
+                            Dashboard
+                        </a>
                         <button id="themeToggle" type="button" class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white" aria-pressed="false">
                             <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
                             <span id="themeLabel">Mode terang</span>
