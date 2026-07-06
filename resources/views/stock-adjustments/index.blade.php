@@ -39,7 +39,7 @@
             <input
                 name="search"
                 value="{{ $search }}"
-                placeholder="Cari nama, SKU, atau barcode..."
+                placeholder="Cari nama, jenis, SKU, atau barcode..."
                 class="min-w-0 flex-1 rounded-xl border border-white/10 bg-slate-900 px-4 py-3 outline-none focus:border-cyan-400"
             >
             <button class="rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-300">Cari Produk</button>

@@ -488,6 +488,7 @@
 
         const state = {
             products: [],
+            allProducts: [],
             cart: [],
             receipt: null,
             selectedEwallet: null,
@@ -1001,18 +1002,103 @@
             updateSummary();
         };
 
+        // Normalisasi: lowercase + buang semua karakter selain huruf/angka,
+        // sehingga toleran terhadap kapitalisasi dan variasi spasi
+        // ("aqua600ml" vs "Aqua 600ml" vs "aqua 600 ml").
+        const normalizeSearchText = (value) => String(value ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+        // Levenshtein distance sederhana untuk toleransi typo/huruf kembar
+        // (mis. "akua" vs "aqua").
+        const levenshteinDistance = (a, b) => {
+            const rows = a.length + 1;
+            const cols = b.length + 1;
+            const distances = Array.from({ length: rows }, () => new Array(cols).fill(0));
+
+            for (let i = 0; i < rows; i += 1) distances[i][0] = i;
+            for (let j = 0; j < cols; j += 1) distances[0][j] = j;
+
+            for (let i = 1; i < rows; i += 1) {
+                for (let j = 1; j < cols; j += 1) {
+                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                    distances[i][j] = Math.min(
+                        distances[i - 1][j] + 1,
+                        distances[i][j - 1] + 1,
+                        distances[i - 1][j - 1] + cost,
+                    );
+                }
+            }
+
+            return distances[rows - 1][cols - 1];
+        };
+
+        const fuzzyEditThreshold = (length) => {
+            if (length <= 3) return 0;
+            if (length <= 5) return 1;
+            return 2;
+        };
+
+        const fuzzyMatchesToken = (normalizedQuery, normalizedTarget) => {
+            if (!normalizedQuery || !normalizedTarget) return false;
+            return levenshteinDistance(normalizedQuery, normalizedTarget) <= fuzzyEditThreshold(normalizedQuery.length);
+        };
+
+        // Cocokkan query terhadap satu frasa (nama produk atau jenis/kategori):
+        // substring penuh dulu (toleran spasi), lalu per-kata dan keseluruhan
+        // frasa dengan Levenshtein (toleran typo/vokal).
+        const fuzzyMatchesPhrase = (normalizedQuery, phrase) => {
+            if (!phrase) return false;
+
+            const normalizedPhrase = normalizeSearchText(phrase);
+            if (!normalizedPhrase) return false;
+
+            if (normalizedPhrase.includes(normalizedQuery) || normalizedQuery.includes(normalizedPhrase)) {
+                return true;
+            }
+
+            const wordMatches = phrase.trim().split(/\s+/).some((word) => {
+                const normalizedWord = normalizeSearchText(word);
+                return normalizedWord && fuzzyMatchesToken(normalizedQuery, normalizedWord);
+            });
+
+            if (wordMatches) return true;
+
+            return fuzzyMatchesToken(normalizedQuery, normalizedPhrase);
+        };
+
+        // Jenis/kategori produk belum punya kolom sendiri, jadi memakai
+        // description sebagai sumber kategori (mis. "Camilan ringan").
+        const productMatchesSearch = (product, search) => {
+            if (product.sku && String(product.sku).toLowerCase().includes(search.toLowerCase())) return true;
+            if (product.barcode && String(product.barcode).toLowerCase().includes(search.toLowerCase())) return true;
+
+            const normalizedQuery = normalizeSearchText(search);
+
+            if (fuzzyMatchesPhrase(normalizedQuery, product.name)) return true;
+
+            return fuzzyMatchesPhrase(normalizedQuery, product.description);
+        };
+
+        const applyProductFilter = (search = '') => {
+            const trimmedSearch = search.trim();
+
+            state.products = trimmedSearch === ''
+                ? state.allProducts
+                : state.allProducts.filter((product) => productMatchesSearch(product, trimmedSearch));
+
+            renderProducts();
+            updateSummary();
+            refs.productsStatus.textContent = trimmedSearch
+                ? `Menampilkan hasil untuk "${trimmedSearch}".`
+                : 'Pilih produk untuk dimasukkan ke keranjang.';
+        };
+
         const loadProducts = async (search = '') => {
             refs.productsStatus.textContent = 'Memuat produk...';
 
             try {
-                const queryString = search ? `?search=${encodeURIComponent(search)}` : '';
-                const response = await fetchJson(`/products${queryString}`);
-                state.products = response.data ?? [];
-                renderProducts();
-                updateSummary();
-                refs.productsStatus.textContent = search
-                    ? `Menampilkan hasil untuk "${search}".`
-                    : 'Pilih produk untuk dimasukkan ke keranjang.';
+                const response = await fetchJson('/products');
+                state.allProducts = response.data ?? [];
+                applyProductFilter(search);
             } catch (error) {
                 refs.productsStatus.textContent = error.message || 'Gagal memuat produk.';
                 refs.productGrid.innerHTML = `
@@ -1298,7 +1384,7 @@
         refs.productSearch.addEventListener('input', () => {
             window.clearTimeout(searchTimer);
             searchTimer = window.setTimeout(() => {
-                loadProducts(refs.productSearch.value.trim());
+                applyProductFilter(refs.productSearch.value.trim());
             }, 250);
         });
 
