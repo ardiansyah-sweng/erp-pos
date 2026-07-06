@@ -388,29 +388,33 @@
                     <div class="subtitle">Setiap transaksi menampilkan total penjualan dan rincian barang yang terjual.</div>
                 </div>
             </div>
-            <div class="actions">
-                <a class="download" href="{{ route('sales-notes.pdf', array_filter(['start_date' => $startDate ?? null, 'end_date' => $endDate ?? null])) }}">Download PDF</a>
-                <a class="back" href="{{ route('pos.index') }}">Kembali POS</a>
-            </div>
+            @if (!($isPdf ?? false))
+                <div class="actions">
+                    <a class="download" href="{{ route('sales-notes.pdf', array_filter(['start_date' => $startDate ?? null, 'end_date' => $endDate ?? null])) }}">Download PDF</a>
+                    <a class="back" href="{{ route('pos.index') }}">Kembali POS</a>
+                </div>
+            @endif
         </section>
 
-        <form method="GET" action="{{ route('sales-notes') }}" style="display:flex; gap:12px; flex-wrap:wrap; align-items:end; margin-bottom:18px; padding:16px; border:1px solid var(--line); border-radius:8px; background:var(--surface); box-shadow:0 10px 28px var(--shadow);">
-            <div>
-                <label for="start_date" style="display:block; margin-bottom:6px; font-size:12px; color:var(--muted);">Tanggal Mulai</label>
-                <input type="date" id="start_date" name="start_date" value="{{ $startDate ?? '' }}" style="padding:8px 10px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink);">
-            </div>
-            <div>
-                <label for="end_date" style="display:block; margin-bottom:6px; font-size:12px; color:var(--muted);">Tanggal Selesai</label>
-                <input type="date" id="end_date" name="end_date" value="{{ $endDate ?? '' }}" style="padding:8px 10px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink);">
-            </div>
-            <div style="display:flex; gap:8px;">
-                <button type="submit" class="download" style="border:0; cursor:pointer;">Tampilkan</button>
-                <a class="back" href="{{ route('sales-notes') }}">Reset</a>
-            </div>
-        </form>
+        @if (!($isPdf ?? false))
+            <form method="GET" action="{{ route('sales-notes') }}" style="display:flex; gap:12px; flex-wrap:wrap; align-items:end; margin-bottom:18px; padding:16px; border:1px solid var(--line); border-radius:8px; background:var(--surface); box-shadow:0 10px 28px var(--shadow);">
+                <div>
+                    <label for="start_date" style="display:block; margin-bottom:6px; font-size:12px; color:var(--muted);">Tanggal Mulai</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ $startDate ?? '' }}" style="padding:8px 10px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink);">
+                </div>
+                <div>
+                    <label for="end_date" style="display:block; margin-bottom:6px; font-size:12px; color:var(--muted);">Tanggal Selesai</label>
+                    <input type="date" id="end_date" name="end_date" value="{{ $endDate ?? '' }}" style="padding:8px 10px; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink);">
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button type="submit" class="download" style="border:0; cursor:pointer;">Tampilkan</button>
+                    <a class="back" href="{{ route('sales-notes') }}">Reset</a>
+                </div>
+            </form>
 
-        @if ($startDate || $endDate)
-            <div class="summary-note" style="margin-bottom:16px;">Filter aktif: {{ $startDate ? 'dari ' . $startDate : 'semua data' }}{{ $endDate ? ' sampai ' . $endDate : '' }}</div>
+            @if ($startDate || $endDate)
+                <div class="summary-note" style="margin-bottom:16px;">Filter aktif: {{ $startDate ? 'dari ' . $startDate : 'semua data' }}{{ $endDate ? ' sampai ' . $endDate : '' }}</div>
+            @endif
         @endif
 
         <section class="summary" aria-label="Ringkasan penjualan">

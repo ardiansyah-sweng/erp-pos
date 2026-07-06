@@ -277,8 +277,9 @@ class TransactionController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $transactions = $this->buildSalesData($startDate, $endDate);
+        $isPdf = false;
 
-        return view('transactions.sales-notes', compact('transactions', 'startDate', 'endDate'));
+        return view('transactions.sales-notes', compact('transactions', 'startDate', 'endDate', 'isPdf'));
     }
 
     public function downloadSalesReportPdf(Request $request)
@@ -286,6 +287,7 @@ class TransactionController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $transactions = $this->buildSalesData($startDate, $endDate);
+        $isPdf = true;
 
         $fileName = 'laporan-penjualan';
         if ($startDate && $endDate) {
@@ -296,7 +298,7 @@ class TransactionController extends Controller
             $fileName .= '-sampai-' . $endDate;
         }
 
-        $pdf = Pdf::loadView('transactions.sales-notes-pdf', compact('transactions', 'startDate', 'endDate'))
+        $pdf = Pdf::loadView('transactions.sales-notes', compact('transactions', 'startDate', 'endDate', 'isPdf'))
             ->setPaper('a4', 'portrait');
 
         return $pdf->download($fileName . '.pdf');
