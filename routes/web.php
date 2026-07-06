@@ -4,16 +4,13 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
-<<<<<<< Updated upstream
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnTransactionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockAdjustmentController;
-=======
 use App\Http\Controllers\DiscountController;
->>>>>>> Stashed changes
 use Illuminate\Support\Facades\Route;
 
 
