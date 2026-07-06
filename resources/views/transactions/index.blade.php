@@ -76,6 +76,7 @@
     <main class="relative mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-6 lg:px-8">
         @php
             $totalItems = $transactions->sum(fn ($transaction) => $transaction->details->sum('quantity'));
+            $totalReturnedItems = $transactions->sum(fn ($transaction) => $transaction->details->sum(fn ($detail) => $detail->returnDetails->sum('quantity')));
             $totalAmount = $transactions->sum('total');
             $selectedDateLabel = $selectedDate ? \Carbon\Carbon::parse($selectedDate)->translatedFormat('d M Y') : 'Semua';
             $transactionPayload = $transactions->map(fn ($transaction) => [
@@ -89,12 +90,18 @@
                     'cash_tendered' => $payment->cash_tendered,
                     'change_amount' => $payment->change_amount,
                 ])->values(),
-                'details' => $transaction->details->map(fn ($detail) => [
-                    'name' => $detail->product?->name ?? 'Produk #' . $detail->product_id,
-                    'quantity' => $detail->quantity,
-                    'price' => $detail->price,
-                    'amount' => $detail->amount,
-                ])->values(),
+                'details' => $transaction->details->map(function ($detail) {
+                    $returnedQuantity = $detail->returnDetails->sum('quantity');
+
+                    return [
+                        'name' => $detail->product?->name ?? 'Produk #' . $detail->product_id,
+                        'quantity' => $detail->quantity,
+                        'returned_quantity' => $returnedQuantity,
+                        'available_quantity' => max(0, $detail->quantity - $returnedQuantity),
+                        'price' => $detail->price,
+                        'amount' => $detail->amount,
+                    ];
+                })->values(),
             ])->values();
         @endphp
 
@@ -108,7 +115,7 @@
                         Kembali ke POS
                     </a>
                 </div>
-                <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+                <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-5">
                     <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
                         <div class="text-slate-400">Transaksi</div>
                         <div class="mt-1 text-xl font-semibold text-white">{{ $transactions->count() }}</div>
@@ -120,6 +127,10 @@
                     <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
                         <div class="text-slate-400">Item</div>
                         <div class="mt-1 text-xl font-semibold text-white">{{ $totalItems }}</div>
+                    </div>
+                    <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                        <div class="text-slate-400">Diretur</div>
+                        <div class="mt-1 text-xl font-semibold text-rose-300">{{ $totalReturnedItems }}</div>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
                         <div class="text-slate-400">Total</div>
@@ -157,6 +168,7 @@
                 @php
                     $details = $transaction->details ?? collect();
                     $itemCount = $details->sum('quantity');
+                    $returnedItemCount = $details->sum(fn ($detail) => $detail->returnDetails->sum('quantity'));
                     $transactionCode = 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT);
                 @endphp
 
@@ -165,6 +177,9 @@
                         <div>
                             <h2 class="text-lg font-semibold text-white">{{ $transactionCode }}</h2>
                             <p class="mt-1 text-sm text-slate-400">{{ $transaction->created_at?->translatedFormat('d M Y, H.i') }}</p>
+                            @if ($returnedItemCount > 0)
+                                <span class="mt-2 inline-flex rounded-full border border-rose-400/30 bg-rose-400/10 px-3 py-1 text-xs font-semibold text-rose-200">Retur {{ $returnedItemCount }} item</span>
+                            @endif
                         </div>
                         <div class="flex flex-wrap items-center justify-between gap-3 md:min-w-72 md:justify-end md:text-right">
                             <div>
@@ -193,7 +208,10 @@
                     <h2 id="transactionModalTitle" class="mt-1 text-xl font-semibold text-white">TRX-0000</h2>
                     <p id="transactionModalDate" class="mt-1 text-sm text-slate-400">-</p>
                 </div>
-                <button id="closeTransactionModal" type="button" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300 transition hover:text-white">Tutup</button>
+                <div class="flex items-center gap-2">
+                    <a id="printReceiptBtn" href="#" target="_blank" class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-sm font-medium text-emerald-200 transition hover:bg-emerald-400/20">Cetak Struk</a>
+                    <button id="closeTransactionModal" type="button" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300 transition hover:text-white">Tutup</button>
+                </div>
             </div>
             <div id="transactionModalItems" class="divide-y divide-white/5 rounded-2xl border border-white/10 bg-slate-950/60"></div>
             <div id="transactionModalPayment" class="mt-4 grid gap-2 rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300"></div>
@@ -255,6 +273,9 @@
                     <div>
                         <div class="font-medium text-white">${escapeHtml(detail.name)}</div>
                         <div class="text-xs text-slate-400">${detail.quantity} x ${formatMoney(detail.price)}</div>
+                        ${Number(detail.returned_quantity || 0) > 0 ? `
+                            <div class="mt-1 text-xs text-rose-300">Retur ${detail.returned_quantity} item, sisa ${detail.available_quantity} item</div>
+                        ` : ''}
                     </div>
                     <div class="font-semibold text-emerald-300">${formatMoney(detail.amount)}</div>
                 </div>
@@ -264,6 +285,7 @@
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            document.getElementById('printReceiptBtn').href = '/transactions/' + transaction.id + '/receipt';
         };
 
         document.querySelectorAll('[data-show-transaction]').forEach((button) => {
@@ -310,6 +332,7 @@
                 closeModal();
             }
         });
+
     </script>
 </body>
 </html>
