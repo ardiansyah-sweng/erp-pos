@@ -56,3 +56,6 @@ Route::get('/reports', [ReportController::class, 'index'])->name('reports.index'
 Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
 Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
 Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+Route::get('/products/filter-price', [ProductController::class, 'filterByPrice'])
+    ->name('products.filter-price');

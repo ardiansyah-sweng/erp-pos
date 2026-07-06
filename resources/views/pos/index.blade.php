@@ -190,6 +190,17 @@
                             <label class="text-sm text-slate-300" for="productSearch">Cari produk</label>
                             <input id="productSearch" type="text" placeholder="Nama, SKU, atau barcode" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none ring-0 placeholder:text-slate-500 focus:border-cyan-400">
                         </div>
+                         <div>
+                            <label class="text-sm text-slate-300" for="priceFilter">Filter Harga</label>
+                            <select id="priceFilter"
+                                class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none focus:border-cyan-400">
+                                <option value="">Semua Harga</option>
+                                <option value="0-5000">Rp 0 - Rp 5.000</option>
+                                <option value="5001-10000">Rp 5.000 - Rp 10.000</option>
+                                <option value="10001-20000">Rp 10.00 - Rp 20.000</option>
+                                <option value="20001-999999999">> Rp 20.000</option>
+                            </select>
+                        </div>
                         <div>
                             <label class="text-sm text-slate-300" for="barcodeSearch">Scan / ketik barcode</label>
                             <div class="mt-2 flex gap-3">
@@ -560,6 +571,9 @@
             cardNumber: document.getElementById('cardNumber'),
             cardBank: document.getElementById('cardBank'),
             approvalCode: document.getElementById('approvalCode'),
+            minPrice: document.getElementById('minPrice'),
+            maxPrice: document.getElementById('maxPrice'),
+            priceFilter: document.getElementById('priceFilter'),
         };
 
         const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
@@ -895,19 +909,32 @@
         const renderProducts = () => {
             refs.productGrid.innerHTML = '';
 
-            if (state.products.length === 0) {
+            const priceRange = refs.priceFilter.value;
+
+            let filteredProducts = state.products;
+
+            if (priceRange) {
+                const [min, max] = priceRange.split('-').map(Number);
+
+                filteredProducts = state.products.filter(product =>
+                    product.selling_price >= min &&
+                    product.selling_price <= max
+                );
+            }
+
+            if (filteredProducts.length === 0) {
                 refs.productGrid.innerHTML = `
                     <div class="rounded-2xl border border-dashed border-white/10 bg-slate-950/60 px-4 py-10 text-center text-sm text-slate-400 md:col-span-2 xl:col-span-3">
-                        Produk tidak ditemukan. Coba kata kunci lain atau muat ulang daftar produk.
+                        Produk tidak ditemukan.
                     </div>
                 `;
                 refs.productsMeta.textContent = '0 item';
                 return;
             }
 
-            refs.productsMeta.textContent = `${state.products.length} item`;
+            refs.productsMeta.textContent = `${filteredProducts.length} item`;
 
-            refs.productGrid.innerHTML = state.products.map((product) => {
+            refs.productGrid.innerHTML = filteredProducts.map((product) => {
                 const stockBadge = getStockBadge(product);
 
                 return `

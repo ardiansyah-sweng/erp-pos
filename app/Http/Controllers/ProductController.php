@@ -55,4 +55,15 @@ class ProductController extends Controller
             'data'    => $product,
         ], 200);
     }
+    public function filterByPrice(Request $request)
+    {
+        $price = $request->query('price');
+
+        $products = $this->productService->filterByPrice($price);
+
+        return response()->json([
+            'success' => true,
+            'data' => $products,
+        ]);
+    }
 }
