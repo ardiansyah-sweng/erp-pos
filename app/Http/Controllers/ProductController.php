@@ -37,6 +37,75 @@ class ProductController extends Controller
         ]);
     }
 
+    public function index(Request $request)
+    {
+        $search = trim((string) $request->query('search', ''));
+
+        $products = Product::query()
+            ->when($search !== '', fn($q) => $q->where('name', 'like', "%$search%")
+                ->orWhere('sku', 'like', "%$search%"))
+            ->orderBy('name')
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('products.index', compact('products', 'search'));
+    }
+
+    public function create()
+    {
+        return view('products.form', ['product' => null]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'sku'            => 'required|unique:products,sku',
+            'name'           => 'required',
+            'barcode'        => 'nullable|unique:products,barcode',
+            'unit'           => 'required',
+            'selling_price'  => 'required|integer|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+            'min_stock'      => 'required|integer|min:0',
+            'description'    => 'nullable',
+        ]);
+
+        $data['is_active'] = $request->boolean('is_active', true);
+        Product::create($data);
+
+        return redirect()->route('produk.index')->with('success', 'Produk berhasil ditambahkan.');
+    }
+
+    public function edit(Product $product)
+    {
+        return view('products.form', compact('product'));
+    }
+
+    public function update(Request $request, Product $product)
+    {
+        $data = $request->validate([
+            'sku'            => 'required|unique:products,sku,' . $product->id,
+            'name'           => 'required',
+            'barcode'        => 'nullable|unique:products,barcode,' . $product->id,
+            'unit'           => 'required',
+            'selling_price'  => 'required|integer|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+            'min_stock'      => 'required|integer|min:0',
+            'description'    => 'nullable',
+        ]);
+
+        $data['is_active'] = $request->boolean('is_active');
+        $product->update($data);
+
+        return redirect()->route('produk.index')->with('success', 'Produk berhasil diperbarui.');
+    }
+
+    public function destroy(Product $product)
+    {
+        $product->delete();
+
+        return redirect()->route('produk.index')->with('success', 'Produk berhasil dihapus.');
+    }
+
     function getItemBySKU($sku)
     {
         $product = $this->productService->getItemBySKU($sku);
