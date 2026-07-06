@@ -4,12 +4,16 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
+<<<<<<< Updated upstream
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnTransactionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockAdjustmentController;
+=======
+use App\Http\Controllers\DiscountController;
+>>>>>>> Stashed changes
 use Illuminate\Support\Facades\Route;
 
 
@@ -56,3 +60,7 @@ Route::get('/reports', [ReportController::class, 'index'])->name('reports.index'
 Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
 Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
 Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+Route::get('/discounts', [DiscountController::class, 'index'])->name('discounts.index');
+Route::post('/discounts', [DiscountController::class, 'store'])->name('discounts.store');
+Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
