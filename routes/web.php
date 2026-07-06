@@ -52,6 +52,13 @@ Route::post('/returns/{transaction}', [ReturnTransactionController::class, 'stor
 
 
 
+Route::get('/produk', [ProductController::class, 'index'])->name('produk.index');
+Route::get('/produk/tambah', [ProductController::class, 'create'])->name('produk.create');
+Route::post('/produk', [ProductController::class, 'store'])->name('produk.store');
+Route::get('/produk/{product}/edit', [ProductController::class, 'edit'])->name('produk.edit');
+Route::put('/produk/{product}', [ProductController::class, 'update'])->name('produk.update');
+Route::delete('/produk/{product}', [ProductController::class, 'destroy'])->name('produk.destroy');
+
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
 Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
