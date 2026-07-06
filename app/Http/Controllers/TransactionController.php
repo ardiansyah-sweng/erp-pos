@@ -17,11 +17,25 @@ class TransactionController extends Controller
             'date' => ['nullable', 'date'],
         ]);
 
+        // Whitelist eksplisit opsi sort -> kolom asli, supaya nilai dari
+        // query string tidak pernah dipakai langsung sebagai nama kolom.
+        $sortColumns = [
+            'date' => 'created_at',
+            'id' => 'id',
+            'total' => 'total',
+            'items' => 'items_total_quantity',
+        ];
+
+        $sortParam = (string) $request->query('sort', 'date');
+        $sort = array_key_exists($sortParam, $sortColumns) ? $sortParam : 'date';
+        $direction = $request->query('direction') === 'asc' ? 'asc' : 'desc';
+
         $transactions = Transaction::with(['details.product', 'details.returnDetails', 'payments'])
+            ->withSum('details as items_total_quantity', 'quantity')
             ->when($validated['date'] ?? null, function ($query, $date) {
                 $query->whereDate('created_at', $date);
             })
-            ->latest()
+            ->orderBy($sortColumns[$sort], $direction)
             ->get();
 
         if (!$request->expectsJson() && !$request->ajax()) {
