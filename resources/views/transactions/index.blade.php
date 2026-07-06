@@ -83,6 +83,8 @@
                 'code' => 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
                 'created_at' => $transaction->created_at?->translatedFormat('d M Y, H.i'),
                 'total' => $transaction->total,
+                'customer_name' => $transaction->customer_name,
+                'customer_phone' => $transaction->customer_phone,
                 'payments' => $transaction->payments->map(fn ($payment) => [
                     'payment_method' => $payment->payment_method,
                     'discount_amount' => $payment->discount_amount,
@@ -193,7 +195,10 @@
                     <h2 id="transactionModalTitle" class="mt-1 text-xl font-semibold text-white">TRX-0000</h2>
                     <p id="transactionModalDate" class="mt-1 text-sm text-slate-400">-</p>
                 </div>
-                <button id="closeTransactionModal" type="button" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300 transition hover:text-white">Tutup</button>
+                <div class="flex items-center gap-2">
+                    <a id="printReceiptBtn" href="#" target="_blank" class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-sm font-medium text-emerald-200 transition hover:bg-emerald-400/20">Cetak Struk</a>
+                    <button id="closeTransactionModal" type="button" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300 transition hover:text-white">Tutup</button>
+                </div>
             </div>
             <div id="transactionModalItems" class="divide-y divide-white/5 rounded-2xl border border-white/10 bg-slate-950/60"></div>
             <div id="transactionModalPayment" class="mt-4 grid gap-2 rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300"></div>
@@ -240,11 +245,15 @@
             modalDate.textContent = transaction.created_at || '-';
             modalTotal.textContent = formatMoney(transaction.total);
             modalPayment.innerHTML = transaction.payments.length ? transaction.payments.map((payment) => `
+                <div>Pelanggan: <span class="font-semibold text-white">${escapeHtml(transaction.customer_name || '-')}</span></div>
+                <div>No. Telepon: <span class="font-semibold text-white">${escapeHtml(transaction.customer_phone || '-')}</span></div>
                 <div>Metode: <span class="font-semibold text-white">${escapeHtml(payment.payment_method || 'cash')}</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
             `).join('') : `
+                <div>Pelanggan: <span class="font-semibold text-white">${escapeHtml(transaction.customer_name || '-')}</span></div>
+                <div>No. Telepon: <span class="font-semibold text-white">${escapeHtml(transaction.customer_phone || '-')}</span></div>
                 <div>Metode: <span class="font-semibold text-white">cash</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
@@ -264,6 +273,7 @@
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            document.getElementById('printReceiptBtn').href = '/transactions/' + transaction.id + '/receipt';
         };
 
         document.querySelectorAll('[data-show-transaction]').forEach((button) => {
@@ -310,6 +320,7 @@
                 closeModal();
             }
         });
+
     </script>
 </body>
 </html>

@@ -3,11 +3,12 @@
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\ScheduleController;
-use App\Http\Controllers\StockAdjustmentController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StockAdjustmentController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -42,6 +43,9 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
 Route::post('/transaction/store', [TransactionController::class, 'store']);
+Route::get('/transactions/{id}/receipt', [ReceiptController::class, 'generate'])->name('transactions.receipt');
+Route::get('/sales-notes', [TransactionController::class, 'salesNotes'])->name('sales-notes');
+Route::get('/sales-notes/pdf', [TransactionController::class, 'downloadSalesReportPdf'])->name('sales-notes.pdf');
 
 
 

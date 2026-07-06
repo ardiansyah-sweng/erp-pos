@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('total');
             $table->timestamp('transaction_date')->nullable();
+            $table->string('customer_name', 100)->nullable();
+            $table->string('customer_phone', 20)->nullable();
             $table->timestamps();
         });
     }
