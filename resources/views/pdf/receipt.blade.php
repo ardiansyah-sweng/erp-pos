@@ -149,6 +149,9 @@
         <div>
             <table>
                 <tr><td class="label">Status</td><td class="value">: LUNAS</td></tr>
+                @if ($transaction->customer_name)
+                <tr><td class="label">Pelanggan</td><td class="value">: {{ $transaction->customer_name }}</td></tr>
+                @endif
             </table>
         </div>
     </div>
