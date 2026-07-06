@@ -10,6 +10,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnTransactionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\SyncHistoryController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -56,3 +57,6 @@ Route::get('/reports', [ReportController::class, 'index'])->name('reports.index'
 Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
 Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
 Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+
+Route::get('/sync-histories', [SyncHistoryController::class, 'index'])->name('sync-histories.index');
