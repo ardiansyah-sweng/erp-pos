@@ -20,6 +20,11 @@ class TransactionDetail extends Model
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    public function returnDetails()
+    {
+        return $this->hasMany(ReturnTransactionDetail::class, 'transaction_detail_id');
+    }
+
     /**
      * Ambil nama kolom tertentu dari $fillable
      */

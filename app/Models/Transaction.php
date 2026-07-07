@@ -20,6 +20,11 @@ class Transaction extends Model
         return $this->hasMany(PaymentDetail::class, 'transaction_id');
     }
 
+    public function returns()
+    {
+        return $this->hasMany(ReturnTransaction::class, 'transaction_id');
+    }
+
     /**
      * Ambil nama kolom tertentu dari $fillable
      */
