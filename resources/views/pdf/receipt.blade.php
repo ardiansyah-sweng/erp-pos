@@ -182,6 +182,17 @@
 
     @php
         $subtotal = $transaction->total + ($payment?->discount_amount ?? 0);
+        // ===== PARKING FEE ADD-ON: parse dari transaction->notes =====
+        $parkingFeeAmount = 0;
+        $parkingFeeLabel  = '';
+        if ($transaction->notes &&
+            preg_match('/^PARKIR:(\d+)\|(.+)$/', $transaction->notes, $pm)) {
+            $parkingFeeAmount = (int) $pm[1];
+            $parkingFeeLabel  = $pm[2];
+            // subtotal produk = total - parkir + diskon
+            $subtotal = $transaction->total - $parkingFeeAmount + ($payment?->discount_amount ?? 0);
+        }
+        // ===== END PARKING FEE ADD-ON =====
     @endphp
 
     <table class="summary">
@@ -195,6 +206,14 @@
             <td class="value" style="color:#e74c3c;">- Rp {{ number_format($payment->discount_amount, 0, ',', '.') }}</td>
         </tr>
         @endif
+        {{-- ===== PARKING FEE ADD-ON: baris parkir di struk =====  --}}
+        @if ($parkingFeeAmount > 0)
+        <tr>
+            <td class="label">Parkir ({{ $parkingFeeLabel }})</td>
+            <td class="value" style="color:#d97706;">+ Rp {{ number_format($parkingFeeAmount, 0, ',', '.') }}</td>
+        </tr>
+        @endif
+        {{-- ===== END PARKING FEE ADD-ON ===== --}}
         <tr class="total">
             <td class="label">Total Bayar</td>
             <td class="value">Rp {{ number_format($transaction->total, 0, ',', '.') }}</td>
@@ -210,7 +229,7 @@
             <tr><td class="label">Tunai</td><td class="value">: Rp {{ number_format($payment->cash_tendered, 0, ',', '.') }}</td></tr>
             <tr><td class="label">Kembalian</td><td class="value">: Rp {{ number_format($payment->change_amount, 0, ',', '.') }}</td></tr>
             @endif
-            @if ($payment->reference_number)
+            @if ($payment->reference_number && !str_starts_with($payment->reference_number, 'PARKIR:'))
             <tr><td class="label">No. Referensi</td><td class="value">: {{ $payment->reference_number }}</td></tr>
             @endif
         </table>

@@ -84,6 +84,14 @@
                 'code' => 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
                 'created_at' => $transaction->created_at?->translatedFormat('d M Y, H.i'),
                 'total' => $transaction->total,
+                // ===== PARKING FEE ADD-ON: parse dari transaction->notes =====
+                'parking_fee' => (function($notes) {
+                    if ($notes && preg_match('/^PARKIR:(\d+)\|(.+)$/', $notes, $m)) {
+                        return ['amount' => (int)$m[1], 'label' => $m[2]];
+                    }
+                    return null;
+                })($transaction->notes),
+                // ===== END PARKING FEE ADD-ON =====
                 'payments' => $transaction->payments->map(fn ($payment) => [
                     'payment_method' => $payment->payment_method,
                     'discount_amount' => $payment->discount_amount,
@@ -276,6 +284,7 @@
                 <div>Metode: <span class="font-semibold text-white">${escapeHtml(payment.payment_method || 'cash')}</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
+                ${transaction.parking_fee ? `<div>Biaya Parkir (<span class="text-amber-200">${escapeHtml(transaction.parking_fee.label)}</span>): <span class="font-semibold text-amber-200">${formatMoney(transaction.parking_fee.amount)}</span></div>` : ''}
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
             `).join('') : `
                 <div>Metode: <span class="font-semibold text-white">cash</span></div>

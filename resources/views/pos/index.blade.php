@@ -344,6 +344,29 @@
                             <label class="text-sm text-slate-300" for="notes">Catatan</label>
                             <textarea id="notes" rows="3" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400" placeholder="Opsional"></textarea>
                         </div>
+
+                        {{-- ===== PARKING ADDON — ISOLATED ===== --}}
+                        <div id="parking-selection">
+                            <label class="text-sm text-slate-300">Biaya Parkir</label>
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                <label class="parking-pill flex cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition has-[:checked]:border-emerald-400/60 has-[:checked]:bg-emerald-400/15 has-[:checked]:text-emerald-200">
+                                    <input type="radio" name="parking_fee" value="0" class="sr-only" checked>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+                                    Tanpa Parkir
+                                </label>
+                                <label class="parking-pill flex cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition has-[:checked]:border-amber-400/60 has-[:checked]:bg-amber-400/15 has-[:checked]:text-amber-200">
+                                    <input type="radio" name="parking_fee" value="2000" class="sr-only">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9 8h4a2 2 0 0 1 0 4H9zm0 4h2l2 4"/></svg>
+                                    Motor — Rp 2.000
+                                </label>
+                                <label class="parking-pill flex cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition has-[:checked]:border-cyan-400/60 has-[:checked]:bg-cyan-400/15 has-[:checked]:text-cyan-200">
+                                    <input type="radio" name="parking_fee" value="5000" class="sr-only">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="12" x="2" y="6" rx="2"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" x2="12" y1="10" y2="14"/><line x1="10" x2="14" y1="12" y2="12"/></svg>
+                                    Mobil — Rp 5.000
+                                </label>
+                            </div>
+                        </div>
+                        {{-- ===== END PARKING ADDON ===== --}}
                     </div>
                     
                     <div class="mt-5">
@@ -376,6 +399,9 @@
                     <div class="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
                         <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
                         <div class="flex items-center justify-between"><span>Diskon</span><span id="discountValue" class="font-semibold text-white">Rp0</span></div>
+                        {{-- ===== PARKING FEE ROW ===== --}}
+                        <div id="row-parking-fee" class="flex items-center justify-between text-amber-200/80 hidden"><span>Biaya Parkir</span><span id="parkingFeeValue" class="font-semibold">Rp0</span></div>
+                        {{-- ===== END PARKING FEE ROW ===== --}}
                         <div class="flex items-center justify-between"><span>Total</span><span id="grandTotalValue" class="font-semibold text-emerald-300">Rp0</span></div>
                         <div id="changeRow" class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
                     </div>
@@ -650,7 +676,7 @@
         const calculateSubtotal = () => state.cart.reduce((total, item) => total + (item.quantity * item.selling_price), 0);
         const getAppliedDiscount = () => Math.min(getDiscount(), calculateSubtotal());
         const isDiscountTooHigh = () => calculateSubtotal() > 0 && getDiscount() >= calculateSubtotal();
-        const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getAppliedDiscount());
+        const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getAppliedDiscount()) + (window._parkingFee || 0);
         const getPaymentMethodLabel = () => {
             const method = refs.paymentMethod.value;
             if (method === 'cash') return 'Cash';
@@ -802,7 +828,10 @@
         const updateSummary = () => {
             const subtotal = calculateSubtotal();
             const discount = Math.min(getDiscount(), subtotal);
-            const grandTotal = Math.max(0, subtotal - discount);
+            // ===== PARKING FEE ADD-ON =====
+            const parkingFee = window._parkingFee || 0;
+            const grandTotal = Math.max(0, subtotal - discount) + parkingFee;
+            // ===== END =====
             const change = calculateChange();
             const paymentMethod = refs.paymentMethod.value;
             const isCashPayment = paymentMethod === 'cash';
@@ -839,6 +868,20 @@
             refs.cashTenderedWrapper.style.display = isCashPayment ? '' : 'none';
             refs.changeRow.style.display = isCashPayment ? '' : 'none';
             refs.checkoutButton.disabled = state.cart.length === 0 || isInvalidDiscount || isCashInsufficient || isEwalletNotSelected || isCardIncomplete;
+
+            // ===== PARKING FEE ADD-ON: tampilkan/sembunyikan baris parkir =====
+            const rowParkingFee = document.getElementById('row-parking-fee');
+            const parkingFeeValEl = document.getElementById('parkingFeeValue');
+            if (rowParkingFee && parkingFeeValEl) {
+                if (parkingFee > 0) {
+                    rowParkingFee.classList.remove('hidden');
+                    parkingFeeValEl.textContent = formatMoney(parkingFee);
+                } else {
+                    rowParkingFee.classList.add('hidden');
+                    parkingFeeValEl.textContent = 'Rp0';
+                }
+            }
+            // ===== END PARKING FEE ADD-ON =====
 
             if (state.cart.length === 0) {
                 setCheckoutStatus('Tambahkan produk ke keranjang terlebih dahulu.', 'info');
@@ -1182,6 +1225,9 @@
                     payment_method: 'qris',
                     cash_tendered: 0,
                     notes: refs.notes.value,
+                    // ===== PARKING FEE ADD-ON =====
+                    parking_fee: window._parkingFee || 0,
+                    // ===== END =====
                 };
                 const subtotal = calculateSubtotal();
                 const discount = Math.min(getDiscount(), subtotal);
@@ -1222,6 +1268,9 @@
                         approval_code: refs.approvalCode.value,
                     }
                     : null,
+                // ===== PARKING FEE ADD-ON =====
+                parking_fee: window._parkingFee || 0,
+                // ===== END =====
             };
 
             refs.checkoutButton.disabled = true;
@@ -1615,6 +1664,21 @@
             btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg> Cetak Struk';
             refs.checkoutButton.after(btn);
         };
+
+        /* =========================================================
+         * PARKING FEE ADD-ON — v3 (event listener only, no patch)
+         * Radio change → update _parkingFee → panggil updateSummary
+         * yang sudah dimodifikasi untuk include parkir.
+         * ========================================================= */
+        window._parkingFee = 0;
+
+        document.querySelectorAll('input[name="parking_fee"]').forEach((radio) => {
+            radio.addEventListener('change', () => {
+                window._parkingFee = parseInt(radio.value, 10) || 0;
+                updateSummary();
+            });
+        });
+        /* ======= END PARKING FEE ADD-ON ======= */
     </script>
 </body>
 </html>
