@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use App\Models\Transaction;
@@ -302,33 +304,58 @@ class TransactionController extends Controller
             ], 201);
         }
 
-    public function salesNotes()
+    public function salesNotes(Request $request)
     {
-        $transactions = $this->buildSalesData();
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $transactions = $this->buildSalesData($startDate, $endDate);
+        $isPdf = false;
 
-        return view('transactions.sales-notes', compact('transactions'));
+        return view('transactions.sales-notes', compact('transactions', 'startDate', 'endDate', 'isPdf'));
     }
 
-    public function downloadSalesReportPdf()
+    public function downloadSalesReportPdf(Request $request)
     {
-        $transactions = $this->buildSalesData();
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $transactions = $this->buildSalesData($startDate, $endDate);
+        $isPdf = true;
 
-        return view('transactions.sales-notes', compact('transactions'));
+        $fileName = 'laporan-penjualan';
+        if ($startDate && $endDate) {
+            $fileName .= '-' . $startDate . '-to-' . $endDate;
+        } elseif ($startDate) {
+            $fileName .= '-dari-' . $startDate;
+        } elseif ($endDate) {
+            $fileName .= '-sampai-' . $endDate;
+        }
+
+        $pdf = Pdf::loadView('transactions.sales-notes', compact('transactions', 'startDate', 'endDate', 'isPdf'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download($fileName . '.pdf');
     }
 
-    private function buildSalesData()
+    private function buildSalesData($startDate = null, $endDate = null)
     {
-        return Transaction::with('details')
-            ->latest()
-            ->get()
-            ->map(function ($transaction) {
-                return [
-                    'transaction_code' => 'TRX-' . $transaction->created_at->format('YmdHis') . '-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
-                    'date' => $transaction->created_at,
-                    'item_count' => $transaction->details->sum('quantity'),
-                    'total' => $transaction->total,
-                    'details' => $transaction->details,
-                ];
-            });
+        $query = Transaction::with(['details.product'])->latest();
+
+        if ($startDate) {
+            $query->whereDate('created_at', '>=', Carbon::parse($startDate)->startOfDay());
+        }
+
+        if ($endDate) {
+            $query->whereDate('created_at', '<=', Carbon::parse($endDate)->endOfDay());
+        }
+
+        return $query->get()->map(function ($transaction) {
+            return [
+                'transaction_code' => 'TRX-' . $transaction->created_at->format('YmdHis') . '-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
+                'date' => $transaction->created_at,
+                'item_count' => $transaction->details->sum('quantity'),
+                'total' => $transaction->total,
+                'details' => $transaction->details,
+            ];
+        });
     }
 }
