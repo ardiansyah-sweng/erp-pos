@@ -402,9 +402,6 @@
                         <a href="{{ route('transactions.index') }}" class="rounded-full border border-white/10 bg-slate-950/60 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white">
                             Lihat semua
                         </a>
-                        <a href="{{ route('categories.index') }}" class="rounded-full border border-purple-400/40 bg-purple-400/10 px-3 py-1.5 text-xs font-medium text-purple-200 transition hover:border-purple-300 hover:text-white">
-                            Kategori
-                        </a>
                     </div>
                     <div id="transactionHistory" class="space-y-3">
                         <div class="rounded-2xl border border-dashed border-white/10 bg-slate-950/60 p-4 text-sm text-slate-400">
