@@ -31,6 +31,7 @@ Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])
 Route::get('/products', [ProductController::class, 'getProducts'])
     ->name('products.index');
 
+Route::get('/products/sort', [ProductController::class, 'sort'])->name('products.sort');
 Route::get('/products/sku/{sku}', [ProductController::class, 'getItemBySKU']);
 
 Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index'])
