@@ -11,12 +11,25 @@ class Customer extends Model
     protected $fillable = [
         'customer_code',
         'name',
-        'phone',
         'email',
+        'phone',
         'address',
         'points',
-        'member_level'
+        'member_level',
+        'loyalty_points',
+        'is_active',
     ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'points' => 'integer',
+        'loyalty_points' => 'integer',
+    ];
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 
     public function transactions()
     {

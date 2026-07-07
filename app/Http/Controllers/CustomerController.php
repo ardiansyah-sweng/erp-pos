@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Services\CustomerService;
-use App\Models\Customer;
+use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
-    protected $customerService;
+    protected CustomerService $customerService;
 
     public function __construct(CustomerService $customerService)
     {
@@ -17,89 +16,98 @@ class CustomerController extends Controller
 
     public function index()
     {
-        return view('members.index');
+        $customers = $this->customerService->getAll();
+        $viewName = view()->exists('members.index') ? 'members.index' : 'customer.index';
+
+        return view($viewName, compact('customers'));
     }
 
-    public function getCustomers(Request $request)
+    public function getCustomers()
     {
-        $query = Customer::query();
-
-        if($request->filled('search')){
-
-            $query->where(function($q) use ($request){
-
-                $q->where('name','like','%'.$request->search.'%')
-                ->orWhere('phone','like','%'.$request->search.'%');
-
-            });
-
-        }
-
-        return response()->json([
-
-            'success'=>true,
-            'data'=>$query
-                    ->orderBy('name')
-                    ->get()
-
-        ]);
+        return $this->index();
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'phone' => 'required|string|max:20',
-            'email' => 'nullable|email',
-            'address' => 'nullable|string'
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255', 'unique:customers,email'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string'],
+            'customer_code' => ['nullable', 'string', 'max:50'],
+            'points' => ['nullable', 'integer'],
+            'member_level' => ['nullable', 'string', 'max:50'],
+            'is_active' => ['nullable', 'boolean'],
         ]);
 
-        $customer = $this->customerService->createCustomer($validated);
+        $this->customerService->create($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Customer berhasil ditambahkan',
-            'data' => $customer
-        ]);
+        return redirect()->route('customers.index')
+            ->with('success', 'Pelanggan berhasil ditambahkan.');
     }
 
     public function show($id)
     {
         $customer = $this->customerService->getCustomerById($id);
 
-        if (!$customer) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Customer tidak ditemukan'
-            ],404);
+        if (! $customer) {
+            return redirect()->route('customers.index')
+                ->with('error', 'Pelanggan tidak ditemukan.');
         }
 
-        return response()->json([
-            'success'=>true,
-            'data'=>$customer
+        return response()->json($customer);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255', 'unique:customers,email,' . $id],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string'],
+            'customer_code' => ['nullable', 'string', 'max:50'],
+            'points' => ['nullable', 'integer'],
+            'member_level' => ['nullable', 'string', 'max:50'],
+            'is_active' => ['nullable', 'boolean'],
         ]);
+
+        $result = $this->customerService->update($id, $validated);
+
+        if (! $result) {
+            return redirect()->route('customers.index')
+                ->with('error', 'Pelanggan tidak ditemukan.');
+        }
+
+        return redirect()->route('customers.index')
+            ->with('success', 'Pelanggan berhasil diperbarui.');
+    }
+
+    public function destroy($id)
+    {
+        $result = $this->customerService->delete($id);
+
+        if (! $result) {
+            return redirect()->route('customers.index')
+                ->with('error', 'Pelanggan tidak ditemukan.');
+        }
+
+        return redirect()->route('customers.index')
+            ->with('success', 'Pelanggan berhasil dihapus.');
     }
 
     public function search(Request $request)
     {
-        $keyword = trim($request->keyword);
+        $query = $request->query('q', '');
 
-        if (empty($keyword)) {
-            return response()->json([
-                'success' => true,
-                'data' => []
-            ]);
+        if (mb_strlen(trim($query)) < 2) {
+            return response()->json(['success' => true, 'data' => []]);
         }
 
-        $customers = Customer::where('phone', 'like', "%{$keyword}%")
-            ->orWhere('name', 'like', "%{$keyword}%")
-            ->orWhere('customer_code', 'like', "%{$keyword}%")
-            ->orderBy('name')
-            ->get();
+        $customers = $this->customerService->search($query);
 
         return response()->json([
             'success' => true,
-            'data' => $customers
+            'data' => $customers,
         ]);
     }
 }
