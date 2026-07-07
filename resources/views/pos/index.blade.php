@@ -336,6 +336,38 @@
                         </div>
 
 
+                        <!-- Biaya Kemasan -->
+                        <div>
+                            <label class="text-sm text-slate-300">Kemasan</label>
+                            <div id="packagingOptions" class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                <button type="button" data-packaging="0" data-packaging-name="Tanpa Kemasan"
+                                    class="packaging-btn packaging-selected flex flex-col items-start rounded-2xl border border-cyan-400/70 bg-cyan-400/10 px-3 py-2.5 text-left text-xs font-medium text-white transition hover:border-cyan-400/70 hover:bg-cyan-400/10">
+                                    <span class="font-semibold">Tanpa Kemasan</span>
+                                    <span class="mt-0.5 text-slate-400">Rp 0</span>
+                                </button>
+                                <button type="button" data-packaging="200" data-packaging-name="Kantong Kecil"
+                                    class="packaging-btn flex flex-col items-start rounded-2xl border border-white/10 bg-slate-950/70 px-3 py-2.5 text-left text-xs font-medium text-white transition hover:border-cyan-400/50">
+                                    <span class="font-semibold">Kantong Kecil</span>
+                                    <span class="mt-0.5 text-slate-400">Rp 200</span>
+                                </button>
+                                <button type="button" data-packaging="500" data-packaging-name="Kantong Sedang"
+                                    class="packaging-btn flex flex-col items-start rounded-2xl border border-white/10 bg-slate-950/70 px-3 py-2.5 text-left text-xs font-medium text-white transition hover:border-cyan-400/50">
+                                    <span class="font-semibold">Kantong Sedang</span>
+                                    <span class="mt-0.5 text-slate-400">Rp 500</span>
+                                </button>
+                                <button type="button" data-packaging="1000" data-packaging-name="Kantong Besar"
+                                    class="packaging-btn flex flex-col items-start rounded-2xl border border-white/10 bg-slate-950/70 px-3 py-2.5 text-left text-xs font-medium text-white transition hover:border-cyan-400/50">
+                                    <span class="font-semibold">Kantong Besar</span>
+                                    <span class="mt-0.5 text-slate-400">Rp 1.000</span>
+                                </button>
+                                <button type="button" data-packaging="2000" data-packaging-name="Kardus"
+                                    class="packaging-btn flex flex-col items-start rounded-2xl border border-white/10 bg-slate-950/70 px-3 py-2.5 text-left text-xs font-medium text-white transition hover:border-cyan-400/50">
+                                    <span class="font-semibold">Kardus</span>
+                                    <span class="mt-0.5 text-slate-400">Rp 2.000</span>
+                                </button>
+                            </div>
+                        </div>
+
                         <div id="cashTenderedWrapper">
                             <label class="text-sm text-slate-300" for="cashTendered">Uang dibayar</label>
                             <input id="cashTendered" type="text" inputmode="numeric" value="Rp 0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
@@ -376,6 +408,7 @@
                     <div class="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
                         <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
                         <div class="flex items-center justify-between"><span>Diskon</span><span id="discountValue" class="font-semibold text-white">Rp0</span></div>
+                        <div id="packagingFeeRow" class="hidden flex items-center justify-between"><span>Biaya Kemasan</span><span id="packagingFeeValue" class="font-semibold text-amber-300">Rp0</span></div>
                         <div class="flex items-center justify-between"><span>Total</span><span id="grandTotalValue" class="font-semibold text-emerald-300">Rp0</span></div>
                         <div id="changeRow" class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
                     </div>
@@ -483,6 +516,7 @@
                 <div class="mt-4 rounded-3xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300">
                     <div class="flex items-center justify-between"><span>Subtotal</span><span id="checkoutConfirmSubtotal" class="font-semibold text-white">Rp0</span></div>
                     <div class="mt-2 flex items-center justify-between"><span>Diskon</span><span id="checkoutConfirmDiscount" class="font-semibold text-white">Rp0</span></div>
+                    <div id="checkoutConfirmPackagingRow" class="mt-2 hidden flex items-center justify-between"><span>Biaya Kemasan</span><span id="checkoutConfirmPackaging" class="font-semibold text-amber-300">Rp0</span></div>
                     <div class="mt-2 border-t border-white/10 pt-3 flex items-center justify-between text-base font-semibold text-emerald-300"><span>Total</span><span id="checkoutConfirmTotal">Rp0</span></div>
                     <div class="mt-2 text-sm text-slate-400"><span>Metode: </span><span id="checkoutConfirmPayment">-</span></div>
                 </div>
@@ -533,6 +567,7 @@
             pendingQrisPayload: null,
             checkoutConfirmed: false,
             printAfterCheckout: false,
+            packaging: { fee: 0, name: 'Tanpa Kemasan' },
         };
 
         const refs = {
@@ -568,6 +603,8 @@
             checkoutConfirmItems: document.getElementById('checkoutConfirmItems'),
             checkoutConfirmSubtotal: document.getElementById('checkoutConfirmSubtotal'),
             checkoutConfirmDiscount: document.getElementById('checkoutConfirmDiscount'),
+            checkoutConfirmPackagingRow: document.getElementById('checkoutConfirmPackagingRow'),
+            checkoutConfirmPackaging: document.getElementById('checkoutConfirmPackaging'),
             checkoutConfirmTotal: document.getElementById('checkoutConfirmTotal'),
             checkoutConfirmPayment: document.getElementById('checkoutConfirmPayment'),
             confirmCheckoutButton: document.getElementById('confirmCheckoutButton'),
@@ -650,7 +687,7 @@
         const calculateSubtotal = () => state.cart.reduce((total, item) => total + (item.quantity * item.selling_price), 0);
         const getAppliedDiscount = () => Math.min(getDiscount(), calculateSubtotal());
         const isDiscountTooHigh = () => calculateSubtotal() > 0 && getDiscount() >= calculateSubtotal();
-        const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getAppliedDiscount());
+        const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getAppliedDiscount() + state.packaging.fee);
         const getPaymentMethodLabel = () => {
             const method = refs.paymentMethod.value;
             if (method === 'cash') return 'Cash';
@@ -663,7 +700,7 @@
         const renderCheckoutConfirmDetails = () => {
             const subtotal = calculateSubtotal();
             const discount = Math.min(getDiscount(), subtotal);
-            const grandTotal = Math.max(0, subtotal - discount);
+            const grandTotal = Math.max(0, subtotal - discount + state.packaging.fee);
 
             refs.checkoutConfirmItems.innerHTML = state.cart.map((item) => `
                 <div class="grid gap-2 rounded-3xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-200 md:grid-cols-[1fr_auto]">
@@ -677,6 +714,14 @@
 
             refs.checkoutConfirmSubtotal.textContent = formatMoney(subtotal);
             refs.checkoutConfirmDiscount.textContent = formatMoney(discount);
+
+            if (state.packaging.fee > 0) {
+                refs.checkoutConfirmPackagingRow.classList.remove('hidden');
+                refs.checkoutConfirmPackaging.textContent = formatMoney(state.packaging.fee);
+            } else {
+                refs.checkoutConfirmPackagingRow.classList.add('hidden');
+            }
+
             refs.checkoutConfirmTotal.textContent = formatMoney(grandTotal);
             refs.checkoutConfirmPayment.textContent = getPaymentMethodLabel();
         };
@@ -802,7 +847,7 @@
         const updateSummary = () => {
             const subtotal = calculateSubtotal();
             const discount = Math.min(getDiscount(), subtotal);
-            const grandTotal = Math.max(0, subtotal - discount);
+            const grandTotal = Math.max(0, subtotal - discount + state.packaging.fee);
             const change = calculateChange();
             const paymentMethod = refs.paymentMethod.value;
             const isCashPayment = paymentMethod === 'cash';
@@ -830,6 +875,15 @@
                     : formatMoney(0);
             } else {
                 refs.discountValue.textContent = formatMoney(discount);
+            }
+
+            const packagingFeeRow = document.getElementById('packagingFeeRow');
+            const packagingFeeValue = document.getElementById('packagingFeeValue');
+            if (state.packaging.fee > 0) {
+                packagingFeeRow.classList.remove('hidden');
+                packagingFeeValue.textContent = formatMoney(state.packaging.fee);
+            } else {
+                packagingFeeRow.classList.add('hidden');
             }
 
             refs.grandTotalValue.textContent = formatMoney(grandTotal);
@@ -1181,6 +1235,8 @@
                     discount_amount: getAppliedDiscount(),
                     payment_method: 'qris',
                     cash_tendered: 0,
+                    packaging_fee: state.packaging.fee,
+                    packaging_name: state.packaging.name,
                     notes: refs.notes.value,
                 };
                 const subtotal = calculateSubtotal();
@@ -1211,6 +1267,8 @@
                 discount_amount: getAppliedDiscount(),
                 payment_method: refs.paymentMethod.value,
                 cash_tendered: refs.paymentMethod.value === 'cash' ? getCashTendered() : 0,
+                packaging_fee: state.packaging.fee,
+                packaging_name: state.packaging.name,
                 notes: refs.paymentMethod.value === 'e_wallet' && state.selectedEwallet
                     ? `[${state.selectedEwallet.name}]${refs.notes.value ? ' - ' + refs.notes.value : ''}`
                     : refs.notes.value,
@@ -1240,6 +1298,16 @@
                 document.getElementById("memberSearch").value = "";
                 document.getElementById("memberResult").innerHTML = "";
                 state.selectedEwallet = null;
+                state.packaging = { fee: 0, name: 'Tanpa Kemasan' };
+                document.querySelectorAll('.packaging-btn').forEach((b) => {
+                    b.classList.remove('packaging-selected', 'border-cyan-400/70', 'bg-cyan-400/10');
+                    b.classList.add('border-white/10', 'bg-slate-950/70');
+                });
+                const firstPackagingBtn = document.querySelector('.packaging-btn');
+                if (firstPackagingBtn) {
+                    firstPackagingBtn.classList.remove('border-white/10', 'bg-slate-950/70');
+                    firstPackagingBtn.classList.add('packaging-selected', 'border-cyan-400/70', 'bg-cyan-400/10');
+                }
                 document.querySelectorAll('.ewallet-btn').forEach((b) => {
                     b.classList.remove('border-cyan-400/70', 'bg-cyan-400/10');
                     b.classList.add('border-white/10', 'bg-slate-950/70');
@@ -1322,6 +1390,16 @@
                 closeQrisModal();
                 state.receipt = response.data;
                 state.cart = [];
+                state.packaging = { fee: 0, name: 'Tanpa Kemasan' };
+                document.querySelectorAll('.packaging-btn').forEach((b) => {
+                    b.classList.remove('packaging-selected', 'border-cyan-400/70', 'bg-cyan-400/10');
+                    b.classList.add('border-white/10', 'bg-slate-950/70');
+                });
+                const firstPkgBtn = document.querySelector('.packaging-btn');
+                if (firstPkgBtn) {
+                    firstPkgBtn.classList.remove('border-white/10', 'bg-slate-950/70');
+                    firstPkgBtn.classList.add('packaging-selected', 'border-cyan-400/70', 'bg-cyan-400/10');
+                }
                 setCurrencyInputValue(refs.discountAmount, 0);
                 setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
@@ -1471,6 +1549,23 @@
         
         [refs.cardHolder, refs.cardNumber, refs.cardBank, refs.approvalCode].forEach((input) => {
             input.addEventListener('input', updateSummary);
+        });
+
+        // Packaging selection
+        document.querySelectorAll('.packaging-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.packaging-btn').forEach((b) => {
+                    b.classList.remove('packaging-selected', 'border-cyan-400/70', 'bg-cyan-400/10');
+                    b.classList.add('border-white/10', 'bg-slate-950/70');
+                });
+                btn.classList.remove('border-white/10', 'bg-slate-950/70');
+                btn.classList.add('packaging-selected', 'border-cyan-400/70', 'bg-cyan-400/10');
+                state.packaging = {
+                    fee: Number(btn.dataset.packaging),
+                    name: btn.dataset.packagingName,
+                };
+                updateSummary();
+            });
         });
 
         refs.checkoutButton.addEventListener('click', checkout);

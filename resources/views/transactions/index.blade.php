@@ -89,6 +89,7 @@
                     'discount_amount' => $payment->discount_amount,
                     'cash_tendered' => $payment->cash_tendered,
                     'change_amount' => $payment->change_amount,
+                    'reference_number' => $payment->reference_number,
                 ])->values(),
                 'details' => $transaction->details->map(function ($detail) {
                     $returnedQuantity = $detail->returnDetails->sum('quantity');
@@ -268,16 +269,45 @@
             modal.classList.remove('flex');
         };
 
+        const parseReferenceNumber = (ref) => {
+            const result = { parkingFee: 0, parkingName: '', packagingFee: 0, packagingName: '' };
+            if (!ref) return result;
+            ref.split(';').forEach((segment) => {
+                segment = segment.trim();
+                if (segment.startsWith('PARKIR:')) {
+                    const parts = segment.slice(7).split('|');
+                    result.parkingFee = parseInt(parts[0] || 0, 10);
+                    result.parkingName = parts[1] || '';
+                } else if (segment.startsWith('KEMASAN:')) {
+                    const parts = segment.slice(8).split('|');
+                    result.packagingFee = parseInt(parts[0] || 0, 10);
+                    result.packagingName = parts[1] || '';
+                }
+            });
+            return result;
+        };
+
         const openModal = (transaction) => {
             modalTitle.textContent = transaction.code;
             modalDate.textContent = transaction.created_at || '-';
             modalTotal.textContent = formatMoney(transaction.total);
-            modalPayment.innerHTML = transaction.payments.length ? transaction.payments.map((payment) => `
+            modalPayment.innerHTML = transaction.payments.length ? transaction.payments.map((payment) => {
+                const ref = parseReferenceNumber(payment.reference_number);
+                const parkingRow = ref.parkingFee > 0
+                    ? `<div>Biaya Parkir${ref.parkingName ? ' (' + escapeHtml(ref.parkingName) + ')' : ''}: <span class="font-semibold text-amber-300">${formatMoney(ref.parkingFee)}</span></div>`
+                    : '';
+                const packagingRow = ref.packagingFee > 0
+                    ? `<div>Biaya Kemasan${ref.packagingName ? ' (' + escapeHtml(ref.packagingName) + ')' : ''}: <span class="font-semibold text-amber-300">${formatMoney(ref.packagingFee)}</span></div>`
+                    : '';
+                return `
                 <div>Metode: <span class="font-semibold text-white">${escapeHtml(payment.payment_method || 'cash')}</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
+                ${parkingRow}
+                ${packagingRow}
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
-            `).join('') : `
+            `;
+            }).join('') : `
                 <div>Metode: <span class="font-semibold text-white">cash</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
