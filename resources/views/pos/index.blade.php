@@ -348,22 +348,34 @@
                         {{-- ===== PARKING ADDON — ISOLATED ===== --}}
                         <div id="parking-selection">
                             <label class="text-sm text-slate-300">Biaya Parkir</label>
-                            <div class="mt-2 flex flex-wrap gap-2">
-                                <label class="parking-pill flex cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition has-[:checked]:border-emerald-400/60 has-[:checked]:bg-emerald-400/15 has-[:checked]:text-emerald-200">
+                            <div class="mt-2 flex flex-row gap-2">
+
+                                {{-- Tanpa Parkir --}}
+                                <label class="parking-pill flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2 text-xs font-medium text-slate-300 transition has-[:checked]:border-emerald-400/60 has-[:checked]:bg-emerald-400/15 has-[:checked]:text-emerald-200">
                                     <input type="radio" name="parking_fee" value="0" class="sr-only" checked>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
-                                    Tanpa Parkir
+                                    {{-- X circle --}}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+                                    <span>Tanpa</span>
                                 </label>
-                                <label class="parking-pill flex cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition has-[:checked]:border-amber-400/60 has-[:checked]:bg-amber-400/15 has-[:checked]:text-amber-200">
+
+                                {{-- Motor --}}
+                                <label class="parking-pill flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2 text-xs font-medium text-slate-300 transition has-[:checked]:border-amber-400/60 has-[:checked]:bg-amber-400/15 has-[:checked]:text-amber-200">
                                     <input type="radio" name="parking_fee" value="2000" class="sr-only">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9 8h4a2 2 0 0 1 0 4H9zm0 4h2l2 4"/></svg>
-                                    Motor — Rp 2.000
+                                    {{-- Motorcycle --}}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="flex-shrink-0"><circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M8 17h8"/><path d="M3.4 13.4 5 8h9l3 5.5"/><path d="M12 8V5h2"/></svg>
+                                    <span>Motor</span>
+                                    <span class="text-[10px] opacity-70">2k</span>
                                 </label>
-                                <label class="parking-pill flex cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition has-[:checked]:border-cyan-400/60 has-[:checked]:bg-cyan-400/15 has-[:checked]:text-cyan-200">
+
+                                {{-- Mobil --}}
+                                <label class="parking-pill flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2 text-xs font-medium text-slate-300 transition has-[:checked]:border-cyan-400/60 has-[:checked]:bg-cyan-400/15 has-[:checked]:text-cyan-200">
                                     <input type="radio" name="parking_fee" value="5000" class="sr-only">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="12" x="2" y="6" rx="2"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" x2="12" y1="10" y2="14"/><line x1="10" x2="14" y1="12" y2="12"/></svg>
-                                    Mobil — Rp 5.000
+                                    {{-- Car --}}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="flex-shrink-0"><path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h10l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><circle cx="7.5" cy="17" r="2.5"/><circle cx="16.5" cy="17" r="2.5"/><path d="M9 17h6"/></svg>
+                                    <span>Mobil</span>
+                                    <span class="text-[10px] opacity-70">5k</span>
                                 </label>
+
                             </div>
                         </div>
                         {{-- ===== END PARKING ADDON ===== --}}
@@ -509,6 +521,7 @@
                 <div class="mt-4 rounded-3xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300">
                     <div class="flex items-center justify-between"><span>Subtotal</span><span id="checkoutConfirmSubtotal" class="font-semibold text-white">Rp0</span></div>
                     <div class="mt-2 flex items-center justify-between"><span>Diskon</span><span id="checkoutConfirmDiscount" class="font-semibold text-white">Rp0</span></div>
+                    <div id="checkoutConfirmParkingRow" class="mt-2 hidden flex items-center justify-between"><span>Biaya Parkir</span><span id="checkoutConfirmParking" class="font-semibold text-amber-200">Rp0</span></div>
                     <div class="mt-2 border-t border-white/10 pt-3 flex items-center justify-between text-base font-semibold text-emerald-300"><span>Total</span><span id="checkoutConfirmTotal">Rp0</span></div>
                     <div class="mt-2 text-sm text-slate-400"><span>Metode: </span><span id="checkoutConfirmPayment">-</span></div>
                 </div>
@@ -594,6 +607,8 @@
             checkoutConfirmItems: document.getElementById('checkoutConfirmItems'),
             checkoutConfirmSubtotal: document.getElementById('checkoutConfirmSubtotal'),
             checkoutConfirmDiscount: document.getElementById('checkoutConfirmDiscount'),
+            checkoutConfirmParkingRow: document.getElementById('checkoutConfirmParkingRow'),
+            checkoutConfirmParking: document.getElementById('checkoutConfirmParking'),
             checkoutConfirmTotal: document.getElementById('checkoutConfirmTotal'),
             checkoutConfirmPayment: document.getElementById('checkoutConfirmPayment'),
             confirmCheckoutButton: document.getElementById('confirmCheckoutButton'),
@@ -689,7 +704,8 @@
         const renderCheckoutConfirmDetails = () => {
             const subtotal = calculateSubtotal();
             const discount = Math.min(getDiscount(), subtotal);
-            const grandTotal = Math.max(0, subtotal - discount);
+            const parkingFee = window._parkingFee || 0;
+            const grandTotal = Math.max(0, subtotal - discount) + parkingFee;
 
             refs.checkoutConfirmItems.innerHTML = state.cart.map((item) => `
                 <div class="grid gap-2 rounded-3xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-200 md:grid-cols-[1fr_auto]">
@@ -705,6 +721,20 @@
             refs.checkoutConfirmDiscount.textContent = formatMoney(discount);
             refs.checkoutConfirmTotal.textContent = formatMoney(grandTotal);
             refs.checkoutConfirmPayment.textContent = getPaymentMethodLabel();
+
+            // Parkir: baca dari radio button yang aktif saat ini
+            const checkedRadio = document.querySelector('input[name="parking_fee"]:checked');
+            const parkingLabel = checkedRadio
+                ? checkedRadio.closest('label')?.textContent.trim().replace(/\s+/g, ' ')
+                : '';
+            if (parkingFee > 0) {
+                refs.checkoutConfirmParkingRow.classList.remove('hidden');
+                refs.checkoutConfirmParking.textContent = formatMoney(parkingFee)
+                    + (parkingLabel ? ` (${parkingLabel.split('—')[0].trim()})` : '');
+            } else {
+                refs.checkoutConfirmParkingRow.classList.add('hidden');
+                refs.checkoutConfirmParking.textContent = 'Rp0';
+            }
         };
         const openCheckoutConfirmModal = () => {
             renderCheckoutConfirmDetails();
@@ -1124,15 +1154,23 @@
             refs.transactionModalTitle.textContent = transactionCode;
             refs.transactionModalDate.textContent = formatDateTime(transaction.created_at);
             refs.transactionModalTotal.textContent = formatMoney(transaction.total);
+            // Parse biaya parkir dari transaction.notes (format: "PARKIR:2000|Motor")
+            const parkingMatch = String(transaction.notes ?? '').match(/^PARKIR:(\d+)\|(.+)$/);
+            const parkingRow = parkingMatch
+                ? `<div>Biaya Parkir <span class="text-amber-300">(${parkingMatch[2]})</span>: <span class="font-semibold text-amber-200">${formatMoney(parseInt(parkingMatch[1], 10))}</span></div>`
+                : '';
+
             refs.transactionModalPayment.innerHTML = payments.length ? payments.map((payment) => `
                 <div>Metode: <span class="font-semibold text-white">${payment.payment_method}</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
+                ${parkingRow}
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
             `).join('') : `
                 <div>Metode: <span class="font-semibold text-white">cash</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
+                ${parkingRow}
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
             `;
             refs.transactionModalItems.innerHTML = details.length ? details.map((item) => `

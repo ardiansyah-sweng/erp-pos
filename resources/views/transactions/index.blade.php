@@ -284,12 +284,13 @@
                 <div>Metode: <span class="font-semibold text-white">${escapeHtml(payment.payment_method || 'cash')}</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
-                ${transaction.parking_fee ? `<div>Biaya Parkir (<span class="text-amber-200">${escapeHtml(transaction.parking_fee.label)}</span>): <span class="font-semibold text-amber-200">${formatMoney(transaction.parking_fee.amount)}</span></div>` : ''}
+                ${transaction.parking_fee ? `<div>Biaya Parkir <span class="text-amber-300">(${escapeHtml(transaction.parking_fee.label)})</span>: <span class="font-semibold text-amber-200">${formatMoney(transaction.parking_fee.amount)}</span></div>` : ''}
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
             `).join('') : `
                 <div>Metode: <span class="font-semibold text-white">cash</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
+                ${transaction.parking_fee ? `<div>Biaya Parkir <span class="text-amber-300">(${escapeHtml(transaction.parking_fee.label)})</span>: <span class="font-semibold text-amber-200">${formatMoney(transaction.parking_fee.amount)}</span></div>` : ''}
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
             `;
             modalItems.innerHTML = transaction.details.length ? transaction.details.map((detail) => `
