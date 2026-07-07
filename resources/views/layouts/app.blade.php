@@ -194,7 +194,7 @@
 
             <p class="nav-section">Master Data</p>
 
-            <a href="{{ url('/products') }}" class="nav-link {{ request()->is('products*') ? 'active' : '' }}">
+            <a href="{{ route('products.manage') }}" class="nav-link {{ request()->is('products*') ? 'active' : '' }}">
                 <i data-lucide="package" class="w-[18px] h-[18px]"></i>
                 Produk
             </a>
