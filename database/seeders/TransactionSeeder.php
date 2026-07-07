@@ -10,6 +10,7 @@ use App\Models\TransactionDetail;
 
 use Carbon\Carbon;
 use Faker\Factory as Faker;
+use Illuminate\Support\Facades\DB;
 
 class TransactionSeeder extends Seeder
 {
@@ -39,11 +40,12 @@ class TransactionSeeder extends Seeder
 
         foreach ($transactionDates as $timestamp) {
             $selectedProducts = $products->random($this->faker->numberBetween(1, min(4, $products->count())));
-            $transaction = Transaction::create([
+            $transactionId = DB::table('transaction')->insertGetId([
                 'total' => 0,
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ]);
+            $transaction = Transaction::find($transactionId);
             $total = 0;
 
             foreach ($selectedProducts as $product) {

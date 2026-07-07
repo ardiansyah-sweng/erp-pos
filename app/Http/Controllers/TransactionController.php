@@ -8,9 +8,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
+use App\Models\Customer;
+use App\Services\CustomerService;
 
 class TransactionController extends Controller
 {
+    protected $customerService;
+
+    public function __construct(CustomerService $customerService)
+    {
+        $this->customerService = $customerService;
+    }
+
     public function getTransaction(Request $request)
     {
         $validated = $request->validate([
@@ -124,6 +133,7 @@ class TransactionController extends Controller
     public function checkout(Request $request)
     {
         $validated = $request->validate([
+            'customer_id' => ['nullable','integer','exists:customers,id'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
@@ -191,6 +201,7 @@ class TransactionController extends Controller
             }
 
             $transaction = Transaction::create([
+                'customer_id' => $validated['customer_id'] ?? null,
                 'total' => $totalAmount,
             ]);
 
@@ -211,10 +222,30 @@ class TransactionController extends Controller
                     'price' => (int) $item['unit_price'],
                     'amount' => (int) $item['quantity'] * (int) $item['unit_price'],
                 ]);
+
+                $product = Product::find((int) $item['product_id']);
+
+                if ($product->stock_quantity < $item['quantity']) {
+                    throw new \Exception("Stok {$product->name} tidak cukup");
+                }
+
+                $product->stock_quantity -= $item['quantity'];
+                $product->save();
+    
             }
 
             foreach ($productQuantities as $productId => $quantity) {
                 $lockedProducts->get((int) $productId)->decrement('stock_quantity', (int) $quantity);
+            }
+
+            if (!empty($validated['customer_id'])) {
+
+                $customer = Customer::find($validated['customer_id']);
+
+                if ($customer) {
+                    $this->customerService->addPoints($customer, $totalAmount);
+                }
+
             }
 
             return $transaction;
@@ -246,6 +277,7 @@ class TransactionController extends Controller
             ]);
 
             $transaction = Transaction::create([
+                'customer_id' => $request->customer_id,
                 'total' => $request->total
             ]);
 
