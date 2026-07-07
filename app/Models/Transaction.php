@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Customer;
 
 class Transaction extends Model
 {
@@ -31,5 +32,10 @@ class Transaction extends Model
     {
         $fillable = $this->getFillable();
         return $fillable[$index] ?? null;
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 }
