@@ -63,4 +63,24 @@ class DiscountController extends Controller
       ->route('discounts.index')
       ->with('success', 'Diskon berhasil dihapus.');
   }
+
+  public function getActiveForProducts(Request $request)
+  {
+    $productIds = explode(',', $request->query('ids', ''));
+    $productIds = array_filter(array_map('intval', $productIds));
+
+    $discounts = Discount::whereIn('product_id', $productIds)
+      ->where('is_active', true)
+      ->whereDate('start_date', '<=', now())
+      ->whereDate('end_date', '>=', now())
+      ->get()
+      ->keyBy('product_id');
+
+    return response()->json([
+      'success' => true,
+      'data'    => $discounts,
+    ]);
+  }
 }
+
+

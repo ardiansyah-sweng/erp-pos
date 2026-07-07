@@ -1,16 +1,86 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>ERP POS</title>
     <script>
-        try {
-            document.documentElement.dataset.theme = localStorage.getItem('erp-pos-theme') || 'dark';
-        } catch (error) {
-            document.documentElement.dataset.theme = 'dark';
-        }
+        (function() {
+            const applyAutoDiscount = async () => {
+                // Ambil semua baris di tabel keranjang untuk dapat product ID
+                const cartRows = document.querySelectorAll('#cartTable tr[data-product-id]');
+                if (cartRows.length === 0) return;
+
+                const productIds = [...cartRows].map(row => row.dataset.productId).join(',');
+
+                try {
+                    const res = await fetch(`/discounts/active-for-products?ids=${productIds}`);
+                    const result = await res.json();
+                    if (!result.success) return;
+
+                    const discounts = result.data;
+                    if (Object.keys(discounts).length === 0) return;
+
+                    let totalDiscount = 0;
+                    let appliedNames = [];
+
+                    cartRows.forEach(row => {
+                        const pid = row.dataset.productId;
+                        const discount = discounts[pid];
+                        if (!discount) return;
+
+                        const qty = parseInt(row.querySelector('.qty-value')?.textContent || '1');
+                        const price = parseInt(row.dataset.price || '0');
+                        const subtotal = qty * price;
+
+                        if (discount.type === 'percentage') {
+                            totalDiscount += Math.round(subtotal * discount.value / 100);
+                        } else {
+                            totalDiscount += discount.value * qty;
+                        }
+                        appliedNames.push(discount.name);
+                    });
+
+                    if (totalDiscount > 0) {
+                        const input = document.getElementById('discountAmount');
+                        const select = document.getElementById('discountType');
+                        if (input && select) {
+                            input.value = totalDiscount;
+                            select.value = 'nominal';
+                            input.dispatchEvent(new Event('input'));
+                            const info = document.getElementById('discountInfo');
+                            if (info) {
+                                info.textContent = `✓ Diskon aktif: ${[...new Set(appliedNames)].join(', ')} — Rp${totalDiscount.toLocaleString('id-ID')}`;
+                                info.classList.remove('hidden');
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error mengambil diskon:', e);
+                }
+            };
+
+            // Pantau perubahan di tabel keranjang
+            const observer = new MutationObserver(() => applyAutoDiscount());
+            const waitForCart = setInterval(() => {
+                const cartTable = document.getElementById('cartTable');
+                if (cartTable) {
+                    observer.observe(cartTable, {
+                        childList: true,
+                        subtree: true
+                    });
+                    clearInterval(waitForCart);
+                }
+            }, 500);
+
+            // Tombol manual juga tetap bisa diklik
+            document.addEventListener('DOMContentLoaded', () => {
+                const btn = document.getElementById('applyProductDiscount');
+                if (btn) btn.addEventListener('click', applyAutoDiscount);
+            });
+        })();
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -19,7 +89,7 @@
             color: #0f172a !important;
         }
 
-        html[data-theme="light"] body > .absolute {
+        html[data-theme="light"] body>.absolute {
             opacity: 0.45;
         }
 
@@ -54,7 +124,7 @@
             border-color: #dbe3ea !important;
         }
 
-        html[data-theme="light"] .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
+        html[data-theme="light"] .divide-white\/5> :not([hidden])~ :not([hidden]) {
             border-color: #e2e8f0 !important;
         }
 
@@ -108,7 +178,55 @@
             color: #94a3b8 !important;
         }
     </style>
+
+    <script>
+        document.getElementById('applyProductDiscount').addEventListener('click', async function() {
+            const cart = window.__posCart ?? [];
+            if (cart.length === 0) {
+                alert('Keranjang masih kosong.');
+                return;
+            }
+
+            const productIds = cart.map(item => item.product_id ?? item.id).join(',');
+            const response = await fetch(`/discounts/active-for-products?ids=${productIds}`);
+            const result = await response.json();
+
+            if (!result.success || Object.keys(result.data).length === 0) {
+                document.getElementById('discountInfo').textContent = 'Tidak ada diskon aktif untuk produk di keranjang.';
+                document.getElementById('discountInfo').classList.remove('hidden');
+                return;
+            }
+
+            // Hitung total diskon dari semua produk di keranjang
+            let totalDiscount = 0;
+            let appliedNames = [];
+
+            cart.forEach(item => {
+                const discount = result.data[item.product_id ?? item.id];
+                if (!discount) return;
+
+                const subtotal = item.quantity * item.selling_price;
+                if (discount.type === 'percentage') {
+                    totalDiscount += Math.round(subtotal * discount.value / 100);
+                } else {
+                    totalDiscount += discount.value * item.quantity;
+                }
+                appliedNames.push(discount.name);
+            });
+
+            // Terapkan ke field diskon
+            document.getElementById('discountAmount').value = totalDiscount;
+            document.getElementById('discountType').value = 'nominal';
+            document.getElementById('discountType').dispatchEvent(new Event('change'));
+            document.getElementById('discountAmount').dispatchEvent(new Event('input'));
+
+            document.getElementById('discountInfo').textContent =
+                `✓ Diskon diterapkan: ${[...new Set(appliedNames)].join(', ')} (Rp${totalDiscount.toLocaleString('id-ID')})`;
+            document.getElementById('discountInfo').classList.remove('hidden');
+        });
+    </script>
 </head>
+
 <body class="min-h-screen bg-slate-950 text-slate-100">
     <div class="absolute inset-x-0 top-0 h-72 bg-gradient-to-r from-emerald-500/30 via-cyan-500/20 to-transparent blur-3xl"></div>
     <main class="relative mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-6 lg:px-8">
@@ -121,8 +239,8 @@
                     <div class="mt-4 flex flex-wrap items-center gap-3">
                         <a href="{{ route('stock-adjustments.index') }}" class="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/15 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:border-emerald-300 hover:bg-emerald-400/25 hover:text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
-                                <path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>
+                                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                                <path d="m3.3 7 8.7 5 8.7-5M12 22V12" />
                             </svg>
                             Penyesuaian Stok
                         </a>
@@ -132,15 +250,15 @@
                         </button>
                         <a href="{{ route('sales-notes') }}" class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/15 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-400/25 hover:text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M3 3v18h18"/>
-                                <path d="m19 9-5 5-4-4-3 3"/>
+                                <path d="M3 3v18h18" />
+                                <path d="m19 9-5 5-4-4-3 3" />
                             </svg>
                             Laporan Penjualan
                         </a>
                         <a href="{{ route('returns.index') }}" class="inline-flex items-center gap-2 rounded-full border border-rose-400/40 bg-rose-400/15 px-4 py-2 text-sm font-medium text-rose-200 transition hover:border-rose-300 hover:bg-rose-400/25 hover:text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="m9 14-4-4 4-4"/>
-                                <path d="M5 10h11a4 4 0 0 1 0 8h-1"/>
+                                <path d="m9 14-4-4 4-4" />
+                                <path d="M5 10h11a4 4 0 0 1 0 8h-1" />
                             </svg>
                             Retur Transaksi
                         </a>
@@ -150,7 +268,8 @@
                     <div class="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-sm">
                         <div class="flex items-center gap-1.5 text-slate-300">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                                <rect x="3" y="4" width="18" height="18" rx="2" />
+                                <path d="M16 2v4M8 2v4M3 10h18" />
                             </svg>
                             <span id="clockDate">-</span>
                         </div>
@@ -238,7 +357,7 @@
                     <h2 class="text-lg font-semibold text-white">Pembayaran</h2>
                     <div class="mt-4 space-y-4">
                         <div>
-                            <label class="text-sm text-slate-300" for="discountAmount">Diskon</label>
+                            <label class="text-sm text-slate-300" for="discountAmount">Diskon Manual</label>
                             <div class="mt-2 flex overflow-hidden rounded-2xl border border-white/10 bg-slate-950/70 focus-within:border-cyan-400">
                                 <input id="discountAmount" type="text" inputmode="numeric" value="Rp 0"
                                     class="min-w-0 flex-1 bg-transparent px-4 py-3 text-white outline-none placeholder:text-slate-500"
@@ -252,97 +371,116 @@
                                     </select>
                                 </div>
                             </div>
-                        </div>
-                        <div>
-                            <label class="text-sm text-slate-300" for="paymentMethod">Metode pembayaran</label>
-                            <select id="paymentMethod" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none focus:border-cyan-400">
-                                <option value="cash">Cash</option>
-                                <option value="card">Card</option>
-                                <option value="e_wallet">E-wallet</option>
-                                <option value="bank_transfer">Bank Transfer</option>
-                                <option value="qris">QRIS</option>
-                            </select>
-                        </div>
-                        <div id="ewalletPanel" class="hidden">
-                            <label class="text-sm text-slate-300">Pilih E-Wallet</label>
-                            <div class="mt-2 grid grid-cols-2 gap-2">
-                                <button type="button" data-ewallet="dana" data-name="DANA"
-                                    class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
-                                    <img src="/images/dana.png" alt="DANA" class="h-8 w-8 object-contain">
-                                    <span class="text-sm font-medium text-white">DANA</span>
-                                    <span class="ewallet-check absolute right-2 top-2 hidden">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><path d="M20 6 9 17l-5-5"/></svg>
-                                    </span>
+
+                            {{-- Tombol diskon otomatis dari database --}}
+                            <div class="mt-3">
+                                <button id="applyProductDiscount" type="button"
+                                    class="w-full rounded-2xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-sm font-medium text-amber-200 transition hover:bg-amber-400/20">
+                                    ✦ Terapkan Diskon Produk Otomatis
                                 </button>
-                                <button type="button" data-ewallet="gopay" data-name="GoPay"
-                                    class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
-                                    <img src="/images/gopay.png" alt="GoPay" class="h-8 w-8 object-contain">
-                                    <span class="text-sm font-medium text-white">GoPay</span>
-                                    <span class="ewallet-check absolute right-2 top-2 hidden">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><path d="M20 6 9 17l-5-5"/></svg>
-                                    </span>
-                                </button>
-                                <button type="button" data-ewallet="ovo" data-name="OVO"
-                                    class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
-                                    <img src="/images/ovo.png" alt="OVO" class="h-8 w-8 object-contain">
-                                    <span class="text-sm font-medium text-white">OVO</span>
-                                    <span class="ewallet-check absolute right-2 top-2 hidden">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><path d="M20 6 9 17l-5-5"/></svg>
-                                    </span>
-                                </button>
-                                <button type="button" data-ewallet="shopeepay" data-name="ShopeePay"
-                                    class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
-                                    <img src="/images/shopeepay.png" alt="ShopeePay" class="h-8 w-8 object-contain">
-                                    <span class="text-sm font-medium text-white">ShopeePay</span>
-                                    <span class="ewallet-check absolute right-2 top-2 hidden">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><path d="M20 6 9 17l-5-5"/></svg>
-                                    </span>
-                                </button>
+                                <p id="discountInfo" class="mt-2 text-xs text-slate-400 hidden"></p>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-sm text-slate-300" for="paymentMethod">Metode pembayaran</label>
+                    <select id="paymentMethod" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none focus:border-cyan-400">
+                        <option value="cash">Cash</option>
+                        <option value="card">Card</option>
+                        <option value="e_wallet">E-wallet</option>
+                        <option value="bank_transfer">Bank Transfer</option>
+                        <option value="qris">QRIS</option>
+                    </select>
+                </div>
+                <div id="ewalletPanel" class="hidden">
+                    <label class="text-sm text-slate-300">Pilih E-Wallet</label>
+                    <div class="mt-2 grid grid-cols-2 gap-2">
+                        <button type="button" data-ewallet="dana" data-name="DANA"
+                            class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
+                            <img src="/images/dana.png" alt="DANA" class="h-8 w-8 object-contain">
+                            <span class="text-sm font-medium text-white">DANA</span>
+                            <span class="ewallet-check absolute right-2 top-2 hidden">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400">
+                                    <path d="M20 6 9 17l-5-5" />
+                                </svg>
+                            </span>
+                        </button>
+                        <button type="button" data-ewallet="gopay" data-name="GoPay"
+                            class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
+                            <img src="/images/gopay.png" alt="GoPay" class="h-8 w-8 object-contain">
+                            <span class="text-sm font-medium text-white">GoPay</span>
+                            <span class="ewallet-check absolute right-2 top-2 hidden">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400">
+                                    <path d="M20 6 9 17l-5-5" />
+                                </svg>
+                            </span>
+                        </button>
+                        <button type="button" data-ewallet="ovo" data-name="OVO"
+                            class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
+                            <img src="/images/ovo.png" alt="OVO" class="h-8 w-8 object-contain">
+                            <span class="text-sm font-medium text-white">OVO</span>
+                            <span class="ewallet-check absolute right-2 top-2 hidden">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400">
+                                    <path d="M20 6 9 17l-5-5" />
+                                </svg>
+                            </span>
+                        </button>
+                        <button type="button" data-ewallet="shopeepay" data-name="ShopeePay"
+                            class="ewallet-btn relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-left transition hover:border-cyan-400/50">
+                            <img src="/images/shopeepay.png" alt="ShopeePay" class="h-8 w-8 object-contain">
+                            <span class="text-sm font-medium text-white">ShopeePay</span>
+                            <span class="ewallet-check absolute right-2 top-2 hidden">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400">
+                                    <path d="M20 6 9 17l-5-5" />
+                                </svg>
+                            </span>
+                        </button>
+                    </div>
+                </div>
 
-                       <div id="cardForm" class="hidden mt-4 space-y-3">
-                        <div>
-                            <label class="text-sm text-slate-300">Nama Pemegang Kartu</label>
-                            <input id="cardHolder" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
-                        </div>
-
-                        <div>
-                            <label class="text-sm text-slate-300">No Kartu (4 digit terakhir)</label>
-                            <input id="cardNumber" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
-                        </div>
-
-                        <div>
-                            <label class="text-sm text-slate-300">Bank / Provider</label>
-                            <input id="cardBank" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
-                        </div>
-
-                        <div>
-                            <label class="text-sm text-slate-300">Kode Approval</label>
-                            <input id="approvalCode" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
-                        </div>
-                        </div>
-
-
-                        <div id="cashTenderedWrapper">
-                            <label class="text-sm text-slate-300" for="cashTendered">Uang dibayar</label>
-                            <input id="cashTendered" type="text" inputmode="numeric" value="Rp 0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
-                        </div>
-                        <div>
-                            <label class="text-sm text-slate-300" for="notes">Catatan</label>
-                            <textarea id="notes" rows="3" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400" placeholder="Opsional"></textarea>
-                        </div>
+                <div id="cardForm" class="hidden mt-4 space-y-3">
+                    <div>
+                        <label class="text-sm text-slate-300">Nama Pemegang Kartu</label>
+                        <input id="cardHolder" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
                     </div>
 
-                    <div class="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
-                        <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
-                        <div class="flex items-center justify-between"><span>Diskon</span><span id="discountValue" class="font-semibold text-white">Rp0</span></div>
-                        <div class="flex items-center justify-between"><span>Total</span><span id="grandTotalValue" class="font-semibold text-emerald-300">Rp0</span></div>
-                        <div id="changeRow" class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
+                    <div>
+                        <label class="text-sm text-slate-300">No Kartu (4 digit terakhir)</label>
+                        <input id="cardNumber" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
                     </div>
 
-                    <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50" disabled>Checkout</button>
-                    <div id="checkoutStatus" class="mt-3 hidden rounded-2xl border px-4 py-3 text-sm font-medium"></div>
+                    <div>
+                        <label class="text-sm text-slate-300">Bank / Provider</label>
+                        <input id="cardBank" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-slate-300">Kode Approval</label>
+                        <input id="approvalCode" type="text" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white">
+                    </div>
+                </div>
+
+
+                <div id="cashTenderedWrapper">
+                    <label class="text-sm text-slate-300" for="cashTendered">Uang dibayar</label>
+                    <input id="cashTendered" type="text" inputmode="numeric" value="Rp 0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
+                </div>
+                <div>
+                    <label class="text-sm text-slate-300" for="notes">Catatan</label>
+                    <textarea id="notes" rows="3" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400" placeholder="Opsional"></textarea>
+                </div>
+                </div>
+
+                <div class="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
+                    <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
+                    <div class="flex items-center justify-between"><span>Diskon</span><span id="discountValue" class="font-semibold text-white">Rp0</span></div>
+                    <div class="flex items-center justify-between"><span>Total</span><span id="grandTotalValue" class="font-semibold text-emerald-300">Rp0</span></div>
+                    <div id="changeRow" class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
+                </div>
+
+                <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50" disabled>Checkout</button>
+                <div id="checkoutStatus" class="mt-3 hidden rounded-2xl border px-4 py-3 text-sm font-medium"></div>
                 </div>
 
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
@@ -380,13 +518,18 @@
                 <div class="flex justify-center">
                     <div class="rounded-2xl border-2 border-white/20 bg-white p-3 shadow-xl w-60">
                         <img id="qrisImage" src="/images/qris.png" alt="QRIS Payment Code"
-                             class="w-full aspect-[3/4] object-contain"
-                             onerror="this.style.display='none';document.getElementById('qrisFallback').style.display='flex'">
+                            class="w-full aspect-[3/4] object-contain"
+                            onerror="this.style.display='none';document.getElementById('qrisFallback').style.display='flex'">
                         <div id="qrisFallback" style="display:none"
-                             class="w-full aspect-[3/4] flex-col items-center justify-center rounded-xl bg-slate-100 text-slate-500 text-xs text-center gap-2 px-4">
+                            class="w-full aspect-[3/4] flex-col items-center justify-center rounded-xl bg-slate-100 text-slate-500 text-xs text-center gap-2 px-4">
                             <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-slate-400">
-                                <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
-                                <rect x="14" y="14" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/>
+                                <rect x="3" y="3" width="7" height="7" rx="1" />
+                                <rect x="14" y="3" width="7" height="7" rx="1" />
+                                <rect x="3" y="14" width="7" height="7" rx="1" />
+                                <rect x="14" y="14" width="3" height="3" />
+                                <rect x="18" y="14" width="3" height="3" />
+                                <rect x="14" y="18" width="3" height="3" />
+                                <rect x="18" y="18" width="3" height="3" />
                             </svg>
                             <span>Simpan gambar QRIS<br>di <b>public/images/qris.png</b></span>
                         </div>
@@ -418,8 +561,10 @@
             <div class="flex-shrink-0 px-6 pb-5 pt-3 space-y-2 border-t border-white/10 bg-slate-900">
                 <button id="checkQrisButton" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>
-                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/>
+                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                        <path d="M21 3v5h-5" />
+                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                        <path d="M3 21v-5h5" />
                     </svg>
                     Cek Pembayaran
                 </button>
@@ -780,9 +925,9 @@
             // Show discount as "Rp X (Y%)" 
             if (refs.discountType.value === 'percent') {
                 const pct = Math.min(100, Math.max(0, parseCurrencyInput(refs.discountAmount.value)));
-                refs.discountValue.textContent = pct > 0
-                    ? `${formatMoney(discount)} (${pct}%)`
-                    : formatMoney(0);
+                refs.discountValue.textContent = pct > 0 ?
+                    `${formatMoney(discount)} (${pct}%)` :
+                    formatMoney(0);
             } else {
                 refs.discountValue.textContent = formatMoney(discount);
             }
@@ -943,6 +1088,64 @@
             });
         };
 
+        const applyAutoDiscount = async () => {
+            if (state.cart.length === 0) {
+                document.getElementById('discountAmount').value = 'Rp 0';
+                document.getElementById('discountType').value = 'nominal';
+                document.getElementById('discountAmount').dispatchEvent(new Event('input'));
+                const info = document.getElementById('discountInfo');
+                if (info) {
+                    info.textContent = '';
+                    info.classList.add('hidden');
+                }
+                return;
+            }
+
+            const productIds = state.cart.map(item => item.id).join(',');
+
+            try {
+                const response = await fetch(`/discounts/active-for-products?ids=${productIds}`);
+                const result = await response.json();
+
+                if (!result.success || Object.keys(result.data).length === 0) {
+                    const info = document.getElementById('discountInfo');
+                    if (info) {
+                        info.textContent = 'Tidak ada diskon aktif untuk produk ini.';
+                        info.classList.remove('hidden');
+                    }
+                    return;
+                }
+
+                let totalDiscount = 0;
+                let appliedNames = [];
+
+                state.cart.forEach(item => {
+                    const discount = result.data[String(item.id)];
+                    if (!discount) return;
+                    const subtotal = item.quantity * item.selling_price;
+                    if (discount.type === 'percentage') {
+                        totalDiscount += Math.round(subtotal * discount.value / 100);
+                    } else {
+                        totalDiscount += discount.value * item.quantity;
+                    }
+                    appliedNames.push(discount.name);
+                });
+
+                if (totalDiscount > 0) {
+                    document.getElementById('discountAmount').value = totalDiscount;
+                    document.getElementById('discountType').value = 'nominal';
+                    document.getElementById('discountAmount').dispatchEvent(new Event('input'));
+                    const info = document.getElementById('discountInfo');
+                    if (info) {
+                        info.textContent = `✓ Diskon: ${[...new Set(appliedNames)].join(', ')} — Rp${totalDiscount.toLocaleString('id-ID')}`;
+                        info.classList.remove('hidden');
+                    }
+                }
+            } catch (e) {
+                console.error('Gagal mengambil diskon:', e);
+            }
+        };
+
         const renderCart = () => {
             refs.cartTable.innerHTML = '';
 
@@ -999,6 +1202,7 @@
             });
 
             updateSummary();
+            applyAutoDiscount();
         };
 
         const loadProducts = async (search = '') => {
@@ -1010,9 +1214,9 @@
                 state.products = response.data ?? [];
                 renderProducts();
                 updateSummary();
-                refs.productsStatus.textContent = search
-                    ? `Menampilkan hasil untuk "${search}".`
-                    : 'Pilih produk untuk dimasukkan ke keranjang.';
+                refs.productsStatus.textContent = search ?
+                    `Menampilkan hasil untuk "${search}".` :
+                    'Pilih produk untuk dimasukkan ke keranjang.';
             } catch (error) {
                 refs.productsStatus.textContent = error.message || 'Gagal memuat produk.';
                 refs.productGrid.innerHTML = `
@@ -1160,17 +1364,14 @@
                 discount_amount: getAppliedDiscount(),
                 payment_method: refs.paymentMethod.value,
                 cash_tendered: refs.paymentMethod.value === 'cash' ? getCashTendered() : 0,
-                notes: refs.paymentMethod.value === 'e_wallet' && state.selectedEwallet
-                    ? `[${state.selectedEwallet.name}]${refs.notes.value ? ' - ' + refs.notes.value : ''}`
-                    : refs.notes.value,
-                card_info: refs.paymentMethod.value === 'card'
-                    ? {
-                        card_holder: refs.cardHolder.value,
-                        card_number_last4: refs.cardNumber.value,
-                        bank: refs.cardBank.value,
-                        approval_code: refs.approvalCode.value,
-                    }
-                    : null,
+                notes: refs.paymentMethod.value === 'e_wallet' && state.selectedEwallet ?
+                    `[${state.selectedEwallet.name}]${refs.notes.value ? ' - ' + refs.notes.value : ''}` : refs.notes.value,
+                card_info: refs.paymentMethod.value === 'card' ? {
+                    card_holder: refs.cardHolder.value,
+                    card_number_last4: refs.cardNumber.value,
+                    bank: refs.cardBank.value,
+                    approval_code: refs.approvalCode.value,
+                } : null,
             };
 
             refs.checkoutButton.disabled = true;
@@ -1409,7 +1610,10 @@
                 btn.classList.remove('border-white/10', 'bg-slate-950/70');
                 btn.classList.add('border-cyan-400/70', 'bg-cyan-400/10');
                 btn.querySelector('.ewallet-check').classList.remove('hidden');
-                state.selectedEwallet = { id: btn.dataset.ewallet, name: btn.dataset.name };
+                state.selectedEwallet = {
+                    id: btn.dataset.ewallet,
+                    name: btn.dataset.name
+                };
                 updateSummary();
             });
         });
@@ -1435,8 +1639,8 @@
 
         const updateClock = () => {
             const now = new Date();
-            const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-            const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
             const h = now.getHours();
             const m = now.getMinutes();
             const totalMinutes = h * 60 + m;
@@ -1445,9 +1649,9 @@
             document.getElementById('clockDate').textContent =
                 `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
             document.getElementById('clockTime').textContent =
-                String(h).padStart(2,'0') + ':' +
-                String(m).padStart(2,'0') + ':' +
-                String(now.getSeconds()).padStart(2,'0');
+                String(h).padStart(2, '0') + ':' +
+                String(m).padStart(2, '0') + ':' +
+                String(now.getSeconds()).padStart(2, '0');
             document.getElementById('clockIcon').innerHTML = isSunTime ? sunIconSvg : moonIconSvg;
         };
         updateClock();
@@ -1472,4 +1676,5 @@
         };
     </script>
 </body>
+
 </html>

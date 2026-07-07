@@ -61,3 +61,4 @@ Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->n
 Route::get('/discounts', [DiscountController::class, 'index'])->name('discounts.index');
 Route::post('/discounts', [DiscountController::class, 'store'])->name('discounts.store');
 Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
+Route::get('/discounts/active-for-products', [DiscountController::class, 'getActiveForProducts']);
