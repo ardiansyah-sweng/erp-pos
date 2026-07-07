@@ -333,6 +333,33 @@
                             <textarea id="notes" rows="3" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400" placeholder="Opsional"></textarea>
                         </div>
                     </div>
+                    
+                    <div class="mt-5">
+
+                        <label class="mb-2 block text-sm font-medium text-white">
+                            Cari Member
+                        </label>
+
+                        <input
+                            type="text"
+                            id="memberSearch"
+                            placeholder="Cari nomor HP / 4 digit terakhir"
+                            class="w-full rounded-xl border border-white/10 bg-slate-950/70 p-3 text-white placeholder:text-slate-400">
+
+                        <div
+                            id="memberResult"
+                            class="mt-3 space-y-2">
+                        </div>
+
+                        <a
+                            href="{{ route('members.index') }}"
+                            class="mt-3 inline-block rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700">
+
+                            + Tambah Member Baru
+
+                        </a>
+
+                    </div>
 
                     <div class="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
                         <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
@@ -1152,6 +1179,7 @@
             }
 
             const payload = {
+                customer_id: selectedCustomer,
                 items: state.cart.map((item) => ({
                     product_id: item.id,
                     quantity: item.quantity,
@@ -1184,6 +1212,10 @@
 
                 state.receipt = response.data;
                 state.cart = [];
+                selectedCustomer = null;
+
+                document.getElementById("memberSearch").value = "";
+                document.getElementById("memberResult").innerHTML = "";
                 state.selectedEwallet = null;
                 document.querySelectorAll('.ewallet-btn').forEach((b) => {
                     b.classList.remove('border-cyan-400/70', 'bg-cyan-400/10');
@@ -1458,6 +1490,91 @@
         setCurrencyInputValue(refs.cashTendered, getCashTendered());
         loadProducts();
         loadTransactions();
+
+        let selectedCustomer = null;
+
+        document
+        .getElementById("memberSearch")
+        .addEventListener("keyup", async function () {
+
+            const keyword = this.value.trim();
+
+            if (keyword.length < 4) {
+
+                document.getElementById("memberResult").innerHTML = "";
+
+                return;
+
+            }
+
+            try{
+
+                const response = await fetch(
+                    "/customers/search?keyword=" + encodeURIComponent(keyword)
+                );
+
+                const result = await response.json();
+
+                let html = "";
+
+                result.data.forEach(customer => {
+
+                    html += `
+                    <div
+                        onclick="chooseMember(${customer.id},'${customer.name}','${customer.phone}')"
+                        class="cursor-pointer rounded-xl border border-cyan-500/30 bg-slate-900 p-3 hover:bg-cyan-700/30 transition">
+
+                        <div class="font-semibold text-white">
+                            ${customer.name}
+                        </div>
+
+                        <div class="text-sm text-slate-300">
+                            ${customer.phone}
+                        </div>
+
+                        <div class="text-xs text-cyan-300">
+                            ${customer.member_level} • ${customer.points} poin
+                        </div>
+
+                    </div>
+                    `;
+
+                });
+
+                if(result.data.length===0){
+
+                    html = `
+                        <div class="rounded-lg bg-slate-900 p-3 text-slate-400">
+                            Member tidak ditemukan
+                        </div>
+                    `;
+
+                }
+
+                document.getElementById("memberResult").innerHTML = html;
+
+            }catch(error){
+
+                console.error(error);
+
+            }
+
+        });
+
+        function chooseMember(id,name,phone){
+
+            selectedCustomer=id;
+
+            document.getElementById("memberSearch").value =
+                name+" ("+phone+")";
+
+            document.getElementById("memberResult").innerHTML=`
+                <div class="rounded-xl border border-green-500 bg-green-500/20 p-3 text-green-300">
+                    ✓ ${name}
+                </div>
+            `;
+
+        }
 
         const showPrintReceiptButton = (transactionId) => {
             const existing = document.getElementById('printReceiptBtn');
