@@ -222,7 +222,10 @@
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
                     <div class="mb-4 flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-white">Daftar Produk</h2>
-                        <span id="productsMeta" class="text-sm text-slate-400"></span>
+                        <div class="flex items-center gap-3">
+                            <a href="{{ route('products.manage') }}" class="rounded-xl bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300">+ Product</a>
+                            <span id="productsMeta" class="text-sm text-slate-400"></span>
+                        </div>
                     </div>
                     <div id="productGrid" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"></div>
                 </div>

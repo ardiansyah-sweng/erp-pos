@@ -40,6 +40,11 @@ Route::get('/products', [ProductController::class, 'getProducts'])
 
 Route::get('/products/sku/{sku}', [ProductController::class, 'getItemBySKU']);
 
+Route::get('/products/manage', [ProductController::class, 'manage'])->name('products.manage');
+Route::post('/products/manage', [ProductController::class, 'store'])->name('products.store');
+Route::put('/products/manage/{product}', [ProductController::class, 'update'])->name('products.update');
+Route::delete('/products/manage/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+
 Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index'])
     ->name('stock-adjustments.index');
 
