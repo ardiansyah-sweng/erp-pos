@@ -17,8 +17,14 @@ class CustomerController extends Controller
     public function index()
     {
         $customers = $this->customerService->getAll();
+        $viewName = view()->exists('members.index') ? 'members.index' : 'customer.index';
 
-        return view('customer.index', compact('customers'));
+        return view($viewName, compact('customers'));
+    }
+
+    public function getCustomers()
+    {
+        return $this->index();
     }
 
     public function store(Request $request)
@@ -28,12 +34,28 @@ class CustomerController extends Controller
             'email' => ['nullable', 'email', 'max:255', 'unique:customers,email'],
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string'],
+            'customer_code' => ['nullable', 'string', 'max:50'],
+            'points' => ['nullable', 'integer'],
+            'member_level' => ['nullable', 'string', 'max:50'],
+            'is_active' => ['nullable', 'boolean'],
         ]);
 
         $this->customerService->create($validated);
 
         return redirect()->route('customers.index')
             ->with('success', 'Pelanggan berhasil ditambahkan.');
+    }
+
+    public function show($id)
+    {
+        $customer = $this->customerService->getCustomerById($id);
+
+        if (! $customer) {
+            return redirect()->route('customers.index')
+                ->with('error', 'Pelanggan tidak ditemukan.');
+        }
+
+        return response()->json($customer);
     }
 
     public function update(Request $request, $id)
@@ -43,6 +65,9 @@ class CustomerController extends Controller
             'email' => ['nullable', 'email', 'max:255', 'unique:customers,email,' . $id],
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string'],
+            'customer_code' => ['nullable', 'string', 'max:50'],
+            'points' => ['nullable', 'integer'],
+            'member_level' => ['nullable', 'string', 'max:50'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 

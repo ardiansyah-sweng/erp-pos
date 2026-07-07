@@ -11,6 +11,11 @@ class CustomerService
         return Customer::orderBy('name')->get();
     }
 
+    public function getCustomers()
+    {
+        return $this->getAll();
+    }
+
     public function search(string $query)
     {
         $q = trim($query);
@@ -31,9 +36,34 @@ class CustomerService
         return Customer::find($id);
     }
 
+    public function getCustomerById($id)
+    {
+        return $this->findById($id);
+    }
+
     public function create(array $data): Customer
     {
         return Customer::create($data);
+    }
+
+    public function createCustomer(array $data)
+    {
+        $last = Customer::latest()->first();
+        $code = 'CUS0001';
+
+        if ($last) {
+            $number = (int) substr((string) $last->customer_code, 3);
+            $number++;
+            $code = 'CUS' . str_pad((string) $number, 4, '0', STR_PAD_LEFT);
+        }
+
+        $data = array_merge($data, [
+            'customer_code' => $code,
+            'points' => 0,
+            'member_level' => 'Regular',
+        ]);
+
+        return $this->create($data);
     }
 
     public function update($id, array $data): ?Customer
@@ -58,5 +88,25 @@ class CustomerService
         }
 
         return $customer->delete();
+    }
+
+    public function addPoints(Customer $customer, $totalBelanja)
+    {
+        $points = intdiv((int) $totalBelanja, 10000);
+        $customer->points += $points;
+
+        if ($customer->points >= 3000) {
+            $customer->member_level = 'Platinum';
+        } elseif ($customer->points >= 1500) {
+            $customer->member_level = 'Gold';
+        } elseif ($customer->points >= 500) {
+            $customer->member_level = 'Silver';
+        } else {
+            $customer->member_level = 'Regular';
+        }
+
+        $customer->save();
+
+        return $customer;
     }
 }
