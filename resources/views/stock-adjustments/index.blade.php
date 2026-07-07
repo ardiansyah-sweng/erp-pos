@@ -46,6 +46,10 @@
         </form>
 
         <div class="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+            <div class="flex items-center justify-between border-b border-white/10 px-5 py-4">
+                <h2 class="text-lg font-semibold">Daftar Produk</h2>
+                <a href="{{ route('products.manage') }}" class="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300">+ Product</a>
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-white/10">
                     <thead class="bg-white/5 text-left text-xs uppercase tracking-wider text-slate-400">
