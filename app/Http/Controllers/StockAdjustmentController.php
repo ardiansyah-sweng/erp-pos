@@ -16,10 +16,15 @@ class StockAdjustmentController extends Controller
     {
         $search = trim((string) $request->query('search', ''));
 
-        $products = $productService->searchPaginated($search, 15, (int) $request->query('page', 1), [
-            'path' => $request->url(),
-            'query' => $request->query(),
-        ]);
+        $products = $productService->searchPaginated(
+            $search,
+            15,
+            (int) $request->query('page', 1),
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ],
+        );
 
         return view('stock-adjustments.index', compact('products', 'search'));
     }
