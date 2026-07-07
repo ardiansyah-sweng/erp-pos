@@ -3,23 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-<<<<<<< HEAD
-use App\Models\Transaction;
-use App\Models\TransactionDetail;
-=======
 use Barryvdh\DomPDF\Facade\Pdf;
->>>>>>> develop
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-<<<<<<< HEAD
-=======
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\Customer;
 use App\Services\CustomerService;
->>>>>>> develop
 
 class TransactionController extends Controller
 {
@@ -251,15 +243,6 @@ class TransactionController extends Controller
                     'amount' => (int) $item['quantity'] * (int) $item['unit_price'],
                 ]);
 
-                $product = Product::find((int) $item['product_id']);
-
-                if ($product->stock_quantity < $item['quantity']) {
-                    throw new \Exception("Stok {$product->name} tidak cukup");
-                }
-
-                $product->stock_quantity -= $item['quantity'];
-                $product->save();
-    
             }
 
             foreach ($productQuantities as $productId => $quantity) {
@@ -297,74 +280,7 @@ class TransactionController extends Controller
         ], 201);
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'total' => 'required|numeric',
-            'details' => 'required|array',
-            'customer_name' => 'nullable|string|max:100',
-            'customer_phone' => 'nullable|string|max:20',
-        ]);
-
-        $transaction = Transaction::create([
-            'total' => $request->total,
-            'customer_name' => $request->customer_name,
-            'customer_phone' => $request->customer_phone,
-        ]);
-
-        $transaction->payments()->create([
-            'payment_method' => 'cash',
-            'amount' => $request->total,
-        ]);
-
-        foreach ($request->details as $detail) {
-            TransactionDetail::create([
-                'transaction_id' => $transaction->id,
-                'product_id' => $detail['product_id'],
-                'quantity' => $detail['quantity'],
-                'price' => $detail['price'],
-                'amount' => $detail['quantity'] * $detail['price'],
-            ]);
-<<<<<<< HEAD
-        }
-
-        return response()->json([
-            'message' => 'Transaction berhasil ditambahkan',
-            'data' => $transaction,
-        ], 201);
-    }
-
-    public function salesNotes()
-=======
-
-            $transaction = Transaction::create([
-                'customer_id' => $request->customer_id,
-                'total' => $request->total
-            ]);
-
-            $transaction->payments()->create([
-                'payment_method' => 'cash',
-                'amount' => $request->total,
-            ]);
-
-            foreach ($request->details as $detail) {
-                TransactionDetail::create([
-                    'transaction_id' => $transaction->id,
-                    'product_id' => $detail['product_id'],
-                    'quantity' => $detail['quantity'],
-                    'price' => $detail['price'],
-                    'amount' => $detail['quantity'] * $detail['price']
-                ]);
-            }
-
-            return response()->json([
-                'message' => 'Transaction berhasil ditambahkan',
-                'data' => $transaction
-            ], 201);
-        }
-
     public function salesNotes(Request $request)
->>>>>>> develop
     {
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
@@ -398,20 +314,7 @@ class TransactionController extends Controller
 
     private function buildSalesData($startDate = null, $endDate = null)
     {
-<<<<<<< HEAD
-        return Transaction::with('details')
-            ->latest()
-            ->get()
-            ->map(function ($transaction) {
-                return [
-                    'transaction_code' => 'TRX-'.$transaction->created_at->format('YmdHis').'-'.str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
-                    'date' => $transaction->created_at,
-                    'item_count' => $transaction->details->sum('quantity'),
-                    'total' => $transaction->total,
-                    'details' => $transaction->details,
-                ];
-            });
-=======
+
         $query = Transaction::with(['details.product'])->latest();
 
         if ($startDate) {
@@ -431,6 +334,5 @@ class TransactionController extends Controller
                 'details' => $transaction->details,
             ];
         });
->>>>>>> develop
     }
 }

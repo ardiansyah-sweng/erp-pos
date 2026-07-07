@@ -19,10 +19,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
-
-
-
-
     return redirect()->route('pos.index');
 });
 
@@ -55,10 +51,6 @@ Route::get('/transactions', [TransactionController::class, 'getTransaction'])->n
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 
-Route::post('/pos/checkout', [TransactionController::class, 'checkout']);
-
-Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
-Route::post('/transaction/store', [TransactionController::class, 'store']);
 
 Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.index');
 Route::post('/cashier/add', [CashierController::class, 'add'])->name('cashier.add');
@@ -75,7 +67,7 @@ Route::delete('/customers/{id}', [CustomerController::class,'destroy']);
 Route::get('/members', [CustomerController::class, 'index'])->name('members.index');
 Route::post('/members/store', [CustomerController::class, 'store'])->name('members.store');
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
-Route::post('/transaction/store', [TransactionController::class, 'store']);
+
 Route::get('/transactions/{id}/receipt', [ReceiptController::class, 'generate'])->name('transactions.receipt');
 Route::get('/sales-notes', [TransactionController::class, 'salesNotes'])->name('sales-notes');
 Route::get('/sales-notes/pdf', [TransactionController::class, 'downloadSalesReportPdf'])->name('sales-notes.pdf');
