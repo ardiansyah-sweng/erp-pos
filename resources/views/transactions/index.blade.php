@@ -151,9 +151,24 @@
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <label id="dateFilterControl" for="date" class="flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition focus-within:border-cyan-400 hover:border-cyan-400/50">
                         <span class="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/70">Tanggal</span>
-                        <input id="date" name="date" type="date" value="{{ $selectedDate }}" class="w-36 border-0 bg-transparent p-0 text-sm text-white outline-none">
+                        <input id="date" name="date" type="date" value="{{ $selectedDate }}" onchange="this.form.submit()" class="w-36 border-0 bg-transparent p-0 text-sm text-white outline-none">
                     </label>
-                    <a href="{{ route('transactions.export', array_filter(['date' => $selectedDate])) }}" class="inline-flex items-center justify-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:border-emerald-300 hover:text-white">
+                    <input type="hidden" id="direction" name="direction" value="{{ request('direction', 'desc') }}">
+                    <label for="sort" class="flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition focus-within:border-cyan-400 hover:border-cyan-400/50">
+                        <span class="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/70">Urutkan</span>
+                        <select id="sort" name="sort" onchange="this.form.submit()" class="border-0 bg-transparent p-0 text-sm text-white outline-none">
+                            <option value="date" class="bg-slate-950 text-white" @selected(request('sort', 'date') === 'date')>Tanggal</option>
+                            <option value="id" class="bg-slate-950 text-white" @selected(request('sort') === 'id')>ID Transaksi</option>
+                            <option value="total" class="bg-slate-950 text-white" @selected(request('sort') === 'total')>Harga</option>
+                            <option value="items" class="bg-slate-950 text-white" @selected(request('sort') === 'items')>Jumlah Item</option>
+                        </select>
+                    </label>
+                    <button type="button" title="Ubah arah urutan" onclick="const d = document.getElementById('direction'); d.value = d.value === 'asc' ? 'desc' : 'asc'; this.form.submit();" class="flex items-center justify-center rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-cyan-300/70 transition hover:border-cyan-400/50 hover:text-cyan-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 transition-transform {{ request('direction', 'desc') === 'asc' ? 'rotate-180' : '' }}">
+                            <path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <a href="{{ route('transactions.export', array_filter(['date' => $selectedDate, 'sort' => request('sort', 'date'), 'direction' => request('direction', 'desc')])) }}" class="inline-flex items-center justify-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:border-emerald-300 hover:text-white">
                         Export Detail CSV
                     </a>
                     @if ($selectedDate)
@@ -310,10 +325,6 @@
                     showTransaction();
                 }
             });
-        });
-
-        document.getElementById('date')?.addEventListener('change', () => {
-            document.getElementById('dateFilterForm')?.submit();
         });
 
         document.getElementById('dateFilterControl')?.addEventListener('click', () => {
