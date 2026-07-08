@@ -373,9 +373,61 @@
 
                     </div>
 
+                    <!-- Pilihan Kemasan -->
+                    <div id="packaging-selection" class="mt-5">
+                        <label class="text-sm text-slate-300">Pilihan Kemasan</label>
+                        <div class="mt-2 space-y-2" id="packagingList">
+                            <div class="packaging-row flex items-center gap-2" data-price="200" data-label="Kantong Kecil">
+                                <button type="button" class="pkg-toggle flex-shrink-0 rounded-full border border-white/10 bg-slate-950/70 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-teal-400/50">
+                                    Kantong Kecil <span class="text-slate-500">Rp200</span>
+                                </button>
+                                <div class="pkg-qty-wrap hidden items-center gap-1">
+                                    <button type="button" class="pkg-minus flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-800 text-slate-300 hover:bg-slate-700">−</button>
+                                    <span class="pkg-qty-display w-5 text-center text-sm font-semibold text-white">1</span>
+                                    <button type="button" class="pkg-plus flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-800 text-slate-300 hover:bg-slate-700">+</button>
+                                    <span class="pkg-subtotal ml-1 text-xs text-teal-300">Rp200</span>
+                                </div>
+                            </div>
+                            <div class="packaging-row flex items-center gap-2" data-price="500" data-label="Kantong Sedang">
+                                <button type="button" class="pkg-toggle flex-shrink-0 rounded-full border border-white/10 bg-slate-950/70 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-teal-400/50">
+                                    Kantong Sedang <span class="text-slate-500">Rp500</span>
+                                </button>
+                                <div class="pkg-qty-wrap hidden items-center gap-1">
+                                    <button type="button" class="pkg-minus flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-800 text-slate-300 hover:bg-slate-700">−</button>
+                                    <span class="pkg-qty-display w-5 text-center text-sm font-semibold text-white">1</span>
+                                    <button type="button" class="pkg-plus flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-800 text-slate-300 hover:bg-slate-700">+</button>
+                                    <span class="pkg-subtotal ml-1 text-xs text-teal-300">Rp500</span>
+                                </div>
+                            </div>
+                            <div class="packaging-row flex items-center gap-2" data-price="1000" data-label="Kantong Besar">
+                                <button type="button" class="pkg-toggle flex-shrink-0 rounded-full border border-white/10 bg-slate-950/70 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-teal-400/50">
+                                    Kantong Besar <span class="text-slate-500">Rp1.000</span>
+                                </button>
+                                <div class="pkg-qty-wrap hidden items-center gap-1">
+                                    <button type="button" class="pkg-minus flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-800 text-slate-300 hover:bg-slate-700">−</button>
+                                    <span class="pkg-qty-display w-5 text-center text-sm font-semibold text-white">1</span>
+                                    <button type="button" class="pkg-plus flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-800 text-slate-300 hover:bg-slate-700">+</button>
+                                    <span class="pkg-subtotal ml-1 text-xs text-teal-300">Rp1.000</span>
+                                </div>
+                            </div>
+                            <div class="packaging-row flex items-center gap-2" data-price="2000" data-label="Kardus">
+                                <button type="button" class="pkg-toggle flex-shrink-0 rounded-full border border-white/10 bg-slate-950/70 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-teal-400/50">
+                                    Kardus <span class="text-slate-500">Rp2.000</span>
+                                </button>
+                                <div class="pkg-qty-wrap hidden items-center gap-1">
+                                    <button type="button" class="pkg-minus flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-800 text-slate-300 hover:bg-slate-700">−</button>
+                                    <span class="pkg-qty-display w-5 text-center text-sm font-semibold text-white">1</span>
+                                    <button type="button" class="pkg-plus flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-800 text-slate-300 hover:bg-slate-700">+</button>
+                                    <span class="pkg-subtotal ml-1 text-xs text-teal-300">Rp2.000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
                         <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
                         <div class="flex items-center justify-between"><span>Diskon</span><span id="discountValue" class="font-semibold text-white">Rp0</span></div>
+                        <div id="row-packaging-fee" class="flex items-center justify-between text-teal-200/80 hidden"><span>Biaya Kemasan</span><span id="packagingFeeValue" class="font-semibold">Rp0</span></div>
                         <div class="flex items-center justify-between"><span>Total</span><span id="grandTotalValue" class="font-semibold text-emerald-300">Rp0</span></div>
                         <div id="changeRow" class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
                     </div>
@@ -483,6 +535,7 @@
                 <div class="mt-4 rounded-3xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300">
                     <div class="flex items-center justify-between"><span>Subtotal</span><span id="checkoutConfirmSubtotal" class="font-semibold text-white">Rp0</span></div>
                     <div class="mt-2 flex items-center justify-between"><span>Diskon</span><span id="checkoutConfirmDiscount" class="font-semibold text-white">Rp0</span></div>
+                    <div id="checkoutConfirmPackagingRow" class="mt-2 hidden flex items-center justify-between text-teal-200/80"><span>Biaya Kemasan</span><span id="checkoutConfirmPackaging" class="font-semibold">Rp0</span></div>
                     <div class="mt-2 border-t border-white/10 pt-3 flex items-center justify-between text-base font-semibold text-emerald-300"><span>Total</span><span id="checkoutConfirmTotal">Rp0</span></div>
                     <div class="mt-2 text-sm text-slate-400"><span>Metode: </span><span id="checkoutConfirmPayment">-</span></div>
                 </div>
@@ -568,6 +621,8 @@
             checkoutConfirmItems: document.getElementById('checkoutConfirmItems'),
             checkoutConfirmSubtotal: document.getElementById('checkoutConfirmSubtotal'),
             checkoutConfirmDiscount: document.getElementById('checkoutConfirmDiscount'),
+            checkoutConfirmPackagingRow: document.getElementById('checkoutConfirmPackagingRow'),
+            checkoutConfirmPackaging: document.getElementById('checkoutConfirmPackaging'),
             checkoutConfirmTotal: document.getElementById('checkoutConfirmTotal'),
             checkoutConfirmPayment: document.getElementById('checkoutConfirmPayment'),
             confirmCheckoutButton: document.getElementById('confirmCheckoutButton'),
@@ -650,7 +705,28 @@
         const calculateSubtotal = () => state.cart.reduce((total, item) => total + (item.quantity * item.selling_price), 0);
         const getAppliedDiscount = () => Math.min(getDiscount(), calculateSubtotal());
         const isDiscountTooHigh = () => calculateSubtotal() > 0 && getDiscount() >= calculateSubtotal();
-        const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getAppliedDiscount());
+        const getPackagingFee = () => {
+            let total = 0;
+            document.querySelectorAll('#packagingList .packaging-row').forEach((row) => {
+                if (row.dataset.active === '1') {
+                    const price = parseInt(row.dataset.price, 10);
+                    const qty = parseInt(row.querySelector('.pkg-qty-display').textContent, 10) || 1;
+                    total += price * qty;
+                }
+            });
+            return total;
+        };
+        const getPackagingLabel = () => {
+            const parts = [];
+            document.querySelectorAll('#packagingList .packaging-row').forEach((row) => {
+                if (row.dataset.active === '1') {
+                    const qty = parseInt(row.querySelector('.pkg-qty-display').textContent, 10) || 1;
+                    parts.push(`${qty}×${row.dataset.label}`);
+                }
+            });
+            return parts.length > 0 ? parts.join(', ') : 'Tanpa Kemasan';
+        };
+        const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getAppliedDiscount() + getPackagingFee());
         const getPaymentMethodLabel = () => {
             const method = refs.paymentMethod.value;
             if (method === 'cash') return 'Cash';
@@ -663,7 +739,8 @@
         const renderCheckoutConfirmDetails = () => {
             const subtotal = calculateSubtotal();
             const discount = Math.min(getDiscount(), subtotal);
-            const grandTotal = Math.max(0, subtotal - discount);
+            const packagingFee = getPackagingFee();
+            const grandTotal = Math.max(0, subtotal - discount + packagingFee);
 
             refs.checkoutConfirmItems.innerHTML = state.cart.map((item) => `
                 <div class="grid gap-2 rounded-3xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-200 md:grid-cols-[1fr_auto]">
@@ -677,6 +754,19 @@
 
             refs.checkoutConfirmSubtotal.textContent = formatMoney(subtotal);
             refs.checkoutConfirmDiscount.textContent = formatMoney(discount);
+
+            // Kemasan di confirm modal
+            if (refs.checkoutConfirmPackagingRow && refs.checkoutConfirmPackaging) {
+                if (packagingFee > 0) {
+                    const pkgLabel = getPackagingLabel();
+                    refs.checkoutConfirmPackagingRow.querySelector('span:first-child').textContent = 'Kemasan (' + pkgLabel + ')';
+                    refs.checkoutConfirmPackaging.textContent = formatMoney(packagingFee);
+                    refs.checkoutConfirmPackagingRow.classList.remove('hidden');
+                } else {
+                    refs.checkoutConfirmPackagingRow.classList.add('hidden');
+                }
+            }
+
             refs.checkoutConfirmTotal.textContent = formatMoney(grandTotal);
             refs.checkoutConfirmPayment.textContent = getPaymentMethodLabel();
         };
@@ -802,8 +892,9 @@
         const updateSummary = () => {
             const subtotal = calculateSubtotal();
             const discount = Math.min(getDiscount(), subtotal);
-            const grandTotal = Math.max(0, subtotal - discount);
-            const change = calculateChange();
+            const packagingFee = getPackagingFee();
+            const grandTotal = Math.max(0, subtotal - discount + packagingFee);
+            const change = Math.max(0, getCashTendered() - grandTotal);
             const paymentMethod = refs.paymentMethod.value;
             const isCashPayment = paymentMethod === 'cash';
             const isEwallet = paymentMethod === 'e_wallet';
@@ -834,6 +925,21 @@
 
             refs.grandTotalValue.textContent = formatMoney(grandTotal);
             refs.changeValue.textContent = formatMoney(change);
+
+            // Tampilkan/sembunyikan baris biaya kemasan
+            const rowPackaging = document.getElementById('row-packaging-fee');
+            const packagingValEl = document.getElementById('packagingFeeValue');
+            if (rowPackaging && packagingValEl) {
+                if (packagingFee > 0) {
+                    const pkgLabel = getPackagingLabel();
+                    rowPackaging.querySelector('span:first-child').textContent = 'Kemasan (' + pkgLabel + ')';
+                    packagingValEl.textContent = formatMoney(packagingFee);
+                    rowPackaging.classList.remove('hidden');
+                } else {
+                    rowPackaging.classList.add('hidden');
+                }
+            }
+
             refs.ewalletPanel.classList.toggle('hidden', !isEwallet);
             refs.cardForm.classList.toggle('hidden', paymentMethod !== 'card');
             refs.cashTenderedWrapper.style.display = isCashPayment ? '' : 'none';
@@ -1081,12 +1187,24 @@
             refs.transactionModalTitle.textContent = transactionCode;
             refs.transactionModalDate.textContent = formatDateTime(transaction.created_at);
             refs.transactionModalTotal.textContent = formatMoney(transaction.total);
-            refs.transactionModalPayment.innerHTML = payments.length ? payments.map((payment) => `
+            refs.transactionModalPayment.innerHTML = payments.length ? payments.map((payment) => {
+                const ref = payment.reference_number || '';
+                const kemasanMatch = ref.match(/KEMASAN:(\d+)\|([^;]+)/i);
+                const parkingMatch = ref.match(/PARKIR:(\d+)\|([^;]+)/i);
+                const kemasanRow = kemasanMatch
+                    ? `<div>Kemasan <span class="text-teal-300">(${kemasanMatch[2].trim()})</span>: <span class="font-semibold text-teal-200">${formatMoney(parseInt(kemasanMatch[1], 10))}</span></div>`
+                    : '';
+                const parkingRow = parkingMatch
+                    ? `<div>Parkir <span class="text-amber-300">(${parkingMatch[2].trim()})</span>: <span class="font-semibold text-amber-200">${formatMoney(parseInt(parkingMatch[1], 10))}</span></div>`
+                    : '';
+                return `
                 <div>Metode: <span class="font-semibold text-white">${payment.payment_method}</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
+                ${parkingRow}${kemasanRow}
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
-            `).join('') : `
+                `;
+            }).join('') : `
                 <div>Metode: <span class="font-semibold text-white">cash</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
@@ -1222,6 +1340,8 @@
                         approval_code: refs.approvalCode.value,
                     }
                     : null,
+                packaging_fee: getPackagingFee(),
+                packaging_label: getPackagingLabel(),
             };
 
             refs.checkoutButton.disabled = true;
@@ -1615,6 +1735,62 @@
             btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg> Cetak Struk';
             refs.checkoutButton.after(btn);
         };
+
+        /* ===== KEMASAN ADD-ON v2 — toggle + qty per jenis ===== */
+        document.querySelectorAll('#packagingList .packaging-row').forEach((row) => {
+            const toggleBtn = row.querySelector('.pkg-toggle');
+            const qtyWrap   = row.querySelector('.pkg-qty-wrap');
+            const minusBtn  = row.querySelector('.pkg-minus');
+            const plusBtn   = row.querySelector('.pkg-plus');
+            const qtyDisplay = row.querySelector('.pkg-qty-display');
+            const subtotalEl = row.querySelector('.pkg-subtotal');
+            const price = parseInt(row.dataset.price, 10);
+
+            const refreshSubtotal = () => {
+                const qty = parseInt(qtyDisplay.textContent, 10) || 1;
+                subtotalEl.textContent = 'Rp' + (price * qty).toLocaleString('id-ID');
+            };
+
+            toggleBtn.addEventListener('click', () => {
+                const isActive = row.dataset.active === '1';
+                if (isActive) {
+                    // matikan
+                    row.dataset.active = '0';
+                    toggleBtn.classList.remove('border-teal-400/60', 'bg-teal-400/10', 'text-teal-200');
+                    toggleBtn.classList.add('border-white/10', 'bg-slate-950/70', 'text-slate-300');
+                    qtyWrap.classList.add('hidden');
+                    qtyWrap.classList.remove('flex');
+                    qtyDisplay.textContent = '1';
+                } else {
+                    // aktifkan
+                    row.dataset.active = '1';
+                    toggleBtn.classList.remove('border-white/10', 'bg-slate-950/70', 'text-slate-300');
+                    toggleBtn.classList.add('border-teal-400/60', 'bg-teal-400/10', 'text-teal-200');
+                    qtyWrap.classList.remove('hidden');
+                    qtyWrap.classList.add('flex');
+                    refreshSubtotal();
+                }
+                updateSummary();
+            });
+
+            minusBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                let qty = parseInt(qtyDisplay.textContent, 10) || 1;
+                if (qty > 1) {
+                    qtyDisplay.textContent = qty - 1;
+                    refreshSubtotal();
+                    updateSummary();
+                }
+            });
+
+            plusBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                let qty = parseInt(qtyDisplay.textContent, 10) || 1;
+                qtyDisplay.textContent = qty + 1;
+                refreshSubtotal();
+                updateSummary();
+            });
+        });
     </script>
 </body>
 </html>

@@ -89,6 +89,7 @@
                     'discount_amount' => $payment->discount_amount,
                     'cash_tendered' => $payment->cash_tendered,
                     'change_amount' => $payment->change_amount,
+                    'reference_number' => $payment->reference_number,
                 ])->values(),
                 'details' => $transaction->details->map(function ($detail) {
                     $returnedQuantity = $detail->returnDetails->sum('quantity');
@@ -272,12 +273,24 @@
             modalTitle.textContent = transaction.code;
             modalDate.textContent = transaction.created_at || '-';
             modalTotal.textContent = formatMoney(transaction.total);
-            modalPayment.innerHTML = transaction.payments.length ? transaction.payments.map((payment) => `
+            modalPayment.innerHTML = transaction.payments.length ? transaction.payments.map((payment) => {
+                const ref = payment.reference_number || '';
+                const kemasanMatch = ref.match(/KEMASAN:(\d+)\|([^;]+)/i);
+                const parkingMatch = ref.match(/PARKIR:(\d+)\|([^;]+)/i);
+                const kemasanRow = kemasanMatch
+                    ? `<div>Kemasan <span class="text-teal-300">(${kemasanMatch[2].trim()})</span>: <span class="font-semibold text-teal-200">${formatMoney(parseInt(kemasanMatch[1], 10))}</span></div>`
+                    : '';
+                const parkingRow = parkingMatch
+                    ? `<div>Parkir <span class="text-amber-300">(${parkingMatch[2].trim()})</span>: <span class="font-semibold text-amber-200">${formatMoney(parseInt(parkingMatch[1], 10))}</span></div>`
+                    : '';
+                return `
                 <div>Metode: <span class="font-semibold text-white">${escapeHtml(payment.payment_method || 'cash')}</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
+                ${parkingRow}${kemasanRow}
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
-            `).join('') : `
+                `;
+            }).join('') : `
                 <div>Metode: <span class="font-semibold text-white">cash</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>

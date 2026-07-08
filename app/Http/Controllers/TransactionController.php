@@ -158,6 +158,8 @@ class TransactionController extends Controller
             'payment_method' => ['required', 'in:cash,card,e_wallet,bank_transfer,qris'],
             'cash_tendered' => ['nullable', 'integer', 'min:0'],
             'notes' => ['nullable', 'string', 'max:255'],
+            'packaging_fee' => ['nullable', 'integer', 'min:0'],
+            'packaging_label' => ['nullable', 'string', 'max:200'],
         ]);
 
         $items = collect($validated['items']);
@@ -191,12 +193,20 @@ class TransactionController extends Controller
         }
 
         $discountAmount = (int) ($validated['discount_amount'] ?? 0);
-        $totalAmount = max(0, $subtotal - $discountAmount);
+        $packagingFee = (int) ($validated['packaging_fee'] ?? 0);
+        $packagingLabel = trim($validated['packaging_label'] ?? 'Tanpa Kemasan');
+        $totalAmount = max(0, $subtotal - $discountAmount + $packagingFee);
         $cashTendered = (int) ($validated['cash_tendered'] ?? 0);
         $changeAmount = $validated['payment_method'] === 'cash' ? max(0, $cashTendered - $totalAmount) : 0;
         $paymentStatus = $validated['payment_method'] === 'cash' && $cashTendered < $totalAmount ? 'pending' : 'paid';
 
-        $transaction = DB::transaction(function () use ($validated, $totalAmount, $discountAmount, $cashTendered, $changeAmount, $paymentStatus, $productQuantities) {
+        // Build reference_number string: gabungkan tag KEMASAN (dan PARKIR jika ada di notes)
+        $referenceSegments = [];
+        if ($packagingFee > 0) {
+            $referenceSegments[] = 'KEMASAN:' . $packagingFee . '|' . $packagingLabel;
+        }
+
+        $transaction = DB::transaction(function () use ($validated, $totalAmount, $discountAmount, $cashTendered, $changeAmount, $paymentStatus, $productQuantities, $referenceSegments) {
             $lockedProducts = Product::query()
                 ->whereIn('id', $productQuantities->keys())
                 ->lockForUpdate()
@@ -221,6 +231,8 @@ class TransactionController extends Controller
                 'total' => $totalAmount,
             ]);
 
+            $referenceNumber = implode(';', $referenceSegments) ?: null;
+
             $transaction->payments()->create([
                 'payment_method' => $validated['payment_method'],
                 'amount' => $totalAmount,
@@ -228,6 +240,7 @@ class TransactionController extends Controller
                 'discount_amount' => $discountAmount,
                 'cash_tendered' => $cashTendered,
                 'change_amount' => $changeAmount,
+                'reference_number' => $referenceNumber,
             ]);
 
             foreach ($validated['items'] as $item) {
@@ -275,6 +288,8 @@ class TransactionController extends Controller
                 'transaction_number' => 'TRX-' . now()->format('YmdHis') . '-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
                 'subtotal' => $subtotal,
                 'discount_amount' => $discountAmount,
+                'packaging_fee' => $packagingFee,
+                'packaging_label' => $packagingLabel,
                 'total_amount' => $totalAmount,
                 'payment_method' => $validated['payment_method'],
                 'payment_status' => $paymentStatus,
