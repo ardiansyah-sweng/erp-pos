@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('transaction', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('customer_id')->nullable();
+            $table->string('customer_name', 100)->nullable()->after('customer_id');
+            $table->string('customer_phone', 20)->nullable()->after('customer_name');
             $table->bigInteger('total');
             $table->timestamp('transaction_date')->nullable();
             $table->timestamps();
