@@ -50,6 +50,9 @@ Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index'])
 Route::put('/stock-adjustments/{product}', [StockAdjustmentController::class, 'update'])
     ->name('stock-adjustments.update');
 
+Route::post('/stock-adjustments/import-csv', [StockAdjustmentController::class, 'importCsv'])
+    ->name('stock-adjustments.import-csv');
+
 Route::get('/transactions/export/csv', [TransactionController::class, 'exportCsv'])->name('transactions.export');
 Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
 
