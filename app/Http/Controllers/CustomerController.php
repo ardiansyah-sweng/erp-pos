@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\CustomerService;
 use App\Models\Customer;
+use App\Models\Product;
+use App\Models\Transaction;
 
 class CustomerController extends Controller
 {
@@ -100,6 +102,45 @@ class CustomerController extends Controller
         return response()->json([
             'success' => true,
             'data' => $customers
+        ]);
+    }
+
+    public function repeatProducts($id)
+    {
+        $customer = $this->customerService->getCustomerById($id);
+
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Customer tidak ditemukan'
+            ], 404);
+        }
+
+        $repeatProducts = Product::select('products.*')
+            ->selectRaw('COUNT(td.id) as total_beli')
+            ->selectRaw('SUM(td.quantity) as total_qty')
+            ->selectRaw('MAX(t.created_at) as terakhir_beli')
+            ->join('transaction_detail as td', 'products.id', '=', 'td.product_id')
+            ->join('transaction as t', 'td.transaction_id', '=', 't.id')
+            ->where('t.customer_id', $id)
+            ->groupBy('products.id')
+            ->orderByDesc('total_beli')
+            ->limit(10)
+            ->get();
+
+        $recentTransactions = Transaction::with('details.product')
+            ->where('customer_id', $id)
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'customer' => $customer,
+                'repeat_products' => $repeatProducts,
+                'recent_transactions' => $recentTransactions,
+            ]
         ]);
     }
 }

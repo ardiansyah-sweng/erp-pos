@@ -1653,6 +1653,9 @@
 
             selectedCustomer=id;
 
+            document.getElementById("customerName").value = name;
+            document.getElementById("customerPhone").value = phone;
+
             document.getElementById("memberSearch").value =
                 name+" ("+phone+")";
 
