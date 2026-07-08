@@ -76,6 +76,7 @@
     <main class="relative mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-6 lg:px-8">
         @php
             $totalItems = $transactions->sum(fn ($transaction) => $transaction->details->sum('quantity'));
+            $totalReturnedItems = $transactions->sum(fn ($transaction) => $transaction->details->sum(fn ($detail) => $detail->returnDetails->sum('quantity')));
             $totalAmount = $transactions->sum('total');
             $selectedDateLabel = $selectedDate ? \Carbon\Carbon::parse($selectedDate)->translatedFormat('d M Y') : 'Semua';
             $transactionPayload = $transactions->map(fn ($transaction) => [
@@ -91,12 +92,18 @@
                     'cash_tendered' => $payment->cash_tendered,
                     'change_amount' => $payment->change_amount,
                 ])->values(),
-                'details' => $transaction->details->map(fn ($detail) => [
-                    'name' => $detail->product?->name ?? 'Produk #' . $detail->product_id,
-                    'quantity' => $detail->quantity,
-                    'price' => $detail->price,
-                    'amount' => $detail->amount,
-                ])->values(),
+                'details' => $transaction->details->map(function ($detail) {
+                    $returnedQuantity = $detail->returnDetails->sum('quantity');
+
+                    return [
+                        'name' => $detail->product?->name ?? 'Produk #' . $detail->product_id,
+                        'quantity' => $detail->quantity,
+                        'returned_quantity' => $returnedQuantity,
+                        'available_quantity' => max(0, $detail->quantity - $returnedQuantity),
+                        'price' => $detail->price,
+                        'amount' => $detail->amount,
+                    ];
+                })->values(),
             ])->values();
         @endphp
 
@@ -110,7 +117,7 @@
                         Kembali ke POS
                     </a>
                 </div>
-                <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+                <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-5">
                     <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
                         <div class="text-slate-400">Transaksi</div>
                         <div class="mt-1 text-xl font-semibold text-white">{{ $transactions->count() }}</div>
@@ -122,6 +129,10 @@
                     <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
                         <div class="text-slate-400">Item</div>
                         <div class="mt-1 text-xl font-semibold text-white">{{ $totalItems }}</div>
+                    </div>
+                    <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                        <div class="text-slate-400">Diretur</div>
+                        <div class="mt-1 text-xl font-semibold text-rose-300">{{ $totalReturnedItems }}</div>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
                         <div class="text-slate-400">Total</div>
@@ -140,9 +151,24 @@
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <label id="dateFilterControl" for="date" class="flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition focus-within:border-cyan-400 hover:border-cyan-400/50">
                         <span class="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/70">Tanggal</span>
-                        <input id="date" name="date" type="date" value="{{ $selectedDate }}" class="w-36 border-0 bg-transparent p-0 text-sm text-white outline-none">
+                        <input id="date" name="date" type="date" value="{{ $selectedDate }}" onchange="this.form.submit()" class="w-36 border-0 bg-transparent p-0 text-sm text-white outline-none">
                     </label>
-                    <a href="{{ route('transactions.export', array_filter(['date' => $selectedDate])) }}" class="inline-flex items-center justify-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:border-emerald-300 hover:text-white">
+                    <input type="hidden" id="direction" name="direction" value="{{ request('direction', 'desc') }}">
+                    <label for="sort" class="flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition focus-within:border-cyan-400 hover:border-cyan-400/50">
+                        <span class="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/70">Urutkan</span>
+                        <select id="sort" name="sort" onchange="this.form.submit()" class="border-0 bg-transparent p-0 text-sm text-white outline-none">
+                            <option value="date" class="bg-slate-950 text-white" @selected(request('sort', 'date') === 'date')>Tanggal</option>
+                            <option value="id" class="bg-slate-950 text-white" @selected(request('sort') === 'id')>ID Transaksi</option>
+                            <option value="total" class="bg-slate-950 text-white" @selected(request('sort') === 'total')>Harga</option>
+                            <option value="items" class="bg-slate-950 text-white" @selected(request('sort') === 'items')>Jumlah Item</option>
+                        </select>
+                    </label>
+                    <button type="button" title="Ubah arah urutan" onclick="const d = document.getElementById('direction'); d.value = d.value === 'asc' ? 'desc' : 'asc'; this.form.submit();" class="flex items-center justify-center rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-cyan-300/70 transition hover:border-cyan-400/50 hover:text-cyan-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 transition-transform {{ request('direction', 'desc') === 'asc' ? 'rotate-180' : '' }}">
+                            <path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <a href="{{ route('transactions.export', array_filter(['date' => $selectedDate, 'sort' => request('sort', 'date'), 'direction' => request('direction', 'desc')])) }}" class="inline-flex items-center justify-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:border-emerald-300 hover:text-white">
                         Export Detail CSV
                     </a>
                     @if ($selectedDate)
@@ -159,6 +185,7 @@
                 @php
                     $details = $transaction->details ?? collect();
                     $itemCount = $details->sum('quantity');
+                    $returnedItemCount = $details->sum(fn ($detail) => $detail->returnDetails->sum('quantity'));
                     $transactionCode = 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT);
                 @endphp
 
@@ -167,6 +194,9 @@
                         <div>
                             <h2 class="text-lg font-semibold text-white">{{ $transactionCode }}</h2>
                             <p class="mt-1 text-sm text-slate-400">{{ $transaction->created_at?->translatedFormat('d M Y, H.i') }}</p>
+                            @if ($returnedItemCount > 0)
+                                <span class="mt-2 inline-flex rounded-full border border-rose-400/30 bg-rose-400/10 px-3 py-1 text-xs font-semibold text-rose-200">Retur {{ $returnedItemCount }} item</span>
+                            @endif
                         </div>
                         <div class="flex flex-wrap items-center justify-between gap-3 md:min-w-72 md:justify-end md:text-right">
                             <div>
@@ -264,6 +294,9 @@
                     <div>
                         <div class="font-medium text-white">${escapeHtml(detail.name)}</div>
                         <div class="text-xs text-slate-400">${detail.quantity} x ${formatMoney(detail.price)}</div>
+                        ${Number(detail.returned_quantity || 0) > 0 ? `
+                            <div class="mt-1 text-xs text-rose-300">Retur ${detail.returned_quantity} item, sisa ${detail.available_quantity} item</div>
+                        ` : ''}
                     </div>
                     <div class="font-semibold text-emerald-300">${formatMoney(detail.amount)}</div>
                 </div>
@@ -292,10 +325,6 @@
                     showTransaction();
                 }
             });
-        });
-
-        document.getElementById('date')?.addEventListener('change', () => {
-            document.getElementById('dateFilterForm')?.submit();
         });
 
         document.getElementById('dateFilterControl')?.addEventListener('click', () => {
