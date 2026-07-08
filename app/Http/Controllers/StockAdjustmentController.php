@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\UploadedFile;
 
 class StockAdjustmentController extends Controller
 {
@@ -61,5 +62,22 @@ class StockAdjustmentController extends Controller
             'success',
             "Stok {$product->name} berhasil diperbarui dari {$result['old_stock']} menjadi {$result['new_stock']}.",
         );
+    }
+
+    public function importCsv(Request $request, StockAdjustmentService $stockAdjustmentService): RedirectResponse
+    {
+        $request->validate([
+            'csv_file' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
+        ]);
+
+        $result = $stockAdjustmentService->importFromCsv(
+            $request->file('csv_file')
+        );
+
+        if (!empty($result['errors'])) {
+            return back()->with('import_result', $result);
+        }
+
+        return back()->with('success', $result['message']);
     }
 }

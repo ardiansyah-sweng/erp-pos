@@ -14,9 +14,14 @@
                 <h1 class="mt-2 text-3xl font-bold">Penyesuaian Stok</h1>
                 <p class="mt-2 text-sm text-slate-400">Tambah, kurangi, atau koreksi stok produk secara manual.</p>
             </div>
-            <a href="{{ route('pos.index') }}" class="rounded-xl border border-white/10 px-4 py-2 text-center text-sm font-semibold hover:border-cyan-400 hover:text-cyan-300">
-                Kembali ke POS
-            </a>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="openImportModal()" class="rounded-xl border border-white/10 px-4 py-2 text-center text-sm font-semibold hover:border-cyan-400 hover:text-cyan-300">
+                    Import CSV
+                </button>
+                <a href="{{ route('pos.index') }}" class="rounded-xl border border-white/10 px-4 py-2 text-center text-sm font-semibold hover:border-cyan-400 hover:text-cyan-300">
+                    Kembali ke POS
+                </a>
+            </div>
         </div>
 
         @if (session('success'))
@@ -32,6 +37,19 @@
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>
+            </div>
+        @endif
+
+        @if ($importResult = session('import_result'))
+            <div class="mb-6 rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-4 py-3 text-cyan-200">
+                <p class="font-semibold">{{ $importResult['message'] }}</p>
+                @if (!empty($importResult['errors']))
+                    <ul class="mt-2 list-inside list-disc space-y-1 text-sm text-slate-300">
+                        @foreach ($importResult['errors'] as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                @endif
             </div>
         @endif
 
@@ -100,5 +118,41 @@
 
         <div class="mt-6">{{ $products->links() }}</div>
     </main>
+
+    <div id="importModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl">
+            <div class="mb-4 flex items-center justify-between">
+                <h3 class="text-lg font-semibold">Import Produk dari CSV</h3>
+                <button onclick="closeImportModal()" class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <form method="POST" action="{{ route('stock-adjustments.import-csv') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="mb-4">
+                    <label class="mb-2 block text-sm text-slate-400">Pilih file CSV</label>
+                    <input type="file" name="csv_file" accept=".csv,.txt" required
+                           class="w-full rounded-lg border border-white/10 bg-slate-800 px-3 py-2 text-sm file:mr-3 file:rounded file:border-0 file:bg-cyan-400 file:px-3 file:py-1 file:text-sm file:font-semibold file:text-slate-950 hover:file:bg-cyan-300">
+                    <p class="mt-1 text-xs text-slate-500">Format: sku, name, barcode, description, unit, selling_price, stock_quantity, min_stock. Maks 2MB.</p>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="closeImportModal()" class="rounded-lg border border-white/10 px-4 py-2 text-sm hover:bg-white/5">Batal</button>
+                    <button type="submit" class="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300">Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openImportModal() {
+            document.getElementById('importModal').classList.remove('hidden');
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').classList.add('hidden');
+        }
+
+        document.getElementById('importModal').addEventListener('click', function(e) {
+            if (e.target === this) closeImportModal();
+        });
+    </script>
 </body>
 </html>
