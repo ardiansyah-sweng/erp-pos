@@ -13,6 +13,10 @@ return new class extends Migration
             $table->string('barcode')->nullable()->unique();
             $table->string('sku')->unique();
             $table->string('name');
+            $table->foreignId('category_id')
+                ->nullable()
+                ->constrained('categories')
+                ->nullOnDelete();
             $table->text('description')->nullable();
             $table->string('unit')->default('pcs');
             $table->integer('selling_price')->default(0);
