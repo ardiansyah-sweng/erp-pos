@@ -237,16 +237,7 @@
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
                     <h2 class="text-lg font-semibold text-white">Pembayaran</h2>
                     <div class="mt-4 space-y-4">
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div>
-                                <label class="text-sm text-slate-300" for="customerName">Nama Pelanggan</label>
-                                <input id="customerName" type="text" placeholder="Opsional" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
-                            </div>
-                            <div>
-                                <label class="text-sm text-slate-300" for="customerPhone">No. Telepon</label>
-                                <input id="customerPhone" type="text" placeholder="Opsional" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
-                            </div>
-                        </div>
+
                         <div>
                             <label class="text-sm text-slate-300" for="discountAmount">Diskon</label>
                             <div class="mt-2 flex overflow-hidden rounded-2xl border border-white/10 bg-slate-950/70 focus-within:border-cyan-400">
@@ -614,8 +605,6 @@
             cardNumber: document.getElementById('cardNumber'),
             cardBank: document.getElementById('cardBank'),
             approvalCode: document.getElementById('approvalCode'),
-            customerName: document.getElementById('customerName'),
-            customerPhone: document.getElementById('customerPhone'),
             categoryFilter: document.getElementById('categoryFilter'),
         };
 
@@ -698,11 +687,11 @@
             refs.checkoutConfirmTotal.textContent = formatMoney(grandTotal);
             refs.checkoutConfirmPayment.textContent = getPaymentMethodLabel();
 
-            const customerName = refs.customerName.value.trim() || '-';
+            const customerName = selectedCustomerName || '-';
             const isCash = refs.paymentMethod.value === 'cash';
             const cashTendered = isCash ? getCashTendered() : 0;
             refs.checkoutConfirmCustomer.textContent = customerName;
-            const customerPhone = refs.customerPhone.value.trim() || '-';
+            const customerPhone = selectedCustomerPhone || '-';
             refs.checkoutConfirmPhone.textContent = customerPhone;
             refs.checkoutConfirmTenderedRow.classList.toggle('hidden', !isCash);
             refs.checkoutConfirmChangeRow.classList.toggle('hidden', !isCash);
@@ -1114,8 +1103,8 @@
             refs.transactionModalTitle.textContent = transactionCode;
             refs.transactionModalDate.textContent = formatDateTime(transaction.created_at);
             refs.transactionModalTotal.textContent = formatMoney(transaction.total);
-            const displayCustomerName = transaction.customer_name || '-';
-            const displayCustomerPhone = transaction.customer_phone || '-';
+            const displayCustomerName = transaction.customer?.name || '-';
+            const displayCustomerPhone = transaction.customer?.phone || '-';
             refs.transactionModalPayment.innerHTML = payments.length ? payments.map((payment) => `
                 <div>Pelanggan: <span class="font-semibold text-white">${displayCustomerName}</span></div>
                 <div>No. Telepon: <span class="font-semibold text-white">${displayCustomerPhone}</span></div>
@@ -1220,8 +1209,6 @@
                     discount_amount: getAppliedDiscount(),
                     payment_method: 'qris',
                     cash_tendered: 0,
-                    customer_name: refs.customerName.value.trim() || null,
-                    customer_phone: refs.customerPhone.value.trim() || null,
                     notes: refs.notes.value,
                 };
                 const subtotal = calculateSubtotal();
@@ -1252,8 +1239,6 @@
                 discount_amount: getAppliedDiscount(),
                 payment_method: refs.paymentMethod.value,
                 cash_tendered: refs.paymentMethod.value === 'cash' ? getCashTendered() : 0,
-                customer_name: refs.customerName.value.trim() || null,
-                customer_phone: refs.customerPhone.value.trim() || null,
                 notes: refs.paymentMethod.value === 'e_wallet' && state.selectedEwallet
                     ? `[${state.selectedEwallet.name}]${refs.notes.value ? ' - ' + refs.notes.value : ''}`
                     : refs.notes.value,
@@ -1279,6 +1264,8 @@
                 state.receipt = response.data;
                 state.cart = [];
                 selectedCustomer = null;
+                selectedCustomerName = null;
+                selectedCustomerPhone = null;
 
                 document.getElementById("memberSearch").value = "";
                 document.getElementById("memberResult").innerHTML = "";
@@ -1291,8 +1278,6 @@
                 setCurrencyInputValue(refs.discountAmount, 0);
                 setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
-                refs.customerName.value = '';
-                refs.customerPhone.value = '';
                 renderCart();
                 await loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value);
                 await loadTransactions();
@@ -1367,11 +1352,12 @@
                 closeQrisModal();
                 state.receipt = response.data;
                 state.cart = [];
+                selectedCustomer = null;
+                selectedCustomerName = null;
+                selectedCustomerPhone = null;
                 setCurrencyInputValue(refs.discountAmount, 0);
                 setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
-                refs.customerName.value = '';
-                refs.customerPhone.value = '';
                 renderCart();
                 await loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value);
                 await loadTransactions();
@@ -1580,6 +1566,8 @@
         loadTransactions();
 
         let selectedCustomer = null;
+        let selectedCustomerName = null;
+        let selectedCustomerPhone = null;
 
         document
         .getElementById("memberSearch")
@@ -1652,9 +1640,8 @@
         function chooseMember(id,name,phone){
 
             selectedCustomer=id;
-
-            document.getElementById("customerName").value = name;
-            document.getElementById("customerPhone").value = phone;
+            selectedCustomerName=name;
+            selectedCustomerPhone=phone;
 
             document.getElementById("memberSearch").value =
                 name+" ("+phone+")";

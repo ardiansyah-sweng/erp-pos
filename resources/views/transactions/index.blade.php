@@ -74,8 +74,10 @@ html[data-theme="light"] input {
         'code' => 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
         'created_at' => $transaction->created_at?->translatedFormat('d M Y, H.i'),
         'total' => $transaction->total,
-        'customer_name' => $transaction->customer_name,
-        'customer_phone' => $transaction->customer_phone,
+        'customer' => $transaction->customer ? [
+            'name' => $transaction->customer->name,
+            'phone' => $transaction->customer->phone,
+        ] : null,
         'payments' => $transaction->payments->map(fn ($payment) => [
             'payment_method' => $payment->payment_method,
             'discount_amount' => $payment->discount_amount,
@@ -277,8 +279,8 @@ html[data-theme="light"] input {
         modalTitle.textContent = transaction.code;
         modalDate.textContent = transaction.created_at || '-';
         modalTotal.textContent = formatMoney(transaction.total);
-        const custName = transaction.customer_name || '-';
-        const custPhone = transaction.customer_phone || '-';
+        const custName = transaction.customer?.name || '-';
+        const custPhone = transaction.customer?.phone || '-';
         modalPayment.innerHTML = transaction.payments.length ? transaction.payments.map((payment) => `
             <div>Pelanggan: <span class="font-semibold text-white">${escapeHtml(custName)}</span></div>
             <div>No. Telepon: <span class="font-semibold text-white">${escapeHtml(custPhone)}</span></div>

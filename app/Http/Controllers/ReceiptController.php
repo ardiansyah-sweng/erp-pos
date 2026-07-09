@@ -9,7 +9,7 @@ class ReceiptController extends Controller
 {
     public function generate($id)
     {
-        $transaction = Transaction::with(['details.product', 'payments'])->findOrFail($id);
+        $transaction = Transaction::with(['details.product', 'payments', 'customer'])->findOrFail($id);
 
         $storeName = config('app.name', 'ERP POS');
         $storeAddress = 'Jl. Contoh No. 123, Kota';

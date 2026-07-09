@@ -41,7 +41,7 @@ class TransactionController extends Controller
         $sort = array_key_exists($sortParam, $sortColumns) ? $sortParam : 'date';
         $direction = $request->query('direction') === 'asc' ? 'asc' : 'desc';
 
-        $transactions = Transaction::with(['details.product', 'details.returnDetails', 'payments'])
+        $transactions = Transaction::with(['details.product', 'details.returnDetails', 'payments', 'customer'])
             ->withSum('details as items_total_quantity', 'quantity')
             ->when($validated['date'] ?? null, function ($query, $date) {
                 $query->whereDate('created_at', $date);
@@ -158,8 +158,6 @@ class TransactionController extends Controller
             'payment_method' => ['required', 'in:cash,card,e_wallet,bank_transfer,qris'],
             'cash_tendered' => ['nullable', 'integer', 'min:0'],
             'notes' => ['nullable', 'string', 'max:255'],
-            'customer_name' => ['nullable', 'string', 'max:100'],
-            'customer_phone' => ['nullable', 'string', 'max:20'],
         ]);
 
         $items = collect($validated['items']);
@@ -221,8 +219,6 @@ class TransactionController extends Controller
             $transaction = Transaction::create([
                 'customer_id' => $validated['customer_id'] ?? null,
                 'total' => $totalAmount,
-                'customer_name' => $validated['customer_name'] ?? null,
-                'customer_phone' => $validated['customer_phone'] ?? null,
             ]);
 
             $transaction->payments()->create([
@@ -295,15 +291,11 @@ class TransactionController extends Controller
             'total' => 'required|numeric',
             'details' => 'required|array',
             'customer_id' => 'nullable|integer|exists:customers,id',
-            'customer_name' => 'nullable|string|max:100',
-            'customer_phone' => 'nullable|string|max:20',
         ]);
 
         $transaction = Transaction::create([
             'customer_id' => $request->customer_id,
             'total' => $request->total,
-            'customer_name' => $request->customer_name,
-            'customer_phone' => $request->customer_phone,
         ]);
 
         $transaction->payments()->create([

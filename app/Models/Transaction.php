@@ -8,7 +8,7 @@ use App\Models\Customer;
 class Transaction extends Model
 {
     protected $table = 'transaction';
-    protected $fillable = ['total', 'transaction_date', 'created_at', 'updated_at', 'customer_id', 'customer_name', 'customer_phone'];
+    protected $fillable = ['total', 'transaction_date', 'created_at', 'updated_at', 'customer_id'];
 
     public function details()
     {
