@@ -14,6 +14,16 @@ class ReceiptController extends Controller
         $storeName = config('app.name', 'ERP POS');
         $storeAddress = 'Jl. Contoh No. 123, Kota';
 
+        $payment = $transaction->payments->first();
+        $referenceNumber = $payment?->reference_number ?? '';
+
+        $packagingFee = 0;
+        $packagingName = '';
+        if (preg_match('/KEMASAN:(\d+)\|([^;]+)/i', $referenceNumber, $m)) {
+            $packagingFee = (int) $m[1];
+            $packagingName = trim($m[2]);
+        }
+
         $data = [
             'store_name' => $storeName,
             'store_address' => $storeAddress,
@@ -26,7 +36,9 @@ class ReceiptController extends Controller
                 'price' => $detail->price,
                 'amount' => $detail->amount,
             ]),
-            'payment' => $transaction->payments->first(),
+            'payment' => $payment,
+            'packaging_fee' => $packagingFee,
+            'packaging_name' => $packagingName,
         ];
 
         $pdf = Pdf::loadView('pdf.receipt', $data);
