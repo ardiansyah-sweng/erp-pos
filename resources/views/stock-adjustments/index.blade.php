@@ -51,6 +51,7 @@
                     <thead class="bg-white/5 text-left text-xs uppercase tracking-wider text-slate-400">
                         <tr>
                             <th class="px-5 py-4">Produk</th>
+                            <th class="px-5 py-4">Status</th>
                             <th class="px-5 py-4">Stok</th>
                             <th class="px-5 py-4">Penyesuaian</th>
                         </tr>
@@ -62,6 +63,15 @@
                                 <td class="px-5 py-5">
                                     <div class="font-semibold text-white">{{ $product->name }}</div>
                                     <div class="mt-1 text-sm text-slate-400">{{ $product->sku }} · {{ $product->barcode ?: 'Tanpa barcode' }}</div>
+                                </td>
+                                <td class="px-5 py-5">
+                                    @if ($product->stock_status === 'habis')
+                                        <span class="inline-flex rounded-full bg-rose-400/15 px-3 py-1 text-sm font-semibold text-rose-300">Habis</span>
+                                    @elseif ($product->stock_status === 'menipis')
+                                        <span class="inline-flex rounded-full bg-amber-400/15 px-3 py-1 text-sm font-semibold text-amber-300">Menipis</span>
+                                    @else
+                                        <span class="inline-flex rounded-full bg-emerald-400/15 px-3 py-1 text-sm font-semibold text-emerald-300">Stok Penuh</span>
+                                    @endif
                                 </td>
                                 <td class="px-5 py-5">
                                     <span class="inline-flex rounded-full px-3 py-1 text-sm font-semibold {{ $isLowStock ? 'bg-rose-400/15 text-rose-300' : 'bg-emerald-400/15 text-emerald-300' }}">
@@ -86,7 +96,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="px-5 py-12 text-center text-slate-400">Produk tidak ditemukan.</td>
+                                <td colspan="4" class="px-5 py-12 text-center text-slate-400">Produk tidak ditemukan.</td>
                             </tr>
                         @endforelse
                     </tbody>
