@@ -13,6 +13,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnTransactionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -43,6 +44,12 @@ Route::get('/products/manage', [ProductController::class, 'manage'])->name('prod
 Route::post('/products/manage', [ProductController::class, 'store'])->name('products.store');
 Route::put('/products/manage/{product}', [ProductController::class, 'update'])->name('products.update');
 Route::delete('/products/manage/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+Route::delete('/categories/{category}/force', [CategoryController::class, 'delete'])->name('categories.delete');
 
 Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index'])
     ->name('stock-adjustments.index');

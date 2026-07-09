@@ -16,6 +16,7 @@
             </div>
             <div class="flex items-center gap-3">
                 <a href="{{ route('pos.index') }}" class="rounded-xl border border-white/10 px-4 py-2 text-center text-sm font-semibold hover:border-cyan-400 hover:text-cyan-300">Kembali ke POS</a>
+                <a href="{{ route('categories.index') }}" class="rounded-xl border border-white/10 px-4 py-2 text-center text-sm font-semibold hover:border-cyan-400 hover:text-cyan-300">Kelola Kategori</a>
                 <button onclick="openCreateModal()" class="rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-300">+ Tambah Produk</button>
             </div>
         </div>
@@ -43,6 +44,12 @@
                 placeholder="Cari nama, SKU, atau barcode..."
                 class="min-w-0 flex-1 rounded-xl border border-white/10 bg-slate-900 px-4 py-3 outline-none focus:border-cyan-400"
             >
+            <select name="category_id" class="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 outline-none focus:border-cyan-400">
+                <option value="">Semua Kategori</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category->id }}" @selected((string) $categoryId === (string) $category->id)>{{ $category->name }}</option>
+                @endforeach
+            </select>
             <button class="rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-300">Cari</button>
         </form>
 
@@ -52,6 +59,7 @@
                     <thead class="bg-white/5 text-left text-xs uppercase tracking-wider text-slate-400">
                         <tr>
                             <th class="px-5 py-4">Produk</th>
+                            <th class="px-5 py-4">Kategori</th>
                             <th class="px-5 py-4">SKU</th>
                             <th class="px-5 py-4">Harga</th>
                             <th class="px-5 py-4">Stok</th>
@@ -66,6 +74,13 @@
                                     <div class="font-semibold text-white">{{ $product->name }}</div>
                                     @if ($product->description)
                                         <div class="mt-1 text-sm text-slate-400">{{ Str::limit($product->description, 60) }}</div>
+                                    @endif
+                                </td>
+                                <td class="px-5 py-5 text-sm">
+                                    @if ($product->category)
+                                        <span class="inline-flex rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-200">{{ $product->category->name }}</span>
+                                    @else
+                                        <span class="text-xs text-slate-500">—</span>
                                     @endif
                                 </td>
                                 <td class="px-5 py-5 text-sm">
@@ -88,7 +103,7 @@
                                 <td class="px-5 py-5">
                                     <div class="flex gap-2">
                                         <button
-                                            onclick="openEditModal({{ $product->id }}, @js($product->name), @js($product->sku), @js($product->barcode), {{ $product->selling_price }}, @js($product->unit), {{ $product->stock_quantity }}, {{ $product->min_stock }}, @js($product->description ?? ''))"
+                                            onclick="openEditModal({{ $product->id }}, @js($product->name), @js($product->sku), @js($product->barcode), {{ $product->selling_price }}, @js($product->unit), {{ $product->stock_quantity }}, {{ $product->min_stock }}, @js($product->description ?? ''), {{ $product->category_id ?? 'null' }})"
                                             class="rounded-lg border border-white/10 px-3 py-1.5 text-sm hover:border-cyan-400 hover:text-cyan-300"
                                         >Edit</button>
                                         @if ($product->is_active)
@@ -107,7 +122,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-5 py-12 text-center text-slate-400">Produk tidak ditemukan.</td>
+                                <td colspan="7" class="px-5 py-12 text-center text-slate-400">Produk tidak ditemukan.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -132,6 +147,15 @@
                     <div>
                         <label class="mb-1 block text-sm text-slate-400">Nama Produk</label>
                         <input name="name" id="f-name" required maxlength="255" class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 outline-none focus:border-cyan-400">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm text-slate-400">Kategori</label>
+                        <select name="category_id" id="f-category_id" class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 outline-none focus:border-cyan-400">
+                            <option value="">Tanpa kategori</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -204,11 +228,12 @@
             document.getElementById('form-modal').classList.remove('hidden');
         }
 
-        function openEditModal(id, name, sku, barcode, price, unit, stock, minStock, desc) {
+        function openEditModal(id, name, sku, barcode, price, unit, stock, minStock, desc, categoryId) {
             document.getElementById('form-modal-title').textContent = 'Edit Produk';
             document.getElementById('product-form').action = '/products/manage/' + id;
             document.getElementById('form-method').value = 'PUT';
             document.getElementById('f-name').value = name;
+            document.getElementById('f-category_id').value = categoryId ?? '';
             document.getElementById('f-sku').value = sku;
             document.getElementById('f-barcode').value = barcode;
             document.getElementById('f-selling_price').value = price;

@@ -8,11 +8,23 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::create('categories', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('barcode')->nullable()->unique();
             $table->string('sku')->unique();
             $table->string('name');
+            $table->foreignId('category_id')
+                ->nullable()
+                ->constrained('categories')
+                ->nullOnDelete();
             $table->text('description')->nullable();
             $table->string('unit')->default('pcs');
             $table->integer('selling_price')->default(0);
@@ -26,5 +38,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('products');
+        Schema::dropIfExists('categories');
     }
 };
