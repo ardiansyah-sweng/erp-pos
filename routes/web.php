@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
+
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
@@ -59,6 +61,14 @@ Route::post('/pos/checkout', [TransactionController::class, 'checkout']);
 
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
 Route::post('/transaction/store', [TransactionController::class, 'store']);
+
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
+Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+
+
 
 Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.index');
 Route::post('/cashier/add', [CashierController::class, 'add'])->name('cashier.add');

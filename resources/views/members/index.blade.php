@@ -6,6 +6,8 @@
 
 @section('content')
 
+<div class="p-8">
+
 <!-- ===================== HEADER BANNER ===================== -->
 
 <div class="relative overflow-hidden rounded-3xl border border-cyan-500/30 bg-gradient-to-br from-[#0a1628] via-[#0c1a2e] to-[#08111f] p-8 shadow-[0_0_40px_-10px_rgba(34,211,238,.25)]">
@@ -242,6 +244,7 @@
 
     </div>
 
+</div>
 </div>
 
 @endsection

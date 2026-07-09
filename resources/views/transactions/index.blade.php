@@ -1,78 +1,57 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Riwayat Transaksi - ERP POS</title>
-    <script>
-        try {
-            document.documentElement.dataset.theme = localStorage.getItem('erp-pos-theme') || 'dark';
-        } catch (error) {
-            document.documentElement.dataset.theme = 'dark';
-        }
-    </script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        html[data-theme="light"] body {
-            background: #f6f8fb !important;
-            color: #0f172a !important;
-        }
+@extends('layouts.app')
 
-        html[data-theme="light"] body > .absolute {
-            opacity: 0.45;
-        }
+@section('title', 'Riwayat Transaksi')
 
-        html[data-theme="light"] .bg-white\/5 {
-            background-color: rgba(255, 255, 255, 0.94) !important;
-        }
+@push('styles')
+<style>
+    html[data-theme="light"] body {
+        background: #f6f8fb !important;
+        color: #0f172a !important;
+    }
 
-        html[data-theme="light"] .bg-slate-950,
-        html[data-theme="light"] .bg-slate-950\/70,
-        html[data-theme="light"] .bg-slate-950\/60,
-        html[data-theme="light"] .bg-slate-900\/80 {
-            background-color: #ffffff !important;
-        }
+    html[data-theme="light"] body > .absolute {
+        opacity: 0.45;
+    }
 
-        html[data-theme="light"] .border-white\/10 {
-            border-color: #dbe3ea !important;
-        }
+    html[data-theme="light"] .bg-white\/5 {
+        background-color: rgba(255, 255, 255, 0.94) !important;
+    }
 
-        html[data-theme="light"] .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
-            border-color: #e2e8f0 !important;
-        }
+    html[data-theme="light"] .bg-slate-950,
+    html[data-theme="light"] .bg-slate-950\/70,
+    html[data-theme="light"] .bg-slate-950\/60,
+    html[data-theme="light"] .bg-slate-900\/80 {
+        background-color: #ffffff !important;
+    }
 
-        html[data-theme="light"] .text-white {
-            color: #0f172a !important;
-        }
+    html[data-theme="light"] .border-white\/10 {
+        border-color: #dbe3ea !important;
+    }
 
-        html[data-theme="light"] .text-slate-200,
-        html[data-theme="light"] .text-slate-300,
-        html[data-theme="light"] .text-slate-400 {
-            color: #64748b !important;
-        }
+    html[data-theme="light"] .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
+        border-color: #e2e8f0 !important;
+    }
 
-        html[data-theme="light"] .text-cyan-300\/80,
-        html[data-theme="light"] .text-cyan-300\/70 {
-            color: #0e7490 !important;
-        }
+    html[data-theme="light"] .text-white {
+        color: #0f172a !important;
+    }
 
-        html[data-theme="light"] .text-emerald-300 {
-            color: #047857 !important;
-        }
+    html[data-theme="light"] .text-slate-200,
+    html[data-theme="light"] .text-slate-300,
+    html[data-theme="light"] .text-slate-400 {
+        color: #64748b !important;
+    }
 
-        html[data-theme="light"] input {
-            background-color: #ffffff !important;
-            color: #0f172a !important;
-        }
+    html[data-theme="light"] .text-cyan-300\/80,
+    html[data-theme="light"] .text-cyan-300\/70 {
+        color: #0e7490 !important;
+    }
 
-        html[data-theme="light"] .bg-cyan-400\/10 {
-            background-color: #ecfeff !important;
-        }
-    </style>
-</head>
-<body class="min-h-screen bg-slate-950 text-slate-100">
-    <div class="absolute inset-x-0 top-0 h-72 bg-gradient-to-r from-emerald-500/30 via-cyan-500/20 to-transparent blur-3xl"></div>
+    html[data-theme="light"] .text-emerald-300 {
+        color: #047857 !important;
+    }
 
+<<<<<<< HEAD
     <main class="relative mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-6 lg:px-8">
         @php
             $totalItems = $transactions->sum(fn ($transaction) => $transaction->details->sum('quantity'));
@@ -94,177 +73,138 @@
                 ])->values(),
                 'details' => $transaction->details->map(function ($detail) {
                     $returnedQuantity = $detail->returnDetails->sum('quantity');
+=======
+    html[data-theme="light"] input {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+    }
+>>>>>>> develop
 
-                    return [
-                        'name' => $detail->product?->name ?? 'Produk #' . $detail->product_id,
-                        'quantity' => $detail->quantity,
-                        'returned_quantity' => $returnedQuantity,
-                        'available_quantity' => max(0, $detail->quantity - $returnedQuantity),
-                        'price' => $detail->price,
-                        'amount' => $detail->amount,
-                    ];
-                })->values(),
-            ])->values();
-        @endphp
+    html[data-theme="light"] .bg-cyan-400\/10 {
+        background-color: #ecfeff !important;
+    }
+</style>
+@endpush
 
-        <section class="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/30 backdrop-blur-xl">
-            <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div>
-                    <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/80">ERP POS</p>
-                    <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Riwayat transaksi</h1>
-                    <p class="mt-2 max-w-2xl text-sm text-slate-300">Lihat semua transaksi yang sudah tersimpan dan filter berdasarkan tanggal transaksi.</p>
-                    <a href="{{ route('pos.index') }}" class="mt-4 inline-flex items-center justify-center rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white">
-                        Kembali ke POS
-                    </a>
-                </div>
-                <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-5">
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
-                        <div class="text-slate-400">Transaksi</div>
-                        <div class="mt-1 text-xl font-semibold text-white">{{ $transactions->count() }}</div>
-                    </div>
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
-                        <div class="text-slate-400">Tanggal</div>
-                        <div class="mt-1 text-xl font-semibold text-white">{{ $selectedDateLabel }}</div>
-                    </div>
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
-                        <div class="text-slate-400">Item</div>
-                        <div class="mt-1 text-xl font-semibold text-white">{{ $totalItems }}</div>
-                    </div>
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
-                        <div class="text-slate-400">Diretur</div>
-                        <div class="mt-1 text-xl font-semibold text-rose-300">{{ $totalReturnedItems }}</div>
-                    </div>
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
-                        <div class="text-slate-400">Total</div>
-                        <div class="mt-1 text-xl font-semibold text-emerald-300">Rp {{ number_format($totalAmount, 0, ',', '.') }}</div>
-                    </div>
-                </div>
+@section('content')
+
+@php
+    $totalItems = $transactions->sum(fn ($transaction) => $transaction->details->sum('quantity'));
+    $totalReturnedItems = $transactions->sum(fn ($transaction) => $transaction->details->sum(fn ($detail) => $detail->returnDetails->sum('quantity')));
+    $totalAmount = $transactions->sum('total');
+    $selectedDateLabel = $selectedDate ? \Carbon\Carbon::parse($selectedDate)->translatedFormat('d M Y') : 'Semua';
+    $transactionPayload = $transactions->map(fn ($transaction) => [
+        'id' => $transaction->id,
+        'code' => 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
+        'created_at' => $transaction->created_at?->translatedFormat('d M Y, H.i'),
+        'total' => $transaction->total,
+        'payments' => $transaction->payments->map(fn ($payment) => [
+            'payment_method' => $payment->payment_method,
+            'discount_amount' => $payment->discount_amount,
+            'cash_tendered' => $payment->cash_tendered,
+            'change_amount' => $payment->change_amount,
+        ])->values(),
+        'details' => $transaction->details->map(function ($detail) {
+            $returnedQuantity = $detail->returnDetails->sum('quantity');
+
+            return [
+                'name' => $detail->product?->name ?? 'Produk #' . $detail->product_id,
+                'quantity' => $detail->quantity,
+                'returned_quantity' => $returnedQuantity,
+                'available_quantity' => max(0, $detail->quantity - $returnedQuantity),
+                'price' => $detail->price,
+                'amount' => $detail->amount,
+            ];
+        })->values(),
+    ])->values();
+@endphp
+
+<div class="absolute inset-x-0 top-0 h-72 bg-gradient-to-r from-emerald-500/30 via-cyan-500/20 to-transparent blur-3xl"></div>
+
+<main class="relative mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-6 lg:px-8">
+    <section class="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/30 backdrop-blur-xl">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+                <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/80">ERP POS</p>
+                <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Riwayat transaksi</h1>
+                <p class="mt-2 max-w-2xl text-sm text-slate-300">Lihat semua transaksi yang sudah tersimpan dan filter berdasarkan tanggal transaksi.</p>
+                <a href="{{ route('pos.index') }}" class="mt-4 inline-flex items-center justify-center rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white">
+                    Kembali ke POS
+                </a>
             </div>
-        </section>
-
-        <section class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-            <form id="dateFilterForm" method="GET" action="{{ route('transactions.index') }}" class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <p class="text-sm font-medium text-white">Filter transaksi</p>
-                    <p class="mt-1 text-sm text-slate-400">{{ $selectedDate ? 'Menampilkan transaksi pada tanggal terpilih.' : 'Menampilkan semua tanggal transaksi.' }}</p>
+            <div class="grid grid-cols-2 gap-3 text-sm md:grid-cols-5">
+                <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                    <div class="text-slate-400">Transaksi</div>
+                    <div class="mt-1 text-xl font-semibold text-white">{{ $transactions->count() }}</div>
                 </div>
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <label id="dateFilterControl" for="date" class="flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition focus-within:border-cyan-400 hover:border-cyan-400/50">
-                        <span class="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/70">Tanggal</span>
-                        <input id="date" name="date" type="date" value="{{ $selectedDate }}" onchange="this.form.submit()" class="w-36 border-0 bg-transparent p-0 text-sm text-white outline-none">
-                    </label>
-                    <input type="hidden" id="direction" name="direction" value="{{ request('direction', 'desc') }}">
-                    <label for="sort" class="flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition focus-within:border-cyan-400 hover:border-cyan-400/50">
-                        <span class="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/70">Urutkan</span>
-                        <select id="sort" name="sort" onchange="this.form.submit()" class="border-0 bg-transparent p-0 text-sm text-white outline-none">
-                            <option value="date" class="bg-slate-950 text-white" @selected(request('sort', 'date') === 'date')>Tanggal</option>
-                            <option value="id" class="bg-slate-950 text-white" @selected(request('sort') === 'id')>ID Transaksi</option>
-                            <option value="total" class="bg-slate-950 text-white" @selected(request('sort') === 'total')>Harga</option>
-                            <option value="items" class="bg-slate-950 text-white" @selected(request('sort') === 'items')>Jumlah Item</option>
-                        </select>
-                    </label>
-                    <button type="button" title="Ubah arah urutan" onclick="const d = document.getElementById('direction'); d.value = d.value === 'asc' ? 'desc' : 'asc'; this.form.submit();" class="flex items-center justify-center rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-cyan-300/70 transition hover:border-cyan-400/50 hover:text-cyan-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 transition-transform {{ request('direction', 'desc') === 'asc' ? 'rotate-180' : '' }}">
-                            <path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                    <a href="{{ route('transactions.export', array_filter(['date' => $selectedDate, 'sort' => request('sort', 'date'), 'direction' => request('direction', 'desc')])) }}" class="inline-flex items-center justify-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:border-emerald-300 hover:text-white">
-                        Export Detail CSV
-                    </a>
-                    @if ($selectedDate)
-                        <a href="{{ route('transactions.index') }}" class="inline-flex items-center justify-center rounded-full border border-white/10 bg-cyan-400/10 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:border-cyan-300 hover:text-white">
-                            Reset filter
-                        </a>
-                    @endif
+                <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                    <div class="text-slate-400">Tanggal</div>
+                    <div class="mt-1 text-xl font-semibold text-white">{{ $selectedDateLabel }}</div>
                 </div>
-            </form>
-        </section>
-
-        <section class="grid gap-3">
-            @forelse ($transactions as $transaction)
-                @php
-                    $details = $transaction->details ?? collect();
-                    $itemCount = $details->sum('quantity');
-                    $returnedItemCount = $details->sum(fn ($detail) => $detail->returnDetails->sum('quantity'));
-                    $transactionCode = 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT);
-                @endphp
-
-                <article data-show-transaction="{{ $transaction->id }}" role="button" tabindex="0" class="cursor-pointer rounded-2xl border border-white/10 bg-white/5 p-4 shadow-xl shadow-black/20 backdrop-blur-xl transition hover:border-cyan-400/50 hover:bg-white/10">
-                    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                        <div>
-                            <h2 class="text-lg font-semibold text-white">{{ $transactionCode }}</h2>
-                            <p class="mt-1 text-sm text-slate-400">{{ $transaction->created_at?->translatedFormat('d M Y, H.i') }}</p>
-                            @if ($returnedItemCount > 0)
-                                <span class="mt-2 inline-flex rounded-full border border-rose-400/30 bg-rose-400/10 px-3 py-1 text-xs font-semibold text-rose-200">Retur {{ $returnedItemCount }} item</span>
-                            @endif
-                        </div>
-                        <div class="flex flex-wrap items-center justify-between gap-3 md:min-w-72 md:justify-end md:text-right">
-                            <div>
-                                <p class="text-sm text-slate-400">{{ $itemCount }} item</p>
-                                <p class="text-lg font-semibold text-emerald-300">Rp {{ number_format($transaction->total, 0, ',', '.') }}</p>
-                            </div>
-                            <button type="button" class="rounded-full border border-white/10 bg-slate-950/60 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white">
-                                Detail
-                            </button>
-                        </div>
-                    </div>
-                </article>
-            @empty
-                <div class="rounded-3xl border border-dashed border-white/10 bg-white/5 p-8 text-center text-sm text-slate-400 backdrop-blur-xl">
-                    Belum ada transaksi yang tersimpan.
+                <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                    <div class="text-slate-400">Item</div>
+                    <div class="mt-1 text-xl font-semibold text-white">{{ $totalItems }}</div>
                 </div>
-            @endforelse
-        </section>
-    </main>
-
-    <div id="transactionModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm">
-        <div class="w-full max-w-md rounded-3xl border border-white/10 bg-slate-950 p-5 text-slate-100 shadow-2xl shadow-black/40">
-            <div class="mb-4 flex items-start justify-between gap-4">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">Detail Transaksi</p>
-                    <h2 id="transactionModalTitle" class="mt-1 text-xl font-semibold text-white">TRX-0000</h2>
-                    <p id="transactionModalDate" class="mt-1 text-sm text-slate-400">-</p>
+                <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                    <div class="text-slate-400">Diretur</div>
+                    <div class="mt-1 text-xl font-semibold text-rose-300">{{ $totalReturnedItems }}</div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <a id="printReceiptBtn" href="#" target="_blank" class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-sm font-medium text-emerald-200 transition hover:bg-emerald-400/20">Cetak Struk</a>
-                    <button id="closeTransactionModal" type="button" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300 transition hover:text-white">Tutup</button>
-                </div>
-            </div>
-            <div id="transactionModalItems" class="divide-y divide-white/5 rounded-2xl border border-white/10 bg-slate-950/60"></div>
-            <div id="transactionModalPayment" class="mt-4 grid gap-2 rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300"></div>
-            <div class="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div class="flex items-center justify-between text-sm text-slate-300">
-                    <span>Total Belanja</span>
-                    <span id="transactionModalTotal" class="text-lg font-semibold text-emerald-300">Rp0</span>
+                <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
+                    <div class="text-slate-400">Total</div>
+                    <div class="mt-1 text-xl font-semibold text-emerald-300">Rp {{ number_format($totalAmount, 0, ',', '.') }}</div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <script>
-        const transactions = @json($transactionPayload);
-        const moneyFormatter = new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            maximumFractionDigits: 0,
-        });
+    <section class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+        <form id="dateFilterForm" method="GET" action="{{ route('transactions.index') }}" class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+                <p class="text-sm font-medium text-white">Filter transaksi</p>
+                <p class="mt-1 text-sm text-slate-400">{{ $selectedDate ? 'Menampilkan transaksi pada tanggal terpilih.' : 'Menampilkan semua tanggal transaksi.' }}</p>
+            </div>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <label id="dateFilterControl" for="date" class="flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition focus-within:border-cyan-400 hover:border-cyan-400/50">
+                    <span class="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/70">Tanggal</span>
+                    <input id="date" name="date" type="date" value="{{ $selectedDate }}" onchange="this.form.submit()" class="w-36 border-0 bg-transparent p-0 text-sm text-white outline-none">
+                </label>
+                <input type="hidden" id="direction" name="direction" value="{{ request('direction', 'desc') }}">
+                <label for="sort" class="flex cursor-pointer items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 transition focus-within:border-cyan-400 hover:border-cyan-400/50">
+                    <span class="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/70">Urutkan</span>
+                    <select id="sort" name="sort" onchange="this.form.submit()" class="border-0 bg-transparent p-0 text-sm text-white outline-none">
+                        <option value="date" class="bg-slate-950 text-white" @selected(request('sort', 'date') === 'date')>Tanggal</option>
+                        <option value="id" class="bg-slate-950 text-white" @selected(request('sort') === 'id')>ID Transaksi</option>
+                        <option value="total" class="bg-slate-950 text-white" @selected(request('sort') === 'total')>Harga</option>
+                        <option value="items" class="bg-slate-950 text-white" @selected(request('sort') === 'items')>Jumlah Item</option>
+                    </select>
+                </label>
+                <button type="button" title="Ubah arah urutan" onclick="const d = document.getElementById('direction'); d.value = d.value === 'asc' ? 'desc' : 'asc'; this.form.submit();" class="flex items-center justify-center rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-cyan-300/70 transition hover:border-cyan-400/50 hover:text-cyan-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 transition-transform {{ request('direction', 'desc') === 'asc' ? 'rotate-180' : '' }}">
+                        <path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <a href="{{ route('transactions.export', array_filter(['date' => $selectedDate, 'sort' => request('sort', 'date'), 'direction' => request('direction', 'desc')])) }}" class="inline-flex items-center justify-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:border-emerald-300 hover:text-white">
+                    Export Detail CSV
+                </a>
+                @if ($selectedDate)
+                    <a href="{{ route('transactions.index') }}" class="inline-flex items-center justify-center rounded-full border border-white/10 bg-cyan-400/10 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:border-cyan-300 hover:text-white">
+                        Reset filter
+                    </a>
+                @endif
+            </div>
+        </form>
+    </section>
 
-        const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
-        const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;',
-        }[character]));
-        const modal = document.getElementById('transactionModal');
-        const modalTitle = document.getElementById('transactionModalTitle');
-        const modalDate = document.getElementById('transactionModalDate');
-        const modalItems = document.getElementById('transactionModalItems');
-        const modalPayment = document.getElementById('transactionModalPayment');
-        const modalTotal = document.getElementById('transactionModalTotal');
-        const closeModalButton = document.getElementById('closeTransactionModal');
+    <section class="grid gap-3">
+        @forelse ($transactions as $transaction)
+            @php
+                $details = $transaction->details ?? collect();
+                $itemCount = $details->sum('quantity');
+                $returnedItemCount = $details->sum(fn ($detail) => $detail->returnDetails->sum('quantity'));
+                $transactionCode = 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT);
+            @endphp
 
+<<<<<<< HEAD
         const closeModal = () => {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
@@ -291,65 +231,174 @@
             `;
             modalItems.innerHTML = transaction.details.length ? transaction.details.map((detail) => `
                 <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm">
+=======
+            <article data-show-transaction="{{ $transaction->id }}" role="button" tabindex="0" class="cursor-pointer rounded-2xl border border-white/10 bg-white/5 p-4 shadow-xl shadow-black/20 backdrop-blur-xl transition hover:border-cyan-400/50 hover:bg-white/10">
+                <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+>>>>>>> develop
                     <div>
-                        <div class="font-medium text-white">${escapeHtml(detail.name)}</div>
-                        <div class="text-xs text-slate-400">${detail.quantity} x ${formatMoney(detail.price)}</div>
-                        ${Number(detail.returned_quantity || 0) > 0 ? `
-                            <div class="mt-1 text-xs text-rose-300">Retur ${detail.returned_quantity} item, sisa ${detail.available_quantity} item</div>
-                        ` : ''}
+                        <h2 class="text-lg font-semibold text-white">{{ $transactionCode }}</h2>
+                        <p class="mt-1 text-sm text-slate-400">{{ $transaction->created_at?->translatedFormat('d M Y, H.i') }}</p>
+                        @if ($returnedItemCount > 0)
+                            <span class="mt-2 inline-flex rounded-full border border-rose-400/30 bg-rose-400/10 px-3 py-1 text-xs font-semibold text-rose-200">Retur {{ $returnedItemCount }} item</span>
+                        @endif
                     </div>
-                    <div class="font-semibold text-emerald-300">${formatMoney(detail.amount)}</div>
+                    <div class="flex flex-wrap items-center justify-between gap-3 md:min-w-72 md:justify-end md:text-right">
+                        <div>
+                            <p class="text-sm text-slate-400">{{ $itemCount }} item</p>
+                            <p class="text-lg font-semibold text-emerald-300">Rp {{ number_format($transaction->total, 0, ',', '.') }}</p>
+                        </div>
+                        <button type="button" class="rounded-full border border-white/10 bg-slate-950/60 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white">
+                            Detail
+                        </button>
+                    </div>
                 </div>
-            `).join('') : `
-                <div class="px-4 py-4 text-sm text-slate-400">Detail item tidak tersedia.</div>
-            `;
+            </article>
+        @empty
+            <div class="rounded-3xl border border-dashed border-white/10 bg-white/5 p-8 text-center text-sm text-slate-400 backdrop-blur-xl">
+                Belum ada transaksi yang tersimpan.
+            </div>
+        @endforelse
+    </section>
+</main>
 
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            document.getElementById('printReceiptBtn').href = '/transactions/' + transaction.id + '/receipt';
+<div id="transactionModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm">
+    <div class="w-full max-w-md rounded-3xl border border-white/10 bg-slate-950 p-5 text-slate-100 shadow-2xl shadow-black/40">
+        <div class="mb-4 flex items-start justify-between gap-4">
+            <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">Detail Transaksi</p>
+                <h2 id="transactionModalTitle" class="mt-1 text-xl font-semibold text-white">TRX-0000</h2>
+                <p id="transactionModalDate" class="mt-1 text-sm text-slate-400">-</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a id="printReceiptBtn" href="#" target="_blank" class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-sm font-medium text-emerald-200 transition hover:bg-emerald-400/20">Cetak Struk</a>
+                <button id="closeTransactionModal" type="button" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300 transition hover:text-white">Tutup</button>
+            </div>
+        </div>
+        <div id="transactionModalItems" class="divide-y divide-white/5 rounded-2xl border border-white/10 bg-slate-950/60"></div>
+        <div id="transactionModalPayment" class="mt-4 grid gap-2 rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300"></div>
+        <div class="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div class="flex items-center justify-between text-sm text-slate-300">
+                <span>Total Belanja</span>
+                <span id="transactionModalTotal" class="text-lg font-semibold text-emerald-300">Rp0</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@endsection
+
+@push('scripts')
+<script>
+    try {
+        document.documentElement.dataset.theme = localStorage.getItem('erp-pos-theme') || 'dark';
+    } catch (error) {
+        document.documentElement.dataset.theme = 'dark';
+    }
+</script>
+<script>
+    const transactions = @json($transactionPayload);
+    const moneyFormatter = new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0,
+    });
+
+    const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+    }[character]));
+    const modal = document.getElementById('transactionModal');
+    const modalTitle = document.getElementById('transactionModalTitle');
+    const modalDate = document.getElementById('transactionModalDate');
+    const modalItems = document.getElementById('transactionModalItems');
+    const modalPayment = document.getElementById('transactionModalPayment');
+    const modalTotal = document.getElementById('transactionModalTotal');
+    const closeModalButton = document.getElementById('closeTransactionModal');
+
+    const closeModal = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    };
+
+    const openModal = (transaction) => {
+        modalTitle.textContent = transaction.code;
+        modalDate.textContent = transaction.created_at || '-';
+        modalTotal.textContent = formatMoney(transaction.total);
+        modalPayment.innerHTML = transaction.payments.length ? transaction.payments.map((payment) => `
+            <div>Metode: <span class="font-semibold text-white">${escapeHtml(payment.payment_method || 'cash')}</span></div>
+            <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
+            <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
+            <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
+        `).join('') : `
+            <div>Metode: <span class="font-semibold text-white">cash</span></div>
+            <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
+            <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
+            <div>Kembalian: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
+        `;
+        modalItems.innerHTML = transaction.details.length ? transaction.details.map((detail) => `
+            <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm">
+                <div>
+                    <div class="font-medium text-white">${escapeHtml(detail.name)}</div>
+                    <div class="text-xs text-slate-400">${detail.quantity} x ${formatMoney(detail.price)}</div>
+                    ${Number(detail.returned_quantity || 0) > 0 ? `
+                        <div class="mt-1 text-xs text-rose-300">Retur ${detail.returned_quantity} item, sisa ${detail.available_quantity} item</div>
+                    ` : ''}
+                </div>
+                <div class="font-semibold text-emerald-300">${formatMoney(detail.amount)}</div>
+            </div>
+        `).join('') : `
+            <div class="px-4 py-4 text-sm text-slate-400">Detail item tidak tersedia.</div>
+        `;
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.getElementById('printReceiptBtn').href = '/transactions/' + transaction.id + '/receipt';
+    };
+
+    document.querySelectorAll('[data-show-transaction]').forEach((button) => {
+        const showTransaction = () => {
+            const transaction = transactions.find((item) => String(item.id) === button.dataset.showTransaction);
+
+            if (transaction) {
+                openModal(transaction);
+            }
         };
 
-        document.querySelectorAll('[data-show-transaction]').forEach((button) => {
-            const showTransaction = () => {
-                const transaction = transactions.find((item) => String(item.id) === button.dataset.showTransaction);
-
-                if (transaction) {
-                    openModal(transaction);
-                }
-            };
-
-            button.addEventListener('click', showTransaction);
-            button.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    showTransaction();
-                }
-            });
-        });
-
-        document.getElementById('dateFilterControl')?.addEventListener('click', () => {
-            const dateInput = document.getElementById('date');
-
-            if (dateInput?.showPicker) {
-                dateInput.showPicker();
-                return;
-            }
-
-            dateInput?.focus();
-        });
-
-        closeModalButton.addEventListener('click', closeModal);
-        modal.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                closeModal();
+        button.addEventListener('click', showTransaction);
+        button.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                showTransaction();
             }
         });
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
-        });
+    });
 
-    </script>
-</body>
-</html>
+    document.getElementById('dateFilterControl')?.addEventListener('click', () => {
+        const dateInput = document.getElementById('date');
+
+        if (dateInput?.showPicker) {
+            dateInput.showPicker();
+            return;
+        }
+
+        dateInput?.focus();
+    });
+
+    closeModalButton.addEventListener('click', closeModal);
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
+
+</script>
+@endpush

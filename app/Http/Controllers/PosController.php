@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
+
 class PosController extends Controller
 {
     public function index()
     {
-        return view('pos.index');
+        $categories = Category::where('is_active', true)->orderBy('name')->get();
+
+        return view('pos.index', compact('categories'));
     }
 }
