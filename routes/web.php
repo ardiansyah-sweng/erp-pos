@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
@@ -65,6 +66,10 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('categorie
 Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
 Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
 Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+
+
+
 Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.index');
 Route::post('/cashier/add', [CashierController::class, 'add'])->name('cashier.add');
 Route::post('/cashier/checkout', [CashierController::class, 'checkout'])->name('cashier.checkout');

@@ -119,13 +119,6 @@
                     <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat untuk transaksi harian.</h1>
                     <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari atau scan produk, cek isi keranjang, lalu selesaikan pembayaran tanpa reload halaman.</p>
                     <div class="mt-4 flex flex-wrap items-center gap-3">
-                        <a href="{{ route('stock-adjustments.index') }}" class="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/15 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:border-emerald-300 hover:bg-emerald-400/25 hover:text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
-                                <path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>
-                            </svg>
-                            Penyesuaian Stok
-                        </a>
                         <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/15 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-400/25 hover:text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <rect x="3" y="3" width="7" height="7"/>
@@ -139,20 +132,6 @@
                             <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
                             <span id="themeLabel">Mode terang</span>
                         </button>
-                        <a href="{{ route('sales-notes') }}" class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/15 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-400/25 hover:text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M3 3v18h18"/>
-                                <path d="m19 9-5 5-4-4-3 3"/>
-                            </svg>
-                            Laporan Penjualan
-                        </a>
-                        <a href="{{ route('returns.index') }}" class="inline-flex items-center gap-2 rounded-full border border-rose-400/40 bg-rose-400/15 px-4 py-2 text-sm font-medium text-rose-200 transition hover:border-rose-300 hover:bg-rose-400/25 hover:text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="m9 14-4-4 4-4"/>
-                                <path d="M5 10h11a4 4 0 0 1 0 8h-1"/>
-                            </svg>
-                            Retur Transaksi
-                        </a>
                     </div>
                 </div>
                 <div class="flex flex-col items-end gap-3">
