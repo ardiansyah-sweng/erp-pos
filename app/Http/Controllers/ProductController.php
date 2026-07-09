@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use App\Models\Category;
 use App\Models\Product;
 use App\Services\ProductService;
 
@@ -63,8 +64,10 @@ class ProductController extends Controller
     public function manage(Request $request): View
     {
         $search = trim((string) $request->query('search', ''));
+        $categoryId = $request->query('category_id');
 
         $products = Product::query()
+            ->with('category')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($innerQuery) use ($search) {
                     $innerQuery->where('name', 'like', "%{$search}%")
@@ -72,17 +75,23 @@ class ProductController extends Controller
                         ->orWhere('barcode', 'like', "%{$search}%");
                 });
             })
+            ->when($categoryId !== null && $categoryId !== '', function ($query) use ($categoryId) {
+                $query->where('category_id', $categoryId);
+            })
             ->orderBy('name')
             ->paginate(15)
             ->withQueryString();
 
-        return view('products.manage', compact('products', 'search'));
+        $categories = Category::where('is_active', true)->orderBy('name')->get();
+
+        return view('products.manage', compact('products', 'search', 'categories', 'categoryId'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'sku' => ['required', 'string', 'max:50', 'unique:products,sku'],
             'barcode' => ['nullable', 'string', 'max:100', 'unique:products,barcode'],
             'selling_price' => ['required', 'integer', 'min:0'],
@@ -101,6 +110,7 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'sku' => ['required', 'string', 'max:50', Rule::unique('products', 'sku')->ignore($product->id)],
             'barcode' => ['nullable', 'string', 'max:100', Rule::unique('products', 'barcode')->ignore($product->id)],
             'selling_price' => ['required', 'integer', 'min:0'],
