@@ -102,4 +102,50 @@ class CustomerController extends Controller
             'data' => $customers
         ]);
     }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email',
+            'address' => 'nullable|string'
+        ]);
+
+        $customer = Customer::find($id);
+        
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Customer tidak ditemukan'
+            ], 404);
+        }
+
+        $customer->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Customer berhasil diperbarui',
+            'data' => $customer
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        $customer = Customer::find($id);
+
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Customer tidak ditemukan'
+            ], 404);
+        }
+
+        $customer->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Customer berhasil dihapus'
+        ]);
+    }
 }

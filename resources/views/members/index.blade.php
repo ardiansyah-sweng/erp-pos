@@ -5,7 +5,8 @@
 @section('breadcrumb', 'Member')
 
 @section('content')
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
 <div class="p-8">
 
 <!-- ===================== HEADER BANNER ===================== -->
@@ -472,6 +473,7 @@ memberTable.addEventListener("click", async function(e){
         const result = await response.json();
 
         if(result.success){
+            alert("Member berhasil diperbarui!");
             loadCustomers();
         }else{
             alert(result.message ?? "Gagal mengubah member.");
