@@ -1,5 +1,6 @@
 <?php
 
+
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
@@ -59,6 +60,10 @@ Route::post('/pos/checkout', [TransactionController::class, 'checkout']);
 
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
 Route::post('/transaction/store', [TransactionController::class, 'store']);
+
+
+
+
 
 Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.index');
 Route::post('/cashier/add', [CashierController::class, 'add'])->name('cashier.add');
