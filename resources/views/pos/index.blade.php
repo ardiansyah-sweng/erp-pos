@@ -614,12 +614,9 @@
             cardNumber: document.getElementById('cardNumber'),
             cardBank: document.getElementById('cardBank'),
             approvalCode: document.getElementById('approvalCode'),
-<<<<<<< HEAD
             customerName: document.getElementById('customerName'),
             customerPhone: document.getElementById('customerPhone'),
-=======
             categoryFilter: document.getElementById('categoryFilter'),
->>>>>>> develop
         };
 
         const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
@@ -1117,12 +1114,18 @@
             refs.transactionModalTitle.textContent = transactionCode;
             refs.transactionModalDate.textContent = formatDateTime(transaction.created_at);
             refs.transactionModalTotal.textContent = formatMoney(transaction.total);
+            const displayCustomerName = transaction.customer_name || '-';
+            const displayCustomerPhone = transaction.customer_phone || '-';
             refs.transactionModalPayment.innerHTML = payments.length ? payments.map((payment) => `
+                <div>Pelanggan: <span class="font-semibold text-white">${displayCustomerName}</span></div>
+                <div>No. Telepon: <span class="font-semibold text-white">${displayCustomerPhone}</span></div>
                 <div>Metode: <span class="font-semibold text-white">${payment.payment_method}</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
             `).join('') : `
+                <div>Pelanggan: <span class="font-semibold text-white">${displayCustomerName}</span></div>
+                <div>No. Telepon: <span class="font-semibold text-white">${displayCustomerPhone}</span></div>
                 <div>Metode: <span class="font-semibold text-white">cash</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
