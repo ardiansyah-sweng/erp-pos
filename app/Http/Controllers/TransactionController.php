@@ -3,25 +3,50 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
+use App\Models\Customer;
+use App\Services\CustomerService;
 
 class TransactionController extends Controller
 {
+    protected $customerService;
+
+    public function __construct(CustomerService $customerService)
+    {
+        $this->customerService = $customerService;
+    }
+
     public function getTransaction(Request $request)
     {
         $validated = $request->validate([
             'date' => ['nullable', 'date'],
         ]);
 
+        // Whitelist eksplisit opsi sort -> kolom asli, supaya nilai dari
+        // query string tidak pernah dipakai langsung sebagai nama kolom.
+        $sortColumns = [
+            'date' => 'created_at',
+            'id' => 'id',
+            'total' => 'total',
+            'items' => 'items_total_quantity',
+        ];
+
+        $sortParam = (string) $request->query('sort', 'date');
+        $sort = array_key_exists($sortParam, $sortColumns) ? $sortParam : 'date';
+        $direction = $request->query('direction') === 'asc' ? 'asc' : 'desc';
+
         $transactions = Transaction::with(['details.product', 'details.returnDetails', 'payments'])
+            ->withSum('details as items_total_quantity', 'quantity')
             ->when($validated['date'] ?? null, function ($query, $date) {
                 $query->whereDate('created_at', $date);
             })
-            ->latest()
+            ->orderBy($sortColumns[$sort], $direction)
             ->get();
 
         if (!$request->expectsJson() && !$request->ajax()) {
@@ -124,6 +149,7 @@ class TransactionController extends Controller
     public function checkout(Request $request)
     {
         $validated = $request->validate([
+            'customer_id' => ['nullable','integer','exists:customers,id'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
@@ -191,6 +217,7 @@ class TransactionController extends Controller
             }
 
             $transaction = Transaction::create([
+                'customer_id' => $validated['customer_id'] ?? null,
                 'total' => $totalAmount,
             ]);
 
@@ -211,10 +238,30 @@ class TransactionController extends Controller
                     'price' => (int) $item['unit_price'],
                     'amount' => (int) $item['quantity'] * (int) $item['unit_price'],
                 ]);
+
+                $product = Product::find((int) $item['product_id']);
+
+                if ($product->stock_quantity < $item['quantity']) {
+                    throw new \Exception("Stok {$product->name} tidak cukup");
+                }
+
+                $product->stock_quantity -= $item['quantity'];
+                $product->save();
+    
             }
 
             foreach ($productQuantities as $productId => $quantity) {
                 $lockedProducts->get((int) $productId)->decrement('stock_quantity', (int) $quantity);
+            }
+
+            if (!empty($validated['customer_id'])) {
+
+                $customer = Customer::find($validated['customer_id']);
+
+                if ($customer) {
+                    $this->customerService->addPoints($customer, $totalAmount);
+                }
+
             }
 
             return $transaction;
@@ -246,6 +293,7 @@ class TransactionController extends Controller
             ]);
 
             $transaction = Transaction::create([
+                'customer_id' => $request->customer_id,
                 'total' => $request->total
             ]);
 
@@ -270,33 +318,58 @@ class TransactionController extends Controller
             ], 201);
         }
 
-    public function salesNotes()
+    public function salesNotes(Request $request)
     {
-        $transactions = $this->buildSalesData();
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $transactions = $this->buildSalesData($startDate, $endDate);
+        $isPdf = false;
 
-        return view('transactions.sales-notes', compact('transactions'));
+        return view('transactions.sales-notes', compact('transactions', 'startDate', 'endDate', 'isPdf'));
     }
 
-    public function downloadSalesReportPdf()
+    public function downloadSalesReportPdf(Request $request)
     {
-        $transactions = $this->buildSalesData();
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $transactions = $this->buildSalesData($startDate, $endDate);
+        $isPdf = true;
 
-        return view('transactions.sales-notes', compact('transactions'));
+        $fileName = 'laporan-penjualan';
+        if ($startDate && $endDate) {
+            $fileName .= '-' . $startDate . '-to-' . $endDate;
+        } elseif ($startDate) {
+            $fileName .= '-dari-' . $startDate;
+        } elseif ($endDate) {
+            $fileName .= '-sampai-' . $endDate;
+        }
+
+        $pdf = Pdf::loadView('transactions.sales-notes', compact('transactions', 'startDate', 'endDate', 'isPdf'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download($fileName . '.pdf');
     }
 
-    private function buildSalesData()
+    private function buildSalesData($startDate = null, $endDate = null)
     {
-        return Transaction::with('details')
-            ->latest()
-            ->get()
-            ->map(function ($transaction) {
-                return [
-                    'transaction_code' => 'TRX-' . $transaction->created_at->format('YmdHis') . '-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
-                    'date' => $transaction->created_at,
-                    'item_count' => $transaction->details->sum('quantity'),
-                    'total' => $transaction->total,
-                    'details' => $transaction->details,
-                ];
-            });
+        $query = Transaction::with(['details.product'])->latest();
+
+        if ($startDate) {
+            $query->whereDate('created_at', '>=', Carbon::parse($startDate)->startOfDay());
+        }
+
+        if ($endDate) {
+            $query->whereDate('created_at', '<=', Carbon::parse($endDate)->endOfDay());
+        }
+
+        return $query->get()->map(function ($transaction) {
+            return [
+                'transaction_code' => 'TRX-' . $transaction->created_at->format('YmdHis') . '-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
+                'date' => $transaction->created_at,
+                'item_count' => $transaction->details->sum('quantity'),
+                'total' => $transaction->total,
+                'details' => $transaction->details,
+            ];
+        });
     }
 }

@@ -126,6 +126,15 @@
                             </svg>
                             Penyesuaian Stok
                         </a>
+                        <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/15 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-400/25 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="3" y="3" width="7" height="7"/>
+                                <rect x="14" y="3" width="7" height="7"/>
+                                <rect x="14" y="14" width="7" height="7"/>
+                                <rect x="3" y="14" width="7" height="7"/>
+                            </svg>
+                            Dashboard
+                        </a>
                         <button id="themeToggle" type="button" class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white" aria-pressed="false">
                             <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
                             <span id="themeLabel">Mode terang</span>
@@ -213,7 +222,10 @@
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
                     <div class="mb-4 flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-white">Daftar Produk</h2>
-                        <span id="productsMeta" class="text-sm text-slate-400"></span>
+                        <div class="flex items-center gap-3">
+                            <a href="{{ route('products.manage') }}" class="rounded-xl bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300">+ Product</a>
+                            <span id="productsMeta" class="text-sm text-slate-400"></span>
+                        </div>
                     </div>
                     <div id="productGrid" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"></div>
                 </div>
@@ -341,6 +353,33 @@
                             <label class="text-sm text-slate-300" for="notes">Catatan</label>
                             <textarea id="notes" rows="3" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400" placeholder="Opsional"></textarea>
                         </div>
+                    </div>
+                    
+                    <div class="mt-5">
+
+                        <label class="mb-2 block text-sm font-medium text-white">
+                            Cari Member
+                        </label>
+
+                        <input
+                            type="text"
+                            id="memberSearch"
+                            placeholder="Cari nomor HP / 4 digit terakhir"
+                            class="w-full rounded-xl border border-white/10 bg-slate-950/70 p-3 text-white placeholder:text-slate-400">
+
+                        <div
+                            id="memberResult"
+                            class="mt-3 space-y-2">
+                        </div>
+
+                        <a
+                            href="{{ route('members.index') }}"
+                            class="mt-3 inline-block rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700">
+
+                            + Tambah Member Baru
+
+                        </a>
+
                     </div>
 
                     <div class="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
@@ -780,6 +819,12 @@
             const isInvalidDiscount = isDiscountTooHigh();
             const isCashInsufficient = isCashPayment && state.cart.length > 0 && getCashTendered() < grandTotal;
             const isEwalletNotSelected = isEwallet && !state.selectedEwallet;
+            const isCardIncomplete = paymentMethod === 'card' && (
+                !refs.cardHolder.value.trim() || 
+                !refs.cardNumber.value.trim() || 
+                !refs.cardBank.value.trim() || 
+                !refs.approvalCode.value.trim()
+            );
 
             refs.productCount.textContent = String(state.products.length);
             refs.cartCount.textContent = String(state.cart.reduce((total, item) => total + item.quantity, 0));
@@ -802,7 +847,7 @@
             refs.cardForm.classList.toggle('hidden', paymentMethod !== 'card');
             refs.cashTenderedWrapper.style.display = isCashPayment ? '' : 'none';
             refs.changeRow.style.display = isCashPayment ? '' : 'none';
-            refs.checkoutButton.disabled = state.cart.length === 0 || isInvalidDiscount || isCashInsufficient || isEwalletNotSelected;
+            refs.checkoutButton.disabled = state.cart.length === 0 || isInvalidDiscount || isCashInsufficient || isEwalletNotSelected || isCardIncomplete;
 
             if (state.cart.length === 0) {
                 setCheckoutStatus('Tambahkan produk ke keranjang terlebih dahulu.', 'info');
@@ -821,6 +866,11 @@
 
             if (isEwalletNotSelected) {
                 setCheckoutStatus('Pilih e-wallet terlebih dahulu.', 'error');
+                return;
+            }
+
+            if (isCardIncomplete) {
+                setCheckoutStatus('Lengkapi data kartu (Nama, No Kartu, Bank, Kode) terlebih dahulu.', 'error');
                 return;
             }
 
@@ -1161,6 +1211,7 @@
             }
 
             const payload = {
+                customer_id: selectedCustomer,
                 items: state.cart.map((item) => ({
                     product_id: item.id,
                     quantity: item.quantity,
@@ -1193,6 +1244,10 @@
 
                 state.receipt = response.data;
                 state.cart = [];
+                selectedCustomer = null;
+
+                document.getElementById("memberSearch").value = "";
+                document.getElementById("memberResult").innerHTML = "";
                 state.selectedEwallet = null;
                 document.querySelectorAll('.ewallet-btn').forEach((b) => {
                     b.classList.remove('border-cyan-400/70', 'bg-cyan-400/10');
@@ -1422,6 +1477,11 @@
                 updateSummary();
             });
         });
+        
+        [refs.cardHolder, refs.cardNumber, refs.cardBank, refs.approvalCode].forEach((input) => {
+            input.addEventListener('input', updateSummary);
+        });
+
         refs.checkoutButton.addEventListener('click', checkout);
         refs.closeTransactionModal.addEventListener('click', closeTransactionModal);
         refs.transactionModal.addEventListener('click', (event) => {
@@ -1467,6 +1527,91 @@
         setCurrencyInputValue(refs.cashTendered, getCashTendered());
         loadProducts();
         loadTransactions();
+
+        let selectedCustomer = null;
+
+        document
+        .getElementById("memberSearch")
+        .addEventListener("keyup", async function () {
+
+            const keyword = this.value.trim();
+
+            if (keyword.length < 4) {
+
+                document.getElementById("memberResult").innerHTML = "";
+
+                return;
+
+            }
+
+            try{
+
+                const response = await fetch(
+                    "/customers/search?keyword=" + encodeURIComponent(keyword)
+                );
+
+                const result = await response.json();
+
+                let html = "";
+
+                result.data.forEach(customer => {
+
+                    html += `
+                    <div
+                        onclick="chooseMember(${customer.id},'${customer.name}','${customer.phone}')"
+                        class="cursor-pointer rounded-xl border border-cyan-500/30 bg-slate-900 p-3 hover:bg-cyan-700/30 transition">
+
+                        <div class="font-semibold text-white">
+                            ${customer.name}
+                        </div>
+
+                        <div class="text-sm text-slate-300">
+                            ${customer.phone}
+                        </div>
+
+                        <div class="text-xs text-cyan-300">
+                            ${customer.member_level} • ${customer.points} poin
+                        </div>
+
+                    </div>
+                    `;
+
+                });
+
+                if(result.data.length===0){
+
+                    html = `
+                        <div class="rounded-lg bg-slate-900 p-3 text-slate-400">
+                            Member tidak ditemukan
+                        </div>
+                    `;
+
+                }
+
+                document.getElementById("memberResult").innerHTML = html;
+
+            }catch(error){
+
+                console.error(error);
+
+            }
+
+        });
+
+        function chooseMember(id,name,phone){
+
+            selectedCustomer=id;
+
+            document.getElementById("memberSearch").value =
+                name+" ("+phone+")";
+
+            document.getElementById("memberResult").innerHTML=`
+                <div class="rounded-xl border border-green-500 bg-green-500/20 p-3 text-green-300">
+                    ✓ ${name}
+                </div>
+            `;
+
+        }
 
         const showPrintReceiptButton = (transactionId) => {
             const existing = document.getElementById('printReceiptBtn');
