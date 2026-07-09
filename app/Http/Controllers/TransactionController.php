@@ -200,7 +200,6 @@ class TransactionController extends Controller
         $changeAmount = $validated['payment_method'] === 'cash' ? max(0, $cashTendered - $totalAmount) : 0;
         $paymentStatus = $validated['payment_method'] === 'cash' && $cashTendered < $totalAmount ? 'pending' : 'paid';
 
-        // Build reference_number string: gabungkan tag KEMASAN (dan PARKIR jika ada di notes)
         $referenceSegments = [];
         if ($packagingFee > 0) {
             $referenceSegments[] = 'KEMASAN:' . $packagingFee . '|' . $packagingLabel;

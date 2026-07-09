@@ -17,20 +17,11 @@ class ReceiptController extends Controller
         $payment = $transaction->payments->first();
         $referenceNumber = $payment?->reference_number ?? '';
 
-        // Parse KEMASAN dari reference_number (format: "KEMASAN:500|Kantong Sedang")
         $packagingFee = 0;
         $packagingName = '';
         if (preg_match('/KEMASAN:(\d+)\|([^;]+)/i', $referenceNumber, $m)) {
             $packagingFee = (int) $m[1];
             $packagingName = trim($m[2]);
-        }
-
-        // Parse PARKIR dari reference_number (format: "PARKIR:2000|Motor")
-        $parkingFee = 0;
-        $parkingName = '';
-        if (preg_match('/PARKIR:(\d+)\|([^;]+)/i', $referenceNumber, $m)) {
-            $parkingFee = (int) $m[1];
-            $parkingName = trim($m[2]);
         }
 
         $data = [
@@ -46,8 +37,6 @@ class ReceiptController extends Controller
                 'amount' => $detail->amount,
             ]),
             'payment' => $payment,
-            'parking_fee' => $parkingFee,
-            'parking_name' => $parkingName,
             'packaging_fee' => $packagingFee,
             'packaging_name' => $packagingName,
         ];

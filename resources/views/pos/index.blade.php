@@ -1190,18 +1190,14 @@
             refs.transactionModalPayment.innerHTML = payments.length ? payments.map((payment) => {
                 const ref = payment.reference_number || '';
                 const kemasanMatch = ref.match(/KEMASAN:(\d+)\|([^;]+)/i);
-                const parkingMatch = ref.match(/PARKIR:(\d+)\|([^;]+)/i);
                 const kemasanRow = kemasanMatch
                     ? `<div>Kemasan <span class="text-teal-300">(${kemasanMatch[2].trim()})</span>: <span class="font-semibold text-teal-200">${formatMoney(parseInt(kemasanMatch[1], 10))}</span></div>`
-                    : '';
-                const parkingRow = parkingMatch
-                    ? `<div>Parkir <span class="text-amber-300">(${parkingMatch[2].trim()})</span>: <span class="font-semibold text-amber-200">${formatMoney(parseInt(parkingMatch[1], 10))}</span></div>`
                     : '';
                 return `
                 <div>Metode: <span class="font-semibold text-white">${payment.payment_method}</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
-                ${parkingRow}${kemasanRow}
+                ${kemasanRow}
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
                 `;
             }).join('') : `

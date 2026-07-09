@@ -181,7 +181,7 @@
     </table>
 
     @php
-        $subtotal = $transaction->total + ($payment?->discount_amount ?? 0) - ($parking_fee ?? 0) - ($packaging_fee ?? 0);
+        $subtotal = $transaction->total + ($payment?->discount_amount ?? 0) - ($packaging_fee ?? 0);
     @endphp
 
     <table class="summary">
@@ -193,12 +193,6 @@
         <tr>
             <td class="label">Diskon</td>
             <td class="value" style="color:#e74c3c;">- Rp {{ number_format($payment->discount_amount, 0, ',', '.') }}</td>
-        </tr>
-        @endif
-        @if (!empty($parking_fee) && $parking_fee > 0)
-        <tr>
-            <td class="label">Biaya Parkir{{ !empty($parking_name) ? ' (' . $parking_name . ')' : '' }}</td>
-            <td class="value">Rp {{ number_format($parking_fee, 0, ',', '.') }}</td>
         </tr>
         @endif
         @if (!empty($packaging_fee) && $packaging_fee > 0)
@@ -222,7 +216,9 @@
             <tr><td class="label">Tunai</td><td class="value">: Rp {{ number_format($payment->cash_tendered, 0, ',', '.') }}</td></tr>
             <tr><td class="label">Kembalian</td><td class="value">: Rp {{ number_format($payment->change_amount, 0, ',', '.') }}</td></tr>
             @endif
-
+            @if ($payment->reference_number && !str_starts_with($payment->reference_number, 'KEMASAN:'))
+            <tr><td class="label">No. Referensi</td><td class="value">: {{ $payment->reference_number }}</td></tr>
+            @endif
         </table>
     </div>
     @endif
