@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\LowStockReportController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
@@ -45,9 +44,6 @@ Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index'])
 
 Route::put('/stock-adjustments/{product}', [StockAdjustmentController::class, 'update'])
     ->name('stock-adjustments.update');
-
-Route::get('/stock-reports/low-stock', [LowStockReportController::class, 'index'])
-    ->name('stock-reports.low-stock');
 
 Route::get('/transactions/export/csv', [TransactionController::class, 'exportCsv'])->name('transactions.export');
 Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');

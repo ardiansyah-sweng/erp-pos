@@ -126,14 +126,6 @@
                             </svg>
                             Penyesuaian Stok
                         </a>
-                        <a href="{{ route('stock-reports.low-stock') }}" class="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/15 px-4 py-2 text-sm font-medium text-amber-200 transition hover:border-amber-300 hover:bg-amber-400/25 hover:text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>
-                                <path d="M12 9v4"/>
-                                <path d="M12 17h.01"/>
-                            </svg>
-                            Stok Rendah
-                        </a>
                         <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/15 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-400/25 hover:text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <rect x="3" y="3" width="7" height="7"/>
