@@ -16,6 +16,7 @@
             </div>
             <div class="flex items-center gap-3">
                 <a href="{{ route('pos.index') }}" class="rounded-xl border border-white/10 px-4 py-2 text-center text-sm font-semibold hover:border-cyan-400 hover:text-cyan-300">Kembali ke POS</a>
+                <a href="{{ route('categories.index') }}" class="rounded-xl border border-white/10 px-4 py-2 text-center text-sm font-semibold hover:border-cyan-400 hover:text-cyan-300">Kelola Kategori</a>
                 <button onclick="openCreateModal()" class="rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-300">+ Tambah Produk</button>
             </div>
         </div>
@@ -36,24 +37,21 @@
             </div>
         @endif
 
-        <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <form method="GET" action="{{ route('products.manage') }}" class="flex flex-1 flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 sm:flex-row">
-                <input
-                    name="search"
-                    value="{{ $search }}"
-                    placeholder="Cari nama, SKU, atau barcode..."
-                    class="min-w-0 flex-1 rounded-xl border border-white/10 bg-slate-900 px-4 py-3 outline-none focus:border-cyan-400"
-                >
-                <select name="category_id" class="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 outline-none focus:border-cyan-400">
-                    <option value="">Semua Kategori</option>
-                    @foreach ($categories as $category)
-                        <option value="{{ $category->id }}" @selected((string) $categoryId === (string) $category->id)>{{ $category->name }}</option>
-                    @endforeach
-                </select>
-                <button class="rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-300">Cari</button>
-            </form>
-            <a href="{{ route('categories.index') }}" class="rounded-xl border border-white/10 px-4 py-3 text-center text-sm font-semibold hover:border-cyan-400 hover:text-cyan-300">Kelola Kategori</a>
-        </div>
+        <form method="GET" action="{{ route('products.manage') }}" class="mb-6 flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 sm:flex-row">
+            <input
+                name="search"
+                value="{{ $search }}"
+                placeholder="Cari nama, SKU, atau barcode..."
+                class="min-w-0 flex-1 rounded-xl border border-white/10 bg-slate-900 px-4 py-3 outline-none focus:border-cyan-400"
+            >
+            <select name="category_id" class="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 outline-none focus:border-cyan-400">
+                <option value="">Semua Kategori</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category->id }}" @selected((string) $categoryId === (string) $category->id)>{{ $category->name }}</option>
+                @endforeach
+            </select>
+            <button class="rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-300">Cari</button>
+        </form>
 
         <div class="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
             <div class="overflow-x-auto">
@@ -235,7 +233,7 @@
             document.getElementById('product-form').action = '/products/manage/' + id;
             document.getElementById('form-method').value = 'PUT';
             document.getElementById('f-name').value = name;
-            document.getElementById('f-category_id').value = categoryId === null ? '' : categoryId;
+            document.getElementById('f-category_id').value = categoryId ?? '';
             document.getElementById('f-sku').value = sku;
             document.getElementById('f-barcode').value = barcode;
             document.getElementById('f-selling_price').value = price;
