@@ -182,34 +182,8 @@
                 $transactionCode = 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT);
             @endphp
 
-<<<<<<< HEAD
-        const closeModal = () => {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        };
-
-        const openModal = (transaction) => {
-            modalTitle.textContent = transaction.code;
-            modalDate.textContent = transaction.created_at || '-';
-            modalTotal.textContent = formatMoney(transaction.total);
-            modalPayment.innerHTML = transaction.payments.length ? transaction.payments.map((payment) => `
-                <div>Metode: <span class="font-semibold text-white">${escapeHtml(payment.payment_method || 'cash')}</span></div>
-                <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
-                <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
-                ${payment.parking_fee > 0 ? `<div>Biaya Parkir <span class="text-amber-300">(${escapeHtml(payment.parking_type)})</span>: <span class="font-semibold text-amber-200">${formatMoney(payment.parking_fee)}</span></div>` : ''}
-                <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
-            `).join('') : `
-                <div>Metode: <span class="font-semibold text-white">cash</span></div>
-                <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
-                <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
-                <div>Kembalian: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
-            `;
-            modalItems.innerHTML = transaction.details.length ? transaction.details.map((detail) => `
-                <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm">
-=======
             <article data-show-transaction="{{ $transaction->id }}" role="button" tabindex="0" class="cursor-pointer rounded-2xl border border-white/10 bg-white/5 p-4 shadow-xl shadow-black/20 backdrop-blur-xl transition hover:border-cyan-400/50 hover:bg-white/10">
                 <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
->>>>>>> origin/develop
                     <div>
                         <h2 class="text-lg font-semibold text-white">{{ $transactionCode }}</h2>
                         <p class="mt-1 text-sm text-slate-400">{{ $transaction->created_at?->translatedFormat('d M Y, H.i') }}</p>
