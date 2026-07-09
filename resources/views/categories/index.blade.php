@@ -26,6 +26,12 @@
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="mb-6 rounded-xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-rose-200">
+                {{ session('error') }}
+            </div>
+        @endif
+
         @if ($errors->any())
             <div class="mb-6 rounded-xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-rose-200">
                 <ul class="list-inside list-disc space-y-1">
@@ -89,6 +95,12 @@
                                                 <button class="rounded-lg border border-emerald-400/40 px-3 py-1.5 text-sm hover:border-emerald-400 hover:text-emerald-300">Aktifkan</button>
                                             </form>
                                         @endif
+                                        @if ($category->products_count === 0)
+                                            <button
+                                                onclick="openForceDeleteModal({{ $category->id }}, @js($category->name))"
+                                                class="rounded-lg border border-rose-400/40 px-3 py-1.5 text-sm text-rose-300 hover:border-rose-400 hover:text-rose-200"
+                                            >Hapus</button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -149,6 +161,22 @@
         </div>
     </div>
 
+    {{-- Modal Konfirmasi Hapus Permanen (hanya kategori tanpa produk) --}}
+    <div id="force-delete-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 p-4">
+        <div class="w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6">
+            <h2 class="mb-2 text-xl font-bold">Hapus Kategori Permanen</h2>
+            <p class="mb-6 text-slate-400">Hapus <strong id="force-delete-category-name" class="text-white"></strong> secara permanen? Tindakan ini tidak bisa dibatalkan.</p>
+            <form id="force-delete-form" method="POST">
+                @csrf
+                @method('DELETE')
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('force-delete-modal')" class="rounded-xl border border-white/10 px-5 py-3 hover:border-white/20">Batal</button>
+                    <button type="submit" class="rounded-xl bg-rose-500 px-5 py-3 font-semibold text-white hover:bg-rose-400">Ya, Hapus Permanen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
@@ -175,11 +203,20 @@
             document.getElementById('delete-modal').classList.remove('hidden');
         }
 
+        function openForceDeleteModal(id, name) {
+            document.getElementById('force-delete-category-name').textContent = name;
+            document.getElementById('force-delete-form').action = '/categories/' + id + '/force';
+            document.getElementById('force-delete-modal').classList.remove('hidden');
+        }
+
         document.getElementById('form-modal').addEventListener('click', function(e) {
             if (e.target === this) closeModal('form-modal');
         });
         document.getElementById('delete-modal').addEventListener('click', function(e) {
             if (e.target === this) closeModal('delete-modal');
+        });
+        document.getElementById('force-delete-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal('force-delete-modal');
         });
     </script>
 </body>

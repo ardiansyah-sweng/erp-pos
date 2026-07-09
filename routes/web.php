@@ -49,6 +49,7 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('categorie
 Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
 Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
 Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+Route::delete('/categories/{category}/force', [CategoryController::class, 'delete'])->name('categories.delete');
 
 Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index'])
     ->name('stock-adjustments.index');

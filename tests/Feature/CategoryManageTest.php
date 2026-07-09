@@ -99,6 +99,36 @@ class CategoryManageTest extends TestCase
         $this->assertSame('Elektronik', $product->category->name);
     }
 
+    public function test_delete_permanently_removes_empty_category(): void
+    {
+        $category = Category::create(['name' => 'Kosong']);
+
+        $this->delete(route('categories.delete', $category))
+            ->assertRedirect(route('categories.index'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('categories', ['id' => $category->id]);
+    }
+
+    public function test_delete_is_blocked_when_category_has_products(): void
+    {
+        $category = Category::create(['name' => 'Berisi']);
+        Product::create([
+            'sku' => 'CAT-001',
+            'name' => 'Produk Berkategori',
+            'category_id' => $category->id,
+            'selling_price' => 10000,
+            'stock_quantity' => 5,
+            'min_stock' => 1,
+        ]);
+
+        $this->delete(route('categories.delete', $category))
+            ->assertRedirect(route('categories.index'))
+            ->assertSessionHas('error');
+
+        $this->assertDatabaseHas('categories', ['id' => $category->id]);
+    }
+
     public function test_product_store_rejects_invalid_category(): void
     {
         $this->post(route('products.store'), [

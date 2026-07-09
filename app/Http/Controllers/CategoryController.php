@@ -58,4 +58,16 @@ class CategoryController extends Controller
         $status = $category->is_active ? 'diaktifkan' : 'dinonaktifkan';
         return Redirect::route('categories.index')->with('success', "Kategori berhasil {$status}.");
     }
+
+    public function delete(Category $category): RedirectResponse
+    {
+        if ($category->products()->exists()) {
+            return Redirect::route('categories.index')
+                ->with('error', 'Kategori masih memiliki produk, tidak bisa dihapus permanen. Nonaktifkan saja.');
+        }
+
+        $category->delete();
+
+        return Redirect::route('categories.index')->with('success', 'Kategori berhasil dihapus permanen.');
+    }
 }
