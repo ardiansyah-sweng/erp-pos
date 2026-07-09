@@ -87,20 +87,6 @@ Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile
 Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
 Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Route::delete('/cashier/{id}', [CashierController::class, 'destroy'])->name('cashier.destroy');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
