@@ -188,7 +188,6 @@
             preg_match('/^PARKIR:(\d+)\|(.+)$/', $transaction->notes, $pm)) {
             $parkingFeeAmount = (int) $pm[1];
             $parkingFeeLabel  = $pm[2];
-            // subtotal produk = total - parkir + diskon
             $subtotal = $transaction->total - $parkingFeeAmount + ($payment?->discount_amount ?? 0);
         }
     @endphp
