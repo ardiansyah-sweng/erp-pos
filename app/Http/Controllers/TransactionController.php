@@ -158,7 +158,6 @@ class TransactionController extends Controller
             'payment_method' => ['required', 'in:cash,card,e_wallet,bank_transfer,qris'],
             'cash_tendered' => ['nullable', 'integer', 'min:0'],
             'notes' => ['nullable', 'string', 'max:255'],
-            // ===== PARKING FEE ADD-ON =====
             'parking_fee' => ['nullable', 'integer', 'min:0', 'in:0,2000,5000'],
         ]);
 
@@ -195,10 +194,8 @@ class TransactionController extends Controller
         $discountAmount = (int) ($validated['discount_amount'] ?? 0);
         $totalAmount = max(0, $subtotal - $discountAmount);
 
-        // ===== PARKING FEE ADD-ON — tambah biaya parkir ke total =====
         $parkingFee = (int) ($validated['parking_fee'] ?? 0);
         $totalAmount += $parkingFee;
-        // Encode info parkir ke label untuk disimpan di reference_number
         $parkingNote = '';
         if ($parkingFee > 0) {
             $parkingLabel = match ($parkingFee) {
@@ -208,7 +205,6 @@ class TransactionController extends Controller
             };
             $parkingNote = "PARKIR:{$parkingFee}|{$parkingLabel}";
         }
-        // ===== END PARKING FEE ADD-ON =====
 
         $cashTendered = (int) ($validated['cash_tendered'] ?? 0);
         $changeAmount = $validated['payment_method'] === 'cash' ? max(0, $cashTendered - $totalAmount) : 0;
@@ -237,9 +233,7 @@ class TransactionController extends Controller
             $transaction = Transaction::create([
                 'customer_id' => $validated['customer_id'] ?? null,
                 'total' => $totalAmount,
-                // ===== PARKING FEE ADD-ON: simpan info parkir di kolom notes =====
                 'notes' => $parkingNote ?: null,
-                // ===== END PARKING FEE ADD-ON =====
             ]);
 
             $transaction->payments()->create([
@@ -249,7 +243,6 @@ class TransactionController extends Controller
                 'discount_amount' => $discountAmount,
                 'cash_tendered' => $cashTendered,
                 'change_amount' => $changeAmount,
-                // reference_number tetap null/kosong — tidak dipakai untuk parkir
             ]);
 
             foreach ($validated['items'] as $item) {

@@ -345,7 +345,6 @@
                             <textarea id="notes" rows="3" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400" placeholder="Opsional"></textarea>
                         </div>
 
-                        {{-- ===== PARKING ADDON — ISOLATED ===== --}}
                         <div id="parking-selection">
                             <label class="text-sm text-slate-300">Biaya Parkir</label>
                             <div class="mt-2 flex flex-row gap-2">
@@ -353,7 +352,6 @@
                                 {{-- Tanpa Parkir --}}
                                 <label class="parking-pill flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2 text-xs font-medium text-slate-300 transition has-[:checked]:border-emerald-400/60 has-[:checked]:bg-emerald-400/15 has-[:checked]:text-emerald-200">
                                     <input type="radio" name="parking_fee" value="0" class="sr-only" checked>
-                                    {{-- X circle --}}
                                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
                                     <span>Tanpa</span>
                                 </label>
@@ -361,7 +359,6 @@
                                 {{-- Motor --}}
                                 <label class="parking-pill flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2 text-xs font-medium text-slate-300 transition has-[:checked]:border-amber-400/60 has-[:checked]:bg-amber-400/15 has-[:checked]:text-amber-200">
                                     <input type="radio" name="parking_fee" value="2000" class="sr-only">
-                                    {{-- Motorcycle --}}
                                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="flex-shrink-0"><circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M8 17h8"/><path d="M3.4 13.4 5 8h9l3 5.5"/><path d="M12 8V5h2"/></svg>
                                     <span>Motor</span>
                                     <span class="text-[10px] opacity-70">2k</span>
@@ -370,7 +367,6 @@
                                 {{-- Mobil --}}
                                 <label class="parking-pill flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2 text-xs font-medium text-slate-300 transition has-[:checked]:border-cyan-400/60 has-[:checked]:bg-cyan-400/15 has-[:checked]:text-cyan-200">
                                     <input type="radio" name="parking_fee" value="5000" class="sr-only">
-                                    {{-- Car --}}
                                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="flex-shrink-0"><path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h10l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><circle cx="7.5" cy="17" r="2.5"/><circle cx="16.5" cy="17" r="2.5"/><path d="M9 17h6"/></svg>
                                     <span>Mobil</span>
                                     <span class="text-[10px] opacity-70">5k</span>
@@ -378,7 +374,6 @@
 
                             </div>
                         </div>
-                        {{-- ===== END PARKING ADDON ===== --}}
                     </div>
                     
                     <div class="mt-5">
@@ -411,9 +406,7 @@
                     <div class="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
                         <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
                         <div class="flex items-center justify-between"><span>Diskon</span><span id="discountValue" class="font-semibold text-white">Rp0</span></div>
-                        {{-- ===== PARKING FEE ROW ===== --}}
                         <div id="row-parking-fee" class="flex items-center justify-between text-amber-200/80 hidden"><span>Biaya Parkir</span><span id="parkingFeeValue" class="font-semibold">Rp0</span></div>
-                        {{-- ===== END PARKING FEE ROW ===== --}}
                         <div class="flex items-center justify-between"><span>Total</span><span id="grandTotalValue" class="font-semibold text-emerald-300">Rp0</span></div>
                         <div id="changeRow" class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
                     </div>
@@ -722,7 +715,6 @@
             refs.checkoutConfirmTotal.textContent = formatMoney(grandTotal);
             refs.checkoutConfirmPayment.textContent = getPaymentMethodLabel();
 
-            // Parkir: baca dari radio button yang aktif saat ini
             const checkedRadio = document.querySelector('input[name="parking_fee"]:checked');
             const parkingLabel = checkedRadio
                 ? checkedRadio.closest('label')?.textContent.trim().replace(/\s+/g, ' ')
@@ -858,10 +850,8 @@
         const updateSummary = () => {
             const subtotal = calculateSubtotal();
             const discount = Math.min(getDiscount(), subtotal);
-            // ===== PARKING FEE ADD-ON =====
             const parkingFee = window._parkingFee || 0;
             const grandTotal = Math.max(0, subtotal - discount) + parkingFee;
-            // ===== END =====
             const change = calculateChange();
             const paymentMethod = refs.paymentMethod.value;
             const isCashPayment = paymentMethod === 'cash';
@@ -899,7 +889,6 @@
             refs.changeRow.style.display = isCashPayment ? '' : 'none';
             refs.checkoutButton.disabled = state.cart.length === 0 || isInvalidDiscount || isCashInsufficient || isEwalletNotSelected || isCardIncomplete;
 
-            // ===== PARKING FEE ADD-ON: tampilkan/sembunyikan baris parkir =====
             const rowParkingFee = document.getElementById('row-parking-fee');
             const parkingFeeValEl = document.getElementById('parkingFeeValue');
             if (rowParkingFee && parkingFeeValEl) {
@@ -911,7 +900,6 @@
                     parkingFeeValEl.textContent = 'Rp0';
                 }
             }
-            // ===== END PARKING FEE ADD-ON =====
 
             if (state.cart.length === 0) {
                 setCheckoutStatus('Tambahkan produk ke keranjang terlebih dahulu.', 'info');
@@ -1154,7 +1142,6 @@
             refs.transactionModalTitle.textContent = transactionCode;
             refs.transactionModalDate.textContent = formatDateTime(transaction.created_at);
             refs.transactionModalTotal.textContent = formatMoney(transaction.total);
-            // Parse biaya parkir dari transaction.notes (format: "PARKIR:2000|Motor")
             const parkingMatch = String(transaction.notes ?? '').match(/^PARKIR:(\d+)\|(.+)$/);
             const parkingRow = parkingMatch
                 ? `<div>Biaya Parkir <span class="text-amber-300">(${parkingMatch[2]})</span>: <span class="font-semibold text-amber-200">${formatMoney(parseInt(parkingMatch[1], 10))}</span></div>`
@@ -1263,9 +1250,7 @@
                     payment_method: 'qris',
                     cash_tendered: 0,
                     notes: refs.notes.value,
-                    // ===== PARKING FEE ADD-ON =====
                     parking_fee: window._parkingFee || 0,
-                    // ===== END =====
                 };
                 const subtotal = calculateSubtotal();
                 const discount = Math.min(getDiscount(), subtotal);
@@ -1703,11 +1688,7 @@
             refs.checkoutButton.after(btn);
         };
 
-        /* =========================================================
-         * PARKING FEE ADD-ON — v3 (event listener only, no patch)
-         * Radio change → update _parkingFee → panggil updateSummary
-         * yang sudah dimodifikasi untuk include parkir.
-         * ========================================================= */
+        
         window._parkingFee = 0;
 
         document.querySelectorAll('input[name="parking_fee"]').forEach((radio) => {
@@ -1716,7 +1697,6 @@
                 updateSummary();
             });
         });
-        /* ======= END PARKING FEE ADD-ON ======= */
     </script>
 </body>
 </html>

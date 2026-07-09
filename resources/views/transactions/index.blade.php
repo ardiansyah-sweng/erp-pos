@@ -84,14 +84,12 @@
                 'code' => 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
                 'created_at' => $transaction->created_at?->translatedFormat('d M Y, H.i'),
                 'total' => $transaction->total,
-                // ===== PARKING FEE ADD-ON: parse dari transaction->notes =====
                 'parking_fee' => (function($notes) {
                     if ($notes && preg_match('/^PARKIR:(\d+)\|(.+)$/', $notes, $m)) {
                         return ['amount' => (int)$m[1], 'label' => $m[2]];
                     }
                     return null;
                 })($transaction->notes),
-                // ===== END PARKING FEE ADD-ON =====
                 'payments' => $transaction->payments->map(fn ($payment) => [
                     'payment_method' => $payment->payment_method,
                     'discount_amount' => $payment->discount_amount,
