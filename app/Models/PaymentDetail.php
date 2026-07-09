@@ -15,6 +15,8 @@ class PaymentDetail extends Model
         'discount_amount',
         'cash_tendered',
         'change_amount',
+        'parking_fee',
+        'parking_type',
     ];
 
     protected $casts = [
@@ -22,6 +24,8 @@ class PaymentDetail extends Model
         'discount_amount' => 'integer',
         'cash_tendered' => 'integer',
         'change_amount' => 'integer',
+        'parking_fee' => 'integer',
+        'parking_type' => 'string',
     ];
 
     public function transaction()

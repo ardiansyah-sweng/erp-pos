@@ -196,21 +196,17 @@ class TransactionController extends Controller
 
         $parkingFee = (int) ($validated['parking_fee'] ?? 0);
         $totalAmount += $parkingFee;
-        $parkingNote = '';
-        if ($parkingFee > 0) {
-            $parkingLabel = match ($parkingFee) {
-                2000 => 'Motor',
-                5000 => 'Mobil',
-                default => "Rp {$parkingFee}",
-            };
-            $parkingNote = "PARKIR:{$parkingFee}|{$parkingLabel}";
-        }
+        $parkingType = match ($parkingFee) {
+            2000 => 'motor',
+            5000 => 'mobil',
+            default => 'none',
+        };
 
         $cashTendered = (int) ($validated['cash_tendered'] ?? 0);
         $changeAmount = $validated['payment_method'] === 'cash' ? max(0, $cashTendered - $totalAmount) : 0;
         $paymentStatus = $validated['payment_method'] === 'cash' && $cashTendered < $totalAmount ? 'pending' : 'paid';
 
-        $transaction = DB::transaction(function () use ($validated, $totalAmount, $discountAmount, $cashTendered, $changeAmount, $paymentStatus, $productQuantities, $parkingNote) {
+        $transaction = DB::transaction(function () use ($validated, $totalAmount, $discountAmount, $cashTendered, $changeAmount, $paymentStatus, $productQuantities, $parkingFee, $parkingType) {
             $lockedProducts = Product::query()
                 ->whereIn('id', $productQuantities->keys())
                 ->lockForUpdate()
@@ -233,7 +229,7 @@ class TransactionController extends Controller
             $transaction = Transaction::create([
                 'customer_id' => $validated['customer_id'] ?? null,
                 'total' => $totalAmount,
-                'notes' => $parkingNote ?: null,
+                'notes' => $validated['notes'] ?? null,
             ]);
 
             $transaction->payments()->create([
@@ -243,6 +239,8 @@ class TransactionController extends Controller
                 'discount_amount' => $discountAmount,
                 'cash_tendered' => $cashTendered,
                 'change_amount' => $changeAmount,
+                'parking_fee' => $parkingFee,
+                'parking_type' => $parkingType,
             ]);
 
             foreach ($validated['items'] as $item) {

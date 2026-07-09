@@ -181,15 +181,9 @@
     </table>
 
     @php
-        $subtotal = $transaction->total + ($payment?->discount_amount ?? 0);
-        $parkingFeeAmount = 0;
-        $parkingFeeLabel  = '';
-        if ($transaction->notes &&
-            preg_match('/^PARKIR:(\d+)\|(.+)$/', $transaction->notes, $pm)) {
-            $parkingFeeAmount = (int) $pm[1];
-            $parkingFeeLabel  = $pm[2];
-            $subtotal = $transaction->total - $parkingFeeAmount + ($payment?->discount_amount ?? 0);
-        }
+        $parkingFeeAmount = (int) ($payment?->parking_fee ?? 0);
+        $parkingFeeLabel  = ucfirst($payment?->parking_type ?? '');
+        $subtotal = $transaction->total - $parkingFeeAmount + ($payment?->discount_amount ?? 0);
     @endphp
 
     <table class="summary">
@@ -224,7 +218,7 @@
             <tr><td class="label">Tunai</td><td class="value">: Rp {{ number_format($payment->cash_tendered, 0, ',', '.') }}</td></tr>
             <tr><td class="label">Kembalian</td><td class="value">: Rp {{ number_format($payment->change_amount, 0, ',', '.') }}</td></tr>
             @endif
-            @if ($payment->reference_number && !str_starts_with($payment->reference_number, 'PARKIR:'))
+            @if ($payment->reference_number)
             <tr><td class="label">No. Referensi</td><td class="value">: {{ $payment->reference_number }}</td></tr>
             @endif
         </table>
