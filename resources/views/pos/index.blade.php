@@ -119,13 +119,6 @@
                     <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat untuk transaksi harian.</h1>
                     <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari atau scan produk, cek isi keranjang, lalu selesaikan pembayaran tanpa reload halaman.</p>
                     <div class="mt-4 flex flex-wrap items-center gap-3">
-                        <a href="{{ route('stock-adjustments.index') }}" class="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/15 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:border-emerald-300 hover:bg-emerald-400/25 hover:text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
-                                <path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>
-                            </svg>
-                            Penyesuaian Stok
-                        </a>
                         <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/15 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-400/25 hover:text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <rect x="3" y="3" width="7" height="7"/>
@@ -139,20 +132,6 @@
                             <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
                             <span id="themeLabel">Mode terang</span>
                         </button>
-                        <a href="{{ route('sales-notes') }}" class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/15 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-400/25 hover:text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M3 3v18h18"/>
-                                <path d="m19 9-5 5-4-4-3 3"/>
-                            </svg>
-                            Laporan Penjualan
-                        </a>
-                        <a href="{{ route('returns.index') }}" class="inline-flex items-center gap-2 rounded-full border border-rose-400/40 bg-rose-400/15 px-4 py-2 text-sm font-medium text-rose-200 transition hover:border-rose-300 hover:bg-rose-400/25 hover:text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="m9 14-4-4 4-4"/>
-                                <path d="M5 10h11a4 4 0 0 1 0 8h-1"/>
-                            </svg>
-                            Retur Transaksi
-                        </a>
                     </div>
                 </div>
                 <div class="flex flex-col items-end gap-3">
@@ -206,6 +185,15 @@
                                 <button id="refreshProducts" class="rounded-2xl border border-cyan-400/40 bg-cyan-400/15 px-4 py-3 text-cyan-200 transition hover:bg-cyan-400/25">Reload</button>
                             </div>
                         </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="text-sm text-slate-300" for="categoryFilter">Kategori</label>
+                        <select id="categoryFilter" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none focus:border-cyan-400">
+                            <option value="">Semua Kategori</option>
+                            @foreach ($categories as $cat)
+                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <p id="productsStatus" class="mt-3 text-sm text-slate-400">Memuat produk...</p>
                 </div>
@@ -633,6 +621,7 @@
             cardNumber: document.getElementById('cardNumber'),
             cardBank: document.getElementById('cardBank'),
             approvalCode: document.getElementById('approvalCode'),
+            categoryFilter: document.getElementById('categoryFilter'),
         };
 
         const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
@@ -1029,6 +1018,7 @@
                             </div>
                             <h3 class="mt-4 line-clamp-2 text-lg font-semibold leading-snug text-white">${product.name}</h3>
                             <p class="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-400">${product.description || 'Tanpa deskripsi'}</p>
+                            ${product.category ? `<span class="mt-2 inline-block rounded-full border border-purple-400/20 bg-purple-400/10 px-3 py-1 text-xs font-medium text-purple-200">${product.category.name}</span>` : ''}
                         </div>
                         <div class="mt-5 space-y-3 border-t border-white/10 pt-4">
                             <div class="flex items-center justify-between gap-3 text-sm">
@@ -1112,11 +1102,14 @@
             updateSummary();
         };
 
-        const loadProducts = async (search = '') => {
+        const loadProducts = async (search = '', categoryId = '') => {
             refs.productsStatus.textContent = 'Memuat produk...';
 
             try {
-                const queryString = search ? `?search=${encodeURIComponent(search)}` : '';
+                const params = new URLSearchParams();
+                if (search) params.set('search', search);
+                if (categoryId) params.set('category_id', categoryId);
+                const queryString = params.toString() ? `?${params.toString()}` : '';
                 const response = await fetchJson(`/products${queryString}`);
                 state.products = response.data ?? [];
                 renderProducts();
@@ -1319,7 +1312,7 @@
                 setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
                 renderCart();
-                await loadProducts(refs.productSearch.value.trim());
+                await loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value);
                 await loadTransactions();
                 setCheckoutStatus('Transaksi berhasil disimpan.', 'success');
                 if (state.printAfterCheckout) {
@@ -1396,7 +1389,7 @@
                 setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
                 renderCart();
-                await loadProducts(refs.productSearch.value.trim());
+                await loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value);
                 await loadTransactions();
                 setCheckoutStatus('Transaksi QRIS berhasil disimpan.', 'success');
                 if (state.printAfterCheckout) {
@@ -1423,7 +1416,7 @@
         refs.productSearch.addEventListener('input', () => {
             window.clearTimeout(searchTimer);
             searchTimer = window.setTimeout(() => {
-                loadProducts(refs.productSearch.value.trim());
+                loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value);
             }, 250);
         });
 
@@ -1456,7 +1449,8 @@
             }
         });
 
-        refs.refreshProducts.addEventListener('click', () => loadProducts(refs.productSearch.value.trim()));
+        refs.refreshProducts.addEventListener('click', () => loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value));
+        refs.categoryFilter.addEventListener('change', () => loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value));
         refs.clearCart.addEventListener('click', () => {
             state.cart = [];
             renderCart();
@@ -1586,7 +1580,7 @@
         applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
         setCurrencyInputValue(refs.discountAmount, getDiscount());
         setCurrencyInputValue(refs.cashTendered, getCashTendered());
-        loadProducts();
+        loadProducts(null, refs.categoryFilter.value);
         loadTransactions();
 
         let selectedCustomer = null;
