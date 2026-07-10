@@ -332,6 +332,36 @@
                             <label class="text-sm text-slate-300" for="notes">Catatan</label>
                             <textarea id="notes" rows="3" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400" placeholder="Opsional"></textarea>
                         </div>
+
+                         <div id="parking-selection">
+                            <label class="text-sm text-slate-300">Biaya Parkir</label>
+                            <div class="mt-2 flex flex-row gap-2">
+
+                                {{-- Tanpa Parkir --}}
+                                <label class="parking-pill flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2 text-xs font-medium text-slate-300 transition has-[:checked]:border-emerald-400/60 has-[:checked]:bg-emerald-400/15 has-[:checked]:text-emerald-200">
+                                    <input type="radio" name="parking_fee" value="0" class="sr-only" checked>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+                                    <span>Tanpa</span>
+                                </label>
+
+                                {{-- Motor --}}
+                                <label class="parking-pill flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2 text-xs font-medium text-slate-300 transition has-[:checked]:border-amber-400/60 has-[:checked]:bg-amber-400/15 has-[:checked]:text-amber-200">
+                                    <input type="radio" name="parking_fee" value="2000" class="sr-only">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="flex-shrink-0"><circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M8 17h8"/><path d="M3.4 13.4 5 8h9l3 5.5"/><path d="M12 8V5h2"/></svg>
+                                    <span>Motor</span>
+                                    <span class="text-[10px] opacity-70">2k</span>
+                                </label>
+
+                                {{-- Mobil --}}
+                                <label class="parking-pill flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2 text-xs font-medium text-slate-300 transition has-[:checked]:border-cyan-400/60 has-[:checked]:bg-cyan-400/15 has-[:checked]:text-cyan-200">
+                                    <input type="radio" name="parking_fee" value="5000" class="sr-only">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="flex-shrink-0"><path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h10l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/><circle cx="7.5" cy="17" r="2.5"/><circle cx="16.5" cy="17" r="2.5"/><path d="M9 17h6"/></svg>
+                                    <span>Mobil</span>
+                                    <span class="text-[10px] opacity-70">5k</span>
+                                </label>
+
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mt-5">
@@ -364,6 +394,7 @@
                     <div class="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
                         <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
                         <div class="flex items-center justify-between"><span>Diskon</span><span id="discountValue" class="font-semibold text-white">Rp0</span></div>
+                        <div class="flex items-center justify-between"><span>Biaya Parkir</span><span id="parkingValue" class="font-semibold text-amber-300">Rp0</span></div>
                         <div class="flex items-center justify-between"><span>Total</span><span id="grandTotalValue" class="font-semibold text-emerald-300">Rp0</span></div>
                         <div id="changeRow" class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
                     </div>
@@ -471,6 +502,7 @@
                 <div class="mt-4 rounded-3xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300">
                     <div class="flex items-center justify-between"><span>Subtotal</span><span id="checkoutConfirmSubtotal" class="font-semibold text-white">Rp0</span></div>
                     <div class="mt-2 flex items-center justify-between"><span>Diskon</span><span id="checkoutConfirmDiscount" class="font-semibold text-white">Rp0</span></div>
+                    <div id="checkoutConfirmParkingRow" class="mt-2 hidden flex items-center justify-between"><span>Biaya Parkir</span><span id="checkoutConfirmParking" class="font-semibold text-amber-200">Rp0</span></div>
                     <div class="mt-2 border-t border-white/10 pt-3 flex items-center justify-between text-base font-semibold text-emerald-300"><span>Total</span><span id="checkoutConfirmTotal">Rp0</span></div>
                     <div class="mt-2 text-sm text-slate-400"><span>Metode: </span><span id="checkoutConfirmPayment">-</span></div>
                 </div>
@@ -556,6 +588,8 @@
             checkoutConfirmItems: document.getElementById('checkoutConfirmItems'),
             checkoutConfirmSubtotal: document.getElementById('checkoutConfirmSubtotal'),
             checkoutConfirmDiscount: document.getElementById('checkoutConfirmDiscount'),
+            checkoutConfirmParkingRow: document.getElementById('checkoutConfirmParkingRow'),
+            checkoutConfirmParking: document.getElementById('checkoutConfirmParking'),
             checkoutConfirmTotal: document.getElementById('checkoutConfirmTotal'),
             checkoutConfirmPayment: document.getElementById('checkoutConfirmPayment'),
             confirmCheckoutButton: document.getElementById('confirmCheckoutButton'),
@@ -639,7 +673,7 @@
         const calculateSubtotal = () => state.cart.reduce((total, item) => total + (item.quantity * item.selling_price), 0);
         const getAppliedDiscount = () => Math.min(getDiscount(), calculateSubtotal());
         const isDiscountTooHigh = () => calculateSubtotal() > 0 && getDiscount() >= calculateSubtotal();
-        const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getAppliedDiscount());
+        const calculateGrandTotal = () => Math.max(0, calculateSubtotal() - getAppliedDiscount()) + (window._parkingFee || 0);
         const getPaymentMethodLabel = () => {
             const method = refs.paymentMethod.value;
             if (method === 'cash') return 'Cash';
@@ -652,7 +686,8 @@
         const renderCheckoutConfirmDetails = () => {
             const subtotal = calculateSubtotal();
             const discount = Math.min(getDiscount(), subtotal);
-            const grandTotal = Math.max(0, subtotal - discount);
+            const parkingFee = window._parkingFee || 0;
+            const grandTotal = Math.max(0, subtotal - discount) + parkingFee;
 
             refs.checkoutConfirmItems.innerHTML = state.cart.map((item) => `
                 <div class="grid gap-2 rounded-3xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-200 md:grid-cols-[1fr_auto]">
@@ -668,6 +703,19 @@
             refs.checkoutConfirmDiscount.textContent = formatMoney(discount);
             refs.checkoutConfirmTotal.textContent = formatMoney(grandTotal);
             refs.checkoutConfirmPayment.textContent = getPaymentMethodLabel();
+
+            const checkedRadio = document.querySelector('input[name="parking_fee"]:checked');
+            const parkingLabel = checkedRadio
+                ? checkedRadio.closest('label')?.textContent.trim().replace(/\s+/g, ' ')
+                : '';
+            if (parkingFee > 0) {
+                refs.checkoutConfirmParkingRow.classList.remove('hidden');
+                refs.checkoutConfirmParking.textContent = formatMoney(parkingFee)
+                    + (parkingLabel ? ` (${parkingLabel.split('—')[0].trim()})` : '');
+            } else {
+                refs.checkoutConfirmParkingRow.classList.add('hidden');
+                refs.checkoutConfirmParking.textContent = 'Rp0';
+            }
         };
         const openCheckoutConfirmModal = () => {
             renderCheckoutConfirmDetails();
@@ -791,7 +839,8 @@
         const updateSummary = () => {
             const subtotal = calculateSubtotal();
             const discount = Math.min(getDiscount(), subtotal);
-            const grandTotal = Math.max(0, subtotal - discount);
+            const parkingFee = window._parkingFee || 0;
+            const grandTotal = Math.max(0, subtotal - discount) + parkingFee;
             const change = calculateChange();
             const paymentMethod = refs.paymentMethod.value;
             const isCashPayment = paymentMethod === 'cash';
@@ -828,6 +877,18 @@
             refs.cashTenderedWrapper.style.display = isCashPayment ? '' : 'none';
             refs.changeRow.style.display = isCashPayment ? '' : 'none';
             refs.checkoutButton.disabled = state.cart.length === 0 || isInvalidDiscount || isCashInsufficient || isEwalletNotSelected || isCardIncomplete;
+
+            const rowParkingFee = document.getElementById('row-parking-fee');
+            const parkingFeeValEl = document.getElementById('parkingFeeValue');
+            if (rowParkingFee && parkingFeeValEl) {
+                if (parkingFee > 0) {
+                    rowParkingFee.classList.remove('hidden');
+                    parkingFeeValEl.textContent = formatMoney(parkingFee);
+                } else {
+                    rowParkingFee.classList.add('hidden');
+                    parkingFeeValEl.textContent = 'Rp0';
+                }
+            }
 
             if (state.cart.length === 0) {
                 setCheckoutStatus('Tambahkan produk ke keranjang terlebih dahulu.', 'info');
@@ -1074,15 +1135,23 @@
             refs.transactionModalTitle.textContent = transactionCode;
             refs.transactionModalDate.textContent = formatDateTime(transaction.created_at);
             refs.transactionModalTotal.textContent = formatMoney(transaction.total);
+
+            const parkingMatch = String(transaction.notes ?? '').match(/^PARKIR:(\d+)\|(.+)$/);
+            const parkingRow = parkingMatch
+                ? `<div>Biaya Parkir <span class="text-amber-300">(${parkingMatch[2]})</span>: <span class="font-semibold text-amber-200">${formatMoney(parseInt(parkingMatch[1], 10))}</span></div>`
+                : '';
+
             refs.transactionModalPayment.innerHTML = payments.length ? payments.map((payment) => `
                 <div>Metode: <span class="font-semibold text-white">${payment.payment_method}</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
+                ${parkingRow}
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
             `).join('') : `
                 <div>Metode: <span class="font-semibold text-white">cash</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
+                ${parkingRow}
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
             `;
             refs.transactionModalItems.innerHTML = details.length ? details.map((item) => `
@@ -1175,6 +1244,7 @@
                     payment_method: 'qris',
                     cash_tendered: 0,
                     notes: refs.notes.value,
+                    parking_fee: window._parkingFee || 0,
                 };
                 const subtotal = calculateSubtotal();
                 const discount = Math.min(getDiscount(), subtotal);
@@ -1215,6 +1285,7 @@
                         approval_code: refs.approvalCode.value,
                     }
                     : null,
+                parking_fee: window._parkingFee || 0,
             };
 
             refs.checkoutButton.disabled = true;
@@ -1609,6 +1680,15 @@
             btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg> Cetak Struk';
             refs.checkoutButton.after(btn);
         };
+
+        window._parkingFee = 0;
+
+        document.querySelectorAll('input[name="parking_fee"]').forEach((radio) => {
+            radio.addEventListener('change', () => {
+                window._parkingFee = parseInt(radio.value, 10) || 0;
+                updateSummary();
+            });
+        });
     </script>
 </body>
 </html>
