@@ -79,6 +79,8 @@
             'discount_amount' => $payment->discount_amount,
             'cash_tendered' => $payment->cash_tendered,
             'change_amount' => $payment->change_amount,
+            'parking_fee' => $payment->parking_fee ?? 0,
+            'parking_type' => $payment->parking_type ?? 'none',
         ])->values(),
         'details' => $transaction->details->map(function ($detail) {
             $returnedQuantity = $detail->returnDetails->sum('quantity');
@@ -279,6 +281,7 @@
             <div>Metode: <span class="font-semibold text-white">${escapeHtml(payment.payment_method || 'cash')}</span></div>
             <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
             <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
+            ${payment.parking_fee > 0 ? `<div>Biaya Parkir <span class="text-amber-300">(${escapeHtml(payment.parking_type)})</span>: <span class="font-semibold text-amber-200">${formatMoney(payment.parking_fee)}</span></div>` : ''}
             <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
         `).join('') : `
             <div>Metode: <span class="font-semibold text-white">cash</span></div>
