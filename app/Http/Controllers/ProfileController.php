@@ -29,9 +29,6 @@ class ProfileController extends Controller
             return redirect('/pos');
         }
 
-        // Simpan nama ke session agar bisa ditampilkan di topbar
-        session(['cashier_name' => $cashier->name]);
-
         return view('profile.index', compact('cashier'));
     }
 

@@ -19,7 +19,7 @@ class Cashiers extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'username',
+        'email',
         'password',
     ];
 
@@ -41,6 +41,7 @@ class Cashiers extends Authenticatable
     protected function casts(): array
     {
         return [
+            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

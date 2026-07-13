@@ -3,17 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cashiers;
-use App\Services\CashierService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
 class CashierController extends Controller
 {
-    protected CashierService $cashierService;
-
-    public function __construct(CashierService $cashierService)
+    /**
+     * Tampilkan daftar semua kasir
+     */
+    public function index()
     {
-        $this->cashierService = $cashierService;
+        $cashiers = Cashiers::orderBy('name')->get();
+
+        return view('cashier.index', compact('cashiers'));
     }
 
     /**
@@ -22,7 +25,7 @@ class CashierController extends Controller
     public function checkUsername(Request $request)
     {
         $username  = trim($request->get('username', ''));
-        $excludeId = $request->get('exclude_id'); // untuk mode edit
+        $excludeId = $request->get('exclude_id');
 
         if (empty($username)) {
             return response()->json(['available' => null]);
@@ -39,16 +42,6 @@ class CashierController extends Controller
             'available' => !$taken,
             'message'   => $taken ? 'Username sudah digunakan.' : 'Username tersedia.',
         ]);
-    }
-
-    /**
-     * Tampilkan daftar semua kasir
-     */
-    public function index()
-    {
-        $cashiers = $this->cashierService->getAllCashier();
-
-        return view('cashier.index', compact('cashiers'));
     }
 
     /**
@@ -69,7 +62,11 @@ class CashierController extends Controller
             'password.min'       => 'Password minimal 8 karakter.',
         ]);
 
-        $this->cashierService->createCashier($request->only('name', 'username', 'password'));
+        Cashiers::create([
+            'name'     => $request->name,
+            'username' => $request->username,
+            'password' => Hash::make($request->password),
+        ]);
 
         return redirect()->route('cashier.index')
             ->with('success', 'Kasir berhasil ditambahkan.');
@@ -99,7 +96,11 @@ class CashierController extends Controller
             'username.unique'   => 'Username sudah digunakan.',
         ]);
 
-        $this->cashierService->updateCashier($id, $request->only('name', 'username'));
+        $cashier = Cashiers::findOrFail($id);
+        $cashier->update([
+            'name'     => $request->name,
+            'username' => $request->username,
+        ]);
 
         return redirect()->route('cashier.index')
             ->with('success', 'Data kasir berhasil diperbarui.');
