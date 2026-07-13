@@ -17,8 +17,8 @@ class CashierControllerTest extends TestCase
         parent::setUp();
         
         // Daftarkan route secara dinamis untuk keperluan testing saja
-        // Tanpa mengubah routes/web.php
-        Route::get('/cashiers-test', [CashierController::class, 'index']);
+        // Pakai middleware 'web' agar $errors tersedia di view
+        Route::middleware('web')->get('/cashiers-test', [CashierController::class, 'index']);
     }
 
     /**
@@ -63,15 +63,101 @@ class CashierControllerTest extends TestCase
     }
 
     /**
-     * Test the cashier index page works with no cashiers in database.
+     * Test tambah kasir sukses
      */
-    public function test_cashier_index_works_with_empty_database(): void
+    public function test_add_cashier_successfully(): void
     {
-        $response = $this->get('/cashiers-test');
+        $response = $this->post('/cashier/add', [
+            'name'                  => 'Kasir Baru',
+            'username'              => 'kasirbaru',
+            'password'              => 'Password1',
+            'password_confirmation' => 'Password1',
+        ]);
+
+        $response->assertRedirect(route('cashier.index'));
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('cashiers', [
+            'name'     => 'Kasir Baru',
+            'username' => 'kasirbaru',
+        ]);
+    }
+
+    /**
+     * Test tambah kasir gagal — username sudah digunakan
+     */
+    public function test_add_cashier_fails_with_duplicate_username(): void
+    {
+        Cashiers::forceCreate([
+            'name'     => 'Kasir Lama',
+            'username' => 'kasirdup',
+            'password' => bcrypt('Password1'),
+        ]);
+
+        $response = $this->post('/cashier/add', [
+            'name'                  => 'Kasir Lain',
+            'username'              => 'kasirdup',
+            'password'              => 'Password1',
+            'password_confirmation' => 'Password1',
+        ]);
+
+        $response->assertSessionHasErrors('username');
+    }
+
+    /**
+     * Test tambah kasir gagal — password tidak memenuhi syarat
+     */
+    public function test_add_cashier_fails_with_weak_password(): void
+    {
+        $response = $this->post('/cashier/add', [
+            'name'                  => 'Kasir Test',
+            'username'              => 'kasirtest',
+            'password'              => 'lemah',
+            'password_confirmation' => 'lemah',
+        ]);
+
+        $response->assertSessionHasErrors('password');
+    }
+
+    /**
+     * Test halaman edit kasir tampil dengan data yang benar
+     */
+    public function test_edit_cashier_page_shows_correct_data(): void
+    {
+        $cashier = Cashiers::forceCreate([
+            'name'     => 'Kasir Edit',
+            'username' => 'kasiredit',
+            'password' => bcrypt('Password1'),
+        ]);
+
+        $response = $this->get(route('cashier.edit', $cashier->id));
 
         $response->assertStatus(200);
-        $response->assertViewIs('cashier.index');
-        $response->assertViewHas('cashiers');
-        $this->assertCount(0, $response->viewData('cashiers'));
+        $response->assertViewIs('cashier.edit');
+        $response->assertViewHas('cashier');
+        $response->assertSee('Kasir Edit');
+    }
+
+    /**
+     * Test update data kasir sukses
+     */
+    public function test_update_cashier_successfully(): void
+    {
+        $cashier = Cashiers::forceCreate([
+            'name'     => 'Kasir Lama',
+            'username' => 'kasirlama',
+            'password' => bcrypt('Password1'),
+        ]);
+
+        $response = $this->put(route('cashier.update', $cashier->id), [
+            'name'     => 'Kasir Diperbarui',
+            'username' => 'kasirperbarui',
+        ]);
+
+        $response->assertRedirect(route('cashier.index'));
+        $this->assertDatabaseHas('cashiers', [
+            'id'       => $cashier->id,
+            'name'     => 'Kasir Diperbarui',
+            'username' => 'kasirperbarui',
+        ]);
     }
 }
