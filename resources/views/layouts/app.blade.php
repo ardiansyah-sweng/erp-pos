@@ -440,9 +440,20 @@
                     <span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-500"></span>
                 </button>
 
-                <div class="rounded-full border border-cyan-400/40 p-1.5 text-cyan-300">
-                    <i data-lucide="user" class="w-5 h-5"></i>
-                </div>
+                <a href="{{ route('profile.show') }}"
+                   title="Lihat Profil"
+                   class="rounded-full border p-1.5 transition-all duration-200 flex items-center justify-center
+                          {{ request()->is('profile*')
+                              ? 'border-cyan-400 bg-cyan-400/15 text-cyan-300'
+                              : 'border-cyan-400/40 text-cyan-300 hover:border-cyan-400 hover:bg-cyan-400/10' }}">
+                    @if(session('cashier_name'))
+                        <span class="w-5 h-5 text-xs font-bold leading-none flex items-center justify-center">
+                            {{ strtoupper(substr(session('cashier_name'), 0, 1)) }}
+                        </span>
+                    @else
+                        <i data-lucide="user" class="w-5 h-5"></i>
+                    @endif
+                </a>
 
             </div>
 
