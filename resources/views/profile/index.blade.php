@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Profil Saya')
+@section('breadcrumb-prefix', 'Akun /')
+@section('breadcrumb', 'Profil Saya')
 
 @push('styles')
 <style>
@@ -114,15 +116,6 @@
 @endpush
 
 @section('content')
-
-<div class="header">
-    <div>
-        <div class="header-label">Akun</div>
-        <div class="header-title">Profil Saya</div>
-        <div class="header-sub">Kelola informasi dan keamanan akun kasir</div>
-    </div>
-    <a href="{{ url('/pos') }}" class="btn-back">← Kembali ke POS</a>
-</div>
 
 <div class="main">
 
