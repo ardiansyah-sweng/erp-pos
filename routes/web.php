@@ -71,8 +71,10 @@ Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name(
 
 
 Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.index');
+Route::get('/cashier/check-username', [CashierController::class, 'checkUsername'])->name('cashier.check-username');
 Route::post('/cashier/add', [CashierController::class, 'add'])->name('cashier.add');
-Route::post('/cashier/checkout', [CashierController::class, 'checkout'])->name('cashier.checkout');
+Route::get('/cashier/{id}/edit', [CashierController::class, 'edit'])->name('cashier.edit');
+Route::put('/cashier/{id}', [CashierController::class, 'update'])->name('cashier.update');
 
 Route::get('/customers', [CustomerController::class,'getCustomers']);
 Route::post('/customers', [CustomerController::class,'store']);
