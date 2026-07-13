@@ -237,12 +237,16 @@
                     <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Kasir cepat untuk transaksi harian.</h1>
                     <p class="mt-2 max-w-2xl text-sm text-slate-300">Cari atau scan produk, cek isi keranjang, lalu selesaikan pembayaran tanpa reload halaman.</p>
                     <div class="mt-4 flex flex-wrap items-center gap-3">
-                        <a href="{{ route('stock-adjustments.index') }}" class="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/15 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:border-emerald-300 hover:bg-emerald-400/25 hover:text-white">
+                        <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/15 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-400/25 hover:text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
                                 <path d="m3.3 7 8.7 5 8.7-5M12 22V12" />
+                                <rect x="3" y="3" width="7" height="7"/>
+                                <rect x="14" y="3" width="7" height="7"/>
+                                <rect x="14" y="14" width="7" height="7"/>
+                                <rect x="3" y="14" width="7" height="7"/>
                             </svg>
-                            Penyesuaian Stok
+                            Dashboard
                         </a>
                         <button id="themeToggle" type="button" class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white" aria-pressed="false">
                             <span id="themeIcon" aria-hidden="true" class="inline-flex h-4 w-4"></span>
@@ -317,13 +321,25 @@
                             </div>
                         </div>
                     </div>
+                    <div class="mt-3">
+                        <label class="text-sm text-slate-300" for="categoryFilter">Kategori</label>
+                        <select id="categoryFilter" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none focus:border-cyan-400">
+                            <option value="">Semua Kategori</option>
+                            @foreach ($categories as $cat)
+                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <p id="productsStatus" class="mt-3 text-sm text-slate-400">Memuat produk...</p>
                 </div>
 
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
                     <div class="mb-4 flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-white">Daftar Produk</h2>
-                        <span id="productsMeta" class="text-sm text-slate-400"></span>
+                        <div class="flex items-center gap-3">
+                            <a href="{{ route('products.manage') }}" class="rounded-xl bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300">+ Product</a>
+                            <span id="productsMeta" class="text-sm text-slate-400"></span>
+                        </div>
                     </div>
                     <div id="productGrid" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"></div>
                 </div>
@@ -471,6 +487,42 @@
                     <textarea id="notes" rows="3" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400" placeholder="Opsional"></textarea>
                 </div>
                 </div>
+                        <div id="cashTenderedWrapper">
+                            <label class="text-sm text-slate-300" for="cashTendered">Uang dibayar</label>
+                            <input id="cashTendered" type="text" inputmode="numeric" value="Rp 0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
+                        </div>
+                        <div>
+                            <label class="text-sm text-slate-300" for="notes">Catatan</label>
+                            <textarea id="notes" rows="3" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400" placeholder="Opsional"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-5">
+
+                        <label class="mb-2 block text-sm font-medium text-white">
+                            Cari Member
+                        </label>
+
+                        <input
+                            type="text"
+                            id="memberSearch"
+                            placeholder="Cari nomor HP / 4 digit terakhir"
+                            class="w-full rounded-xl border border-white/10 bg-slate-950/70 p-3 text-white placeholder:text-slate-400">
+
+                        <div
+                            id="memberResult"
+                            class="mt-3 space-y-2">
+                        </div>
+
+                        <a
+                            href="{{ route('members.index') }}"
+                            class="mt-3 inline-block rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700">
+
+                            + Tambah Member Baru
+
+                        </a>
+
+                    </div>
 
                 <div class="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
                     <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
@@ -705,6 +757,7 @@
             cardNumber: document.getElementById('cardNumber'),
             cardBank: document.getElementById('cardBank'),
             approvalCode: document.getElementById('approvalCode'),
+            categoryFilter: document.getElementById('categoryFilter'),
         };
 
         const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
@@ -916,6 +969,12 @@
             const isInvalidDiscount = isDiscountTooHigh();
             const isCashInsufficient = isCashPayment && state.cart.length > 0 && getCashTendered() < grandTotal;
             const isEwalletNotSelected = isEwallet && !state.selectedEwallet;
+            const isCardIncomplete = paymentMethod === 'card' && (
+                !refs.cardHolder.value.trim() || 
+                !refs.cardNumber.value.trim() || 
+                !refs.cardBank.value.trim() || 
+                !refs.approvalCode.value.trim()
+            );
 
             refs.productCount.textContent = String(state.products.length);
             refs.cartCount.textContent = String(state.cart.reduce((total, item) => total + item.quantity, 0));
@@ -938,7 +997,7 @@
             refs.cardForm.classList.toggle('hidden', paymentMethod !== 'card');
             refs.cashTenderedWrapper.style.display = isCashPayment ? '' : 'none';
             refs.changeRow.style.display = isCashPayment ? '' : 'none';
-            refs.checkoutButton.disabled = state.cart.length === 0 || isInvalidDiscount || isCashInsufficient || isEwalletNotSelected;
+            refs.checkoutButton.disabled = state.cart.length === 0 || isInvalidDiscount || isCashInsufficient || isEwalletNotSelected || isCardIncomplete;
 
             if (state.cart.length === 0) {
                 setCheckoutStatus('Tambahkan produk ke keranjang terlebih dahulu.', 'info');
@@ -957,6 +1016,11 @@
 
             if (isEwalletNotSelected) {
                 setCheckoutStatus('Pilih e-wallet terlebih dahulu.', 'error');
+                return;
+            }
+
+            if (isCardIncomplete) {
+                setCheckoutStatus('Lengkapi data kartu (Nama, No Kartu, Bank, Kode) terlebih dahulu.', 'error');
                 return;
             }
 
@@ -1063,6 +1127,7 @@
                             </div>
                             <h3 class="mt-4 line-clamp-2 text-lg font-semibold leading-snug text-white">${product.name}</h3>
                             <p class="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-400">${product.description || 'Tanpa deskripsi'}</p>
+                            ${product.category ? `<span class="mt-2 inline-block rounded-full border border-purple-400/20 bg-purple-400/10 px-3 py-1 text-xs font-medium text-purple-200">${product.category.name}</span>` : ''}
                         </div>
                         <div class="mt-5 space-y-3 border-t border-white/10 pt-4">
                             <div class="flex items-center justify-between gap-3 text-sm">
@@ -1205,11 +1270,14 @@
             applyAutoDiscount();
         };
 
-        const loadProducts = async (search = '') => {
+        const loadProducts = async (search = '', categoryId = '') => {
             refs.productsStatus.textContent = 'Memuat produk...';
 
             try {
-                const queryString = search ? `?search=${encodeURIComponent(search)}` : '';
+                const params = new URLSearchParams();
+                if (search) params.set('search', search);
+                if (categoryId) params.set('category_id', categoryId);
+                const queryString = params.toString() ? `?${params.toString()}` : '';
                 const response = await fetchJson(`/products${queryString}`);
                 state.products = response.data ?? [];
                 renderProducts();
@@ -1356,6 +1424,7 @@
             }
 
             const payload = {
+                customer_id: selectedCustomer,
                 items: state.cart.map((item) => ({
                     product_id: item.id,
                     quantity: item.quantity,
@@ -1385,6 +1454,10 @@
 
                 state.receipt = response.data;
                 state.cart = [];
+                selectedCustomer = null;
+
+                document.getElementById("memberSearch").value = "";
+                document.getElementById("memberResult").innerHTML = "";
                 state.selectedEwallet = null;
                 document.querySelectorAll('.ewallet-btn').forEach((b) => {
                     b.classList.remove('border-cyan-400/70', 'bg-cyan-400/10');
@@ -1395,7 +1468,7 @@
                 setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
                 renderCart();
-                await loadProducts(refs.productSearch.value.trim());
+                await loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value);
                 await loadTransactions();
                 setCheckoutStatus('Transaksi berhasil disimpan.', 'success');
                 if (state.printAfterCheckout) {
@@ -1472,7 +1545,7 @@
                 setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
                 renderCart();
-                await loadProducts(refs.productSearch.value.trim());
+                await loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value);
                 await loadTransactions();
                 setCheckoutStatus('Transaksi QRIS berhasil disimpan.', 'success');
                 if (state.printAfterCheckout) {
@@ -1499,7 +1572,7 @@
         refs.productSearch.addEventListener('input', () => {
             window.clearTimeout(searchTimer);
             searchTimer = window.setTimeout(() => {
-                loadProducts(refs.productSearch.value.trim());
+                loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value);
             }, 250);
         });
 
@@ -1532,7 +1605,8 @@
             }
         });
 
-        refs.refreshProducts.addEventListener('click', () => loadProducts(refs.productSearch.value.trim()));
+        refs.refreshProducts.addEventListener('click', () => loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value));
+        refs.categoryFilter.addEventListener('change', () => loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value));
         refs.clearCart.addEventListener('click', () => {
             state.cart = [];
             renderCart();
@@ -1617,6 +1691,11 @@
                 updateSummary();
             });
         });
+        
+        [refs.cardHolder, refs.cardNumber, refs.cardBank, refs.approvalCode].forEach((input) => {
+            input.addEventListener('input', updateSummary);
+        });
+
         refs.checkoutButton.addEventListener('click', checkout);
         refs.closeTransactionModal.addEventListener('click', closeTransactionModal);
         refs.transactionModal.addEventListener('click', (event) => {
@@ -1660,8 +1739,93 @@
         applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
         setCurrencyInputValue(refs.discountAmount, getDiscount());
         setCurrencyInputValue(refs.cashTendered, getCashTendered());
-        loadProducts();
+        loadProducts(null, refs.categoryFilter.value);
         loadTransactions();
+
+        let selectedCustomer = null;
+
+        document
+        .getElementById("memberSearch")
+        .addEventListener("keyup", async function () {
+
+            const keyword = this.value.trim();
+
+            if (keyword.length < 4) {
+
+                document.getElementById("memberResult").innerHTML = "";
+
+                return;
+
+            }
+
+            try{
+
+                const response = await fetch(
+                    "/customers/search?keyword=" + encodeURIComponent(keyword)
+                );
+
+                const result = await response.json();
+
+                let html = "";
+
+                result.data.forEach(customer => {
+
+                    html += `
+                    <div
+                        onclick="chooseMember(${customer.id},'${customer.name}','${customer.phone}')"
+                        class="cursor-pointer rounded-xl border border-cyan-500/30 bg-slate-900 p-3 hover:bg-cyan-700/30 transition">
+
+                        <div class="font-semibold text-white">
+                            ${customer.name}
+                        </div>
+
+                        <div class="text-sm text-slate-300">
+                            ${customer.phone}
+                        </div>
+
+                        <div class="text-xs text-cyan-300">
+                            ${customer.member_level} • ${customer.points} poin
+                        </div>
+
+                    </div>
+                    `;
+
+                });
+
+                if(result.data.length===0){
+
+                    html = `
+                        <div class="rounded-lg bg-slate-900 p-3 text-slate-400">
+                            Member tidak ditemukan
+                        </div>
+                    `;
+
+                }
+
+                document.getElementById("memberResult").innerHTML = html;
+
+            }catch(error){
+
+                console.error(error);
+
+            }
+
+        });
+
+        function chooseMember(id,name,phone){
+
+            selectedCustomer=id;
+
+            document.getElementById("memberSearch").value =
+                name+" ("+phone+")";
+
+            document.getElementById("memberResult").innerHTML=`
+                <div class="rounded-xl border border-green-500 bg-green-500/20 p-3 text-green-300">
+                    ✓ ${name}
+                </div>
+            `;
+
+        }
 
         const showPrintReceiptButton = (transactionId) => {
             const existing = document.getElementById('printReceiptBtn');
