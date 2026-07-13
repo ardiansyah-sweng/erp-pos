@@ -375,6 +375,11 @@
                 <span class="nav-text">User Management</span>
             </a>
 
+            <a href="{{ route('cashier.index') }}" class="nav-link {{ request()->is('cashier*') ? 'active' : '' }}">
+                <i data-lucide="users" class="w-[18px] h-[18px]"></i>
+                <span class="nav-text">Manajemen Kasir</span>
+            </a>
+
         </nav>
 
         <div class="p-3 border-t border-white/5 space-y-1">
