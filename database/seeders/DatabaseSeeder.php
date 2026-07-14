@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
             CashierSeeder::class,
             ProductSeeder::class,
             TransactionSeeder::class,
+            SupplierSeeder::class,
         ]);
     }
 }
