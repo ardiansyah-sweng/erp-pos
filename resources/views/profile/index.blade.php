@@ -1,254 +1,120 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil Saya - ERP POS</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+@extends('layouts.app')
 
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #0d1117;
-            color: #e6edf3;
-            min-height: 100vh;
-        }
+@section('title', 'Profil Saya')
 
-        /* ── HEADER ── */
-        .header {
-            background: #161b22;
-            border-bottom: 1px solid #21262d;
-            padding: 24px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        .header-label {
-            color: #2dd4bf;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-        }
-        .header-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: #f0f6fc;
-        }
-        .header-sub {
-            font-size: 13px;
-            color: #8b949e;
-            margin-top: 4px;
-        }
-        .btn-back {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: #21262d;
-            border: 1px solid #30363d;
-            color: #e6edf3;
-            padding: 8px 16px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 13px;
-            transition: background 0.2s;
-        }
-        .btn-back:hover { background: #30363d; }
+@push('styles')
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .main {
-            padding: 28px 32px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background: #0d1117;
+        color: #e6edf3;
+        min-height: 100vh;
+    }
 
-        /* ── ALERT ── */
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .alert-success {
-            background: #22c55e22;
-            border: 1px solid #22c55e44;
-            color: #22c55e;
-        }
-        .alert-error {
-            background: #ef444422;
-            border: 1px solid #ef444444;
-            color: #ef4444;
-        }
+    .header {
+        background: #161b22;
+        border-bottom: 1px solid #21262d;
+        padding: 24px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .header-label {
+        color: #2dd4bf;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+    .header-title { font-size: 28px; font-weight: 700; color: #f0f6fc; }
+    .header-sub { font-size: 13px; color: #8b949e; margin-top: 4px; }
+    .btn-back {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: #21262d; border: 1px solid #30363d;
+        color: #e6edf3; padding: 8px 16px; border-radius: 8px;
+        text-decoration: none; font-size: 13px; transition: background 0.2s;
+    }
+    .btn-back:hover { background: #30363d; }
 
-        /* ── AVATAR CARD ── */
-        .avatar-card {
-            background: #161b22;
-            border: 1px solid #21262d;
-            border-radius: 12px;
-            padding: 24px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .avatar {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #2dd4bf, #3b82f6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            font-weight: 700;
-            color: #0d1117;
-            flex-shrink: 0;
-        }
-        .avatar-info h2 {
-            font-size: 18px;
-            font-weight: 700;
-            color: #f0f6fc;
-        }
-        .avatar-info p {
-            font-size: 13px;
-            color: #8b949e;
-            margin-top: 4px;
-        }
-        .badge-kasir {
-            display: inline-block;
-            background: #2dd4bf22;
-            color: #2dd4bf;
-            border: 1px solid #2dd4bf44;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 2px 10px;
-            margin-top: 6px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
+    .main { padding: 28px 32px; max-width: 800px; margin: 0 auto; }
 
-        /* ── PANEL ── */
-        .panel {
-            background: #161b22;
-            border: 1px solid #21262d;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-        .panel-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid #21262d;
-        }
-        .panel-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #f0f6fc;
-        }
-        .panel-sub {
-            font-size: 12px;
-            color: #8b949e;
-            margin-top: 2px;
-        }
-        .panel-body {
-            padding: 20px;
-        }
+    .alert {
+        padding: 12px 16px; border-radius: 8px; font-size: 13px;
+        margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+    }
+    .alert-success { background: #22c55e22; border: 1px solid #22c55e44; color: #22c55e; }
+    .alert-error { background: #ef444422; border: 1px solid #ef444444; color: #ef4444; }
 
-        /* ── FORM ── */
-        .form-group {
-            margin-bottom: 16px;
-        }
-        .form-label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: #8b949e;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
-        }
-        .form-input {
-            width: 100%;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            color: #e6edf3;
-            border-radius: 8px;
-            padding: 10px 14px;
-            font-size: 14px;
-            transition: border-color 0.2s;
-        }
-        .form-input:focus {
-            outline: none;
-            border-color: #2dd4bf;
-            box-shadow: 0 0 0 3px #2dd4bf15;
-        }
-        .form-input.is-error {
-            border-color: #ef4444;
-        }
-        .form-error {
-            font-size: 12px;
-            color: #ef4444;
-            margin-top: 4px;
-        }
-        .form-hint {
-            font-size: 12px;
-            color: #8b949e;
-            margin-top: 4px;
-        }
+    .avatar-card {
+        background: #161b22; border: 1px solid #21262d; border-radius: 12px;
+        padding: 24px; display: flex; align-items: center; gap: 20px; margin-bottom: 20px;
+    }
+    .avatar {
+        width: 64px; height: 64px; border-radius: 50%;
+        background: linear-gradient(135deg, #2dd4bf, #3b82f6);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 26px; font-weight: 700; color: #0d1117; flex-shrink: 0;
+    }
+    .avatar-info h2 { font-size: 18px; font-weight: 700; color: #f0f6fc; }
+    .avatar-info p { font-size: 13px; color: #8b949e; margin-top: 4px; }
+    .badge-kasir {
+        display: inline-block; background: #2dd4bf22; color: #2dd4bf;
+        border: 1px solid #2dd4bf44; border-radius: 20px; font-size: 11px;
+        font-weight: 700; padding: 2px 10px; margin-top: 6px;
+        letter-spacing: 1px; text-transform: uppercase;
+    }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-        @media (max-width: 600px) {
-            .form-row { grid-template-columns: 1fr; }
-        }
+    .panel {
+        background: #161b22; border: 1px solid #21262d;
+        border-radius: 12px; overflow: hidden; margin-bottom: 20px;
+    }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid #21262d; }
+    .panel-title { font-size: 14px; font-weight: 700; color: #f0f6fc; }
+    .panel-sub { font-size: 12px; color: #8b949e; margin-top: 2px; }
+    .panel-body { padding: 20px; }
 
-        /* ── BUTTONS ── */
-        .btn-primary {
-            background: #2dd4bf;
-            color: #0d1117;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .btn-primary:hover { opacity: 0.85; }
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+        display: block; font-size: 12px; font-weight: 600;
+        color: #8b949e; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
+    }
+    .form-input {
+        width: 100%; background: #0d1117; border: 1px solid #30363d;
+        color: #e6edf3; border-radius: 8px; padding: 10px 14px;
+        font-size: 14px; transition: border-color 0.2s;
+    }
+    .form-input:focus { outline: none; border-color: #2dd4bf; box-shadow: 0 0 0 3px #2dd4bf15; }
+    .form-input.is-error { border-color: #ef4444; }
+    .form-error { font-size: 12px; color: #ef4444; margin-top: 4px; }
+    .form-hint { font-size: 12px; color: #8b949e; margin-top: 4px; }
 
-        .btn-danger {
-            background: #ef444422;
-            color: #ef4444;
-            border: 1px solid #ef444444;
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-danger:hover {
-            background: #ef444433;
-        }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
 
-        .divider {
-            border: none;
-            border-top: 1px solid #21262d;
-            margin: 16px 0;
-        }
-    </style>
-</head>
-<body>
+    .btn-primary {
+        background: #2dd4bf; color: #0d1117; border: none; border-radius: 8px;
+        padding: 10px 20px; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.85; }
 
-{{-- HEADER --}}
+    .btn-danger {
+        background: #ef444422; color: #ef4444; border: 1px solid #ef444444;
+        border-radius: 8px; padding: 10px 20px; font-size: 14px;
+        font-weight: 700; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-danger:hover { background: #ef444433; }
+
+    .divider { border: none; border-top: 1px solid #21262d; margin: 16px 0; }
+</style>
+@endpush
+
+@section('content')
+
 <div class="header">
     <div>
         <div class="header-label">Akun</div>
@@ -260,20 +126,14 @@
 
 <div class="main">
 
-    {{-- ALERT --}}
     @if(session('success'))
-        <div class="alert alert-success">
-            ✓ {{ session('success') }}
-        </div>
+        <div class="alert alert-success">✓ {{ session('success') }}</div>
     @endif
 
     @if($errors->any() && !$errors->has('current_password'))
-        <div class="alert alert-error">
-            ✕ {{ $errors->first() }}
-        </div>
+        <div class="alert alert-error">✕ {{ $errors->first() }}</div>
     @endif
 
-    {{-- AVATAR CARD --}}
     <div class="avatar-card">
         <div class="avatar">{{ strtoupper(substr($cashier->name, 0, 1)) }}</div>
         <div class="avatar-info">
@@ -283,7 +143,6 @@
         </div>
     </div>
 
-    {{-- FORM EDIT PROFIL --}}
     <div class="panel">
         <div class="panel-header">
             <div class="panel-title">Informasi Profil</div>
@@ -297,30 +156,13 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Nama Lengkap</label>
-                        <input
-                            type="text"
-                            name="name"
-                            class="form-input {{ $errors->has('name') ? 'is-error' : '' }}"
-                            value="{{ old('name', $cashier->name) }}"
-                            placeholder="Nama lengkap"
-                        >
-                        @error('name')
-                            <div class="form-error">{{ $message }}</div>
-                        @enderror
+                        <input type="text" name="name" class="form-input {{ $errors->has('name') ? 'is-error' : '' }}" value="{{ old('name', $cashier->name) }}" placeholder="Nama lengkap">
+                        @error('name')<div class="form-error">{{ $message }}</div>@enderror
                     </div>
-
                     <div class="form-group">
                         <label class="form-label">Username</label>
-                        <input
-                            type="text"
-                            name="username"
-                            class="form-input {{ $errors->has('username') ? 'is-error' : '' }}"
-                            value="{{ old('username', $cashier->username) }}"
-                            placeholder="Username login"
-                        >
-                        @error('username')
-                            <div class="form-error">{{ $message }}</div>
-                        @enderror
+                        <input type="text" name="username" class="form-input {{ $errors->has('username') ? 'is-error' : '' }}" value="{{ old('username', $cashier->username) }}" placeholder="Username login">
+                        @error('username')<div class="form-error">{{ $message }}</div>@enderror
                         <div class="form-hint">Digunakan untuk login ke sistem</div>
                     </div>
                 </div>
@@ -331,7 +173,6 @@
         </div>
     </div>
 
-    {{-- FORM GANTI PASSWORD --}}
     <div class="panel">
         <div class="panel-header">
             <div class="panel-title">Ganti Password</div>
@@ -340,9 +181,7 @@
         <div class="panel-body">
 
             @if($errors->has('current_password'))
-                <div class="alert alert-error" style="margin-bottom:16px;">
-                    ✕ {{ $errors->first('current_password') }}
-                </div>
+                <div class="alert alert-error" style="margin-bottom:16px;">✕ {{ $errors->first('current_password') }}</div>
             @endif
 
             <form method="POST" action="{{ route('profile.password') }}">
@@ -351,36 +190,18 @@
 
                 <div class="form-group">
                     <label class="form-label">Password Lama</label>
-                    <input
-                        type="password"
-                        name="current_password"
-                        class="form-input {{ $errors->has('current_password') ? 'is-error' : '' }}"
-                        placeholder="Masukkan password lama"
-                    >
+                    <input type="password" name="current_password" class="form-input {{ $errors->has('current_password') ? 'is-error' : '' }}" placeholder="Masukkan password lama">
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Password Baru</label>
-                        <input
-                            type="password"
-                            name="new_password"
-                            class="form-input {{ $errors->has('new_password') ? 'is-error' : '' }}"
-                            placeholder="Minimal 6 karakter"
-                        >
-                        @error('new_password')
-                            <div class="form-error">{{ $message }}</div>
-                        @enderror
+                        <input type="password" name="new_password" class="form-input {{ $errors->has('new_password') ? 'is-error' : '' }}" placeholder="Minimal 6 karakter">
+                        @error('new_password')<div class="form-error">{{ $message }}</div>@enderror
                     </div>
-
                     <div class="form-group">
                         <label class="form-label">Konfirmasi Password Baru</label>
-                        <input
-                            type="password"
-                            name="new_password_confirmation"
-                            class="form-input"
-                            placeholder="Ulangi password baru"
-                        >
+                        <input type="password" name="new_password_confirmation" class="form-input" placeholder="Ulangi password baru">
                     </div>
                 </div>
 
@@ -391,5 +212,5 @@
     </div>
 
 </div>
-</body>
-</html>
+
+@endsection

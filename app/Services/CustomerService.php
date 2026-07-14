@@ -40,6 +40,16 @@ class CustomerService
         return Customer::find($id);
     }
 
+    public function updateCustomer($id, array $data)
+    {
+        $customer = Customer::find($id);
+        if (!$customer) {
+            return null;
+        }
+        $customer->update($data);
+        return $customer->fresh();
+    }
+
     public function addPoints(Customer $customer, $totalBelanja)
 {
     // 1 poin setiap Rp10.000
