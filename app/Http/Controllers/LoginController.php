@@ -21,19 +21,21 @@ class LoginController extends Controller
     public function login(Request $request, LoginService $loginService): RedirectResponse
     {
         $credentials = $request->validate([
-            'username' => ['required', 'string'],
+            'email' => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
 
+        // Email dipakai sebagai identitas login; nilainya dicocokkan oleh
+        // LoginService ke kolom "username" pada tabel cashiers (tidak diubah).
         $result = $loginService->loginService(
-            $credentials['username'],
+            $credentials['email'],
             $credentials['password'],
         );
 
         if (! $result['success']) {
             return back()
-                ->withInput($request->only('username'))
-                ->withErrors(['username' => $result['message']]);
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => $result['message']]);
         }
 
         $request->session()->regenerate();

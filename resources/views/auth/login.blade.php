@@ -40,18 +40,18 @@
                 @csrf
                 <div class="space-y-4">
                     <div>
-                        <label for="username" class="block text-sm font-medium text-gray-700">
-                            Username
+                        <label for="email" class="block text-sm font-medium text-gray-700">
+                            Email Address
                         </label>
                         <input
-                            id="username"
-                            name="username"
-                            type="text"
-                            autocomplete="username"
+                            id="email"
+                            name="email"
+                            type="email"
+                            autocomplete="email"
                             required
                             class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                            placeholder="Masukkan username"
-                            value="{{ old('username') }}"
+                            placeholder="Enter your email"
+                            value="{{ old('email') }}"
                         >
                     </div>
 
@@ -95,8 +95,8 @@
 
             <div class="text-center text-xs text-gray-500 border-t border-gray-200 pt-4">
                 <p class="font-semibold text-gray-600">Akun demo</p>
-                <p>Admin — <span class="font-mono">admin</span> / <span class="font-mono">admin123</span></p>
-                <p>Kasir — <span class="font-mono">kasir1</span> / <span class="font-mono">kasir123</span></p>
+                <p>Admin — <span class="font-mono">admin@erp.test</span> / <span class="font-mono">admin123</span></p>
+                <p>Kasir — <span class="font-mono">kasir1@erp.test</span> / <span class="font-mono">kasir123</span></p>
             </div>
         </div>
     </div>

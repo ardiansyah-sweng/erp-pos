@@ -44,8 +44,8 @@
                         class="w-full rounded-xl border border-white/10 bg-[#020617] px-4 py-2.5 outline-none focus:border-cyan-400">
                 </div>
                 <div>
-                    <label class="mb-1 block text-sm text-slate-400">Username</label>
-                    <input type="text" name="username" value="{{ old('username') }}" required
+                    <label class="mb-1 block text-sm text-slate-400">Email</label>
+                    <input type="email" name="email" value="{{ old('email') }}" required
                         class="w-full rounded-xl border border-white/10 bg-[#020617] px-4 py-2.5 outline-none focus:border-cyan-400">
                 </div>
                 <div>
@@ -75,7 +75,7 @@
                     <thead class="border-b border-white/10 text-slate-400">
                         <tr>
                             <th class="px-6 py-4 font-medium">Nama</th>
-                            <th class="px-6 py-4 font-medium">Username</th>
+                            <th class="px-6 py-4 font-medium">Email</th>
                             <th class="px-6 py-4 font-medium">Peran</th>
                             <th class="px-6 py-4 text-right font-medium">Aksi</th>
                         </tr>
