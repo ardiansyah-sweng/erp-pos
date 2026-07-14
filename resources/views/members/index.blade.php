@@ -760,14 +760,6 @@ memberTable.addEventListener("click", async function(e){
     const editBtn = e.target.closest(".btn-edit");
     const deleteBtn = e.target.closest(".btn-delete");
 
-<<<<<<< HEAD
-    if(editBtn){
-        const id = editBtn.dataset.id;
-
-        const res = await fetch("/customers/" + id);
-        const result = await res.json();
-        if (!result.success) return;
-=======
    if(editBtn){
 
         const id = editBtn.dataset.id;
@@ -782,17 +774,6 @@ memberTable.addEventListener("click", async function(e){
         document.getElementById("editEmail").value = customer.email ?? "";
         document.getElementById("editAddress").value = customer.address ?? "";
         
-        const modal = document.getElementById("editModal");
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
->>>>>>> develop
-
-        const c = result.data;
-        editingId = c.id;
-        document.getElementById("editName").value = c.name;
-        document.getElementById("editPhone").value = c.phone;
-        document.getElementById("editEmail").value = c.email ?? "";
-        document.getElementById("editAddress").value = c.address ?? "";
         openModal("editModal");
     }
 
