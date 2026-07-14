@@ -236,7 +236,19 @@
 
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
                     <h2 class="text-lg font-semibold text-white">Pembayaran</h2>
+                    
                     <div class="mt-4 space-y-4">
+                        <div class="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
+                        <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
+                        <div class="flex items-center justify-between"><span>Diskon</span><span id="discountValue" class="font-semibold text-white">Rp0</span></div>
+                        <div class="flex items-center justify-between"><span>Biaya Parkir</span><span id="parkingValue" class="font-semibold text-amber-300">Rp0</span></div>
+                        <div class="flex items-center justify-between"><span>Total</span><span id="grandTotalValue" class="font-semibold text-emerald-300">Rp0</span></div>
+                        <div id="changeRow" class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
+                    </div>
+
+                    <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50" disabled>Checkout</button>
+                    <div id="checkoutStatus" class="mt-3 hidden rounded-2xl border px-4 py-3 text-sm font-medium"></div>
+
                         <div>
                             <label class="text-sm text-slate-300" for="discountAmount">Diskon</label>
                             <div class="mt-2 flex overflow-hidden rounded-2xl border border-white/10 bg-slate-950/70 focus-within:border-cyan-400">
@@ -391,16 +403,6 @@
 
                     </div>
 
-                    <div class="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
-                        <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
-                        <div class="flex items-center justify-between"><span>Diskon</span><span id="discountValue" class="font-semibold text-white">Rp0</span></div>
-                        <div class="flex items-center justify-between"><span>Biaya Parkir</span><span id="parkingValue" class="font-semibold text-amber-300">Rp0</span></div>
-                        <div class="flex items-center justify-between"><span>Total</span><span id="grandTotalValue" class="font-semibold text-emerald-300">Rp0</span></div>
-                        <div id="changeRow" class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
-                    </div>
-
-                    <button id="checkoutButton" class="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50" disabled>Checkout</button>
-                    <div id="checkoutStatus" class="mt-3 hidden rounded-2xl border px-4 py-3 text-sm font-medium"></div>
                 </div>
 
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
