@@ -16,6 +16,7 @@
         color: #fb7185;
     }
 </style>
+<div class="p-8">
 
 <!-- ===================== HEADER BANNER ===================== -->
 
@@ -253,6 +254,7 @@
 
     </div>
 
+</div>
 </div>
 
 @endsection
