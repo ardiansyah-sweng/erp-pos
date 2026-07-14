@@ -149,6 +149,12 @@
         <div>
             <table>
                 <tr><td class="label">Status</td><td class="value">: LUNAS</td></tr>
+                @if ($transaction->customer)
+                <tr><td class="label">Pelanggan</td><td class="value">: {{ $transaction->customer->name }}</td></tr>
+                @endif
+                @if ($transaction->customer)
+                <tr><td class="label">No. Telepon</td><td class="value">: {{ $transaction->customer->phone }}</td></tr>
+                @endif
             </table>
         </div>
     </div>

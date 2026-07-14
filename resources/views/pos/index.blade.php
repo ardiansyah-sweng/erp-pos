@@ -247,6 +247,7 @@
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
                     <h2 class="text-lg font-semibold text-white">Pembayaran</h2>
                     <div class="mt-4 space-y-4">
+
                         <div>
                             <label class="text-sm text-slate-300" for="discountAmount">Diskon</label>
                             <div class="mt-2 flex overflow-hidden rounded-2xl border border-white/10 bg-slate-950/70 focus-within:border-cyan-400">
@@ -337,6 +338,13 @@
                         <div id="cashTenderedWrapper">
                             <label class="text-sm text-slate-300" for="cashTendered">Uang dibayar</label>
                             <input id="cashTendered" type="text" inputmode="numeric" value="Rp 0" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400">
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                <button type="button" data-quick-cash="exact" class="rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-400/20">Uang Pas</button>
+                                <button type="button" data-quick-cash="50000" class="rounded-xl border border-white/10 bg-slate-950/70 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white">Rp50.000</button>
+                                <button type="button" data-quick-cash="100000" class="rounded-xl border border-white/10 bg-slate-950/70 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white">Rp100.000</button>
+                                <button type="button" data-quick-cash="200000" class="rounded-xl border border-white/10 bg-slate-950/70 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white">Rp200.000</button>
+                                <button type="button" data-quick-cash="500000" class="rounded-xl border border-white/10 bg-slate-950/70 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-cyan-400/50 hover:text-white">Rp500.000</button>
+                            </div>
                         </div>
                         <div>
                             <label class="text-sm text-slate-300" for="notes">Catatan</label>
@@ -483,6 +491,10 @@
                     <div class="mt-2 flex items-center justify-between"><span>Diskon</span><span id="checkoutConfirmDiscount" class="font-semibold text-white">Rp0</span></div>
                     <div class="mt-2 border-t border-white/10 pt-3 flex items-center justify-between text-base font-semibold text-emerald-300"><span>Total</span><span id="checkoutConfirmTotal">Rp0</span></div>
                     <div class="mt-2 text-sm text-slate-400"><span>Metode: </span><span id="checkoutConfirmPayment">-</span></div>
+                    <div class="mt-2 flex items-center justify-between"><span>Pelanggan</span><span id="checkoutConfirmCustomer" class="font-semibold text-white">-</span></div>
+                    <div class="flex items-center justify-between"><span>No. Telepon</span><span id="checkoutConfirmPhone" class="font-semibold text-white">-</span></div>
+                    <div id="checkoutConfirmTenderedRow" class="mt-2 flex items-center justify-between hidden"><span>Uang dibayar</span><span id="checkoutConfirmTendered" class="font-semibold text-white">Rp0</span></div>
+                    <div id="checkoutConfirmChangeRow" class="mt-2 flex items-center justify-between hidden"><span>Kembalian</span><span id="checkoutConfirmChange" class="font-semibold text-cyan-300">Rp0</span></div>
                 </div>
             </div>
             <div class="flex flex-col gap-3 border-t border-white/10 bg-slate-900 px-5 py-4">
@@ -568,6 +580,12 @@
             checkoutConfirmDiscount: document.getElementById('checkoutConfirmDiscount'),
             checkoutConfirmTotal: document.getElementById('checkoutConfirmTotal'),
             checkoutConfirmPayment: document.getElementById('checkoutConfirmPayment'),
+            checkoutConfirmCustomer: document.getElementById('checkoutConfirmCustomer'),
+            checkoutConfirmPhone: document.getElementById('checkoutConfirmPhone'),
+            checkoutConfirmTenderedRow: document.getElementById('checkoutConfirmTenderedRow'),
+            checkoutConfirmChangeRow: document.getElementById('checkoutConfirmChangeRow'),
+            checkoutConfirmTendered: document.getElementById('checkoutConfirmTendered'),
+            checkoutConfirmChange: document.getElementById('checkoutConfirmChange'),
             confirmCheckoutButton: document.getElementById('confirmCheckoutButton'),
             confirmCheckoutAndPrintButton: document.getElementById('confirmCheckoutAndPrintButton'),
             cancelCheckoutButton: document.getElementById('cancelCheckoutButton'),
@@ -679,6 +697,17 @@
             refs.checkoutConfirmDiscount.textContent = formatMoney(discount);
             refs.checkoutConfirmTotal.textContent = formatMoney(grandTotal);
             refs.checkoutConfirmPayment.textContent = getPaymentMethodLabel();
+
+            const customerName = selectedCustomerName || '-';
+            const isCash = refs.paymentMethod.value === 'cash';
+            const cashTendered = isCash ? getCashTendered() : 0;
+            refs.checkoutConfirmCustomer.textContent = customerName;
+            const customerPhone = selectedCustomerPhone || '-';
+            refs.checkoutConfirmPhone.textContent = customerPhone;
+            refs.checkoutConfirmTenderedRow.classList.toggle('hidden', !isCash);
+            refs.checkoutConfirmChangeRow.classList.toggle('hidden', !isCash);
+            refs.checkoutConfirmTendered.textContent = formatMoney(cashTendered);
+            refs.checkoutConfirmChange.textContent = formatMoney(isCash ? Math.max(0, cashTendered - grandTotal) : 0);
         };
         const openCheckoutConfirmModal = () => {
             renderCheckoutConfirmDetails();
@@ -1086,12 +1115,18 @@
             refs.transactionModalTitle.textContent = transactionCode;
             refs.transactionModalDate.textContent = formatDateTime(transaction.created_at);
             refs.transactionModalTotal.textContent = formatMoney(transaction.total);
+            const displayCustomerName = transaction.customer?.name || '-';
+            const displayCustomerPhone = transaction.customer?.phone || '-';
             refs.transactionModalPayment.innerHTML = payments.length ? payments.map((payment) => `
+                <div>Pelanggan: <span class="font-semibold text-white">${displayCustomerName}</span></div>
+                <div>No. Telepon: <span class="font-semibold text-white">${displayCustomerPhone}</span></div>
                 <div>Metode: <span class="font-semibold text-white">${payment.payment_method}</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(payment.discount_amount)}</span></div>
                 <div>Kembalian: <span class="font-semibold text-white">${formatMoney(payment.change_amount)}</span></div>
             `).join('') : `
+                <div>Pelanggan: <span class="font-semibold text-white">${displayCustomerName}</span></div>
+                <div>No. Telepon: <span class="font-semibold text-white">${displayCustomerPhone}</span></div>
                 <div>Metode: <span class="font-semibold text-white">cash</span></div>
                 <div>Cash: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
                 <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
@@ -1241,6 +1276,8 @@
                 state.receipt = response.data;
                 state.cart = [];
                 selectedCustomer = null;
+                selectedCustomerName = null;
+                selectedCustomerPhone = null;
 
                 document.getElementById("memberSearch").value = "";
                 document.getElementById("memberResult").innerHTML = "";
@@ -1327,6 +1364,9 @@
                 closeQrisModal();
                 state.receipt = response.data;
                 state.cart = [];
+                selectedCustomer = null;
+                selectedCustomerName = null;
+                selectedCustomerPhone = null;
                 setCurrencyInputValue(refs.discountAmount, 0);
                 setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
@@ -1488,11 +1528,23 @@
                 updateSummary();
             });
         });
-        
+        document.querySelectorAll('[data-quick-cash]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const value = btn.dataset.quickCash;
+                if (value === 'exact') {
+                    setCurrencyInputValue(refs.cashTendered, calculateGrandTotal());
+                } else {
+                    setCurrencyInputValue(refs.cashTendered, Number(value));
+                }
+                normalizeCurrencyInput(refs.cashTendered);
+                updateSummary();
+                refs.cashTendered.focus();
+            });
+        });
+
         [refs.cardHolder, refs.cardNumber, refs.cardBank, refs.approvalCode].forEach((input) => {
             input.addEventListener('input', updateSummary);
         });
-
         refs.checkoutButton.addEventListener('click', checkout);
         refs.closeTransactionModal.addEventListener('click', closeTransactionModal);
         refs.transactionModal.addEventListener('click', (event) => {
@@ -1540,6 +1592,8 @@
         loadTransactions();
 
         let selectedCustomer = null;
+        let selectedCustomerName = null;
+        let selectedCustomerPhone = null;
 
         document
         .getElementById("memberSearch")
@@ -1612,6 +1666,8 @@
         function chooseMember(id,name,phone){
 
             selectedCustomer=id;
+            selectedCustomerName=name;
+            selectedCustomerPhone=phone;
 
             document.getElementById("memberSearch").value =
                 name+" ("+phone+")";

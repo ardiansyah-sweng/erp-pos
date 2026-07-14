@@ -522,8 +522,24 @@ async function loadCustomers(keyword = ""){
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
 
+                <button class="btn-expand ml-2 rounded-lg border border-amber-500/30 p-2 text-amber-400 hover:bg-amber-500/10" data-id="${customer.id}">
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </button>
+
             </td>
 
+        </tr>
+
+        <tr id="detail-${customer.id}" class="hidden">
+            <td colspan="8" class="p-0">
+                <div class="border-t border-cyan-500/20 bg-slate-900/60 p-5">
+                    <div id="detailContent-${customer.id}" data-loaded="false">
+                        <div class="text-center text-slate-400 text-sm py-4">
+                            🔄 Memuat data...
+                        </div>
+                    </div>
+                </div>
+            </td>
         </tr>
 
         `;
@@ -638,7 +654,141 @@ memberTable.addEventListener("click", async function(e){
 
     }
 
+    const expandBtn = e.target.closest(".btn-expand");
+
+    if(expandBtn){
+
+        const id = expandBtn.dataset.id;
+        const detailRow = document.getElementById(`detail-${id}`);
+        const content = document.getElementById(`detailContent-${id}`);
+        const isHidden = detailRow.classList.contains("hidden");
+
+        document.querySelectorAll('[id^="detail-"]').forEach(el => {
+            if (el.id !== `detail-${id}`) {
+                el.classList.add("hidden");
+            }
+        });
+
+        if (isHidden) {
+
+            detailRow.classList.remove("hidden");
+
+            if (content.dataset.loaded !== "true") {
+
+                try {
+
+                    const resp = await fetch(`/customers/${id}/repeat-products`);
+                    const result = await resp.json();
+
+                    if (result.success) {
+                        content.innerHTML = renderDetail(result.data);
+                        content.dataset.loaded = "true";
+                        lucide.createIcons();
+                    }
+
+                } catch (err) {
+                    content.innerHTML = `<div class="text-rose-400 text-sm text-center py-4">Gagal memuat data</div>`;
+                }
+
+            }
+
+        } else {
+            detailRow.classList.add("hidden");
+        }
+
+    }
+
 });
+
+function formatDate(dateStr){
+    if(!dateStr) return "-";
+    return new Date(dateStr).toLocaleDateString("id-ID", {
+        day:"2-digit", month:"short", year:"numeric"
+    });
+}
+
+function formatRupiah(num){
+    return "Rp " + Number(num).toLocaleString("id-ID");
+}
+
+function renderDetail(data){
+
+    const customer = data.customer;
+    const products = data.repeat_products ?? [];
+    const transactions = data.recent_transactions ?? [];
+
+    let productsHtml = "";
+
+    if(products.length > 0){
+        products.forEach(p => {
+            productsHtml += `
+                <div class="rounded-xl border border-white/10 bg-slate-800/60 p-3">
+                    <div class="font-medium text-white text-sm">${p.name}</div>
+                    <div class="mt-1 text-xs text-slate-400">
+                        ${p.total_beli}x beli • ${p.total_qty} pcs
+                    </div>
+                    <div class="text-xs text-cyan-400">
+                        Terakhir: ${formatDate(p.terakhir_beli)}
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        productsHtml = `<div class="text-slate-500 text-sm col-span-4 py-2">Belum ada riwayat pembelian</div>`;
+    }
+
+    let transactionsHtml = "";
+
+    if(transactions.length > 0){
+        transactions.forEach(t => {
+            transactionsHtml += `
+                <div class="flex items-center justify-between rounded-lg border border-white/5 bg-slate-800/40 px-4 py-2.5">
+                    <div>
+                        <div class="text-sm text-white font-medium">${t.transaction_number ?? "TRX-" + String(t.id).padStart(4,"0")}</div>
+                        <div class="text-xs text-slate-500">${formatDate(t.created_at)}</div>
+                    </div>
+                    <div class="text-sm font-semibold text-emerald-300">
+                        ${formatRupiah(t.total)}
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        transactionsHtml = `<div class="text-slate-500 text-sm">Belum ada transaksi</div>`;
+    }
+
+    return `
+        <div class="grid gap-5">
+
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="text-lg font-bold text-white">${customer.name}</div>
+                <span class="text-sm text-slate-400">${customer.phone}</span>
+                <span>${levelBadge(customer.member_level)}</span>
+                <span class="text-sm text-cyan-300">⭐ ${customer.points} poin</span>
+            </div>
+
+            <div>
+                <h3 class="mb-3 text-sm font-semibold text-amber-300 flex items-center gap-2">
+                    <i data-lucide="flame" class="w-4 h-4"></i> Produk Favorit
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    ${productsHtml}
+                </div>
+            </div>
+
+            <div>
+                <h3 class="mb-3 text-sm font-semibold text-cyan-300 flex items-center gap-2">
+                    <i data-lucide="clipboard-list" class="w-4 h-4"></i> Transaksi Terakhir
+                </h3>
+                <div class="space-y-2">
+                    ${transactionsHtml}
+                </div>
+            </div>
+
+        </div>
+    `;
+
+}
 
 document.getElementById("searchMember")
 .addEventListener("keyup", function(){

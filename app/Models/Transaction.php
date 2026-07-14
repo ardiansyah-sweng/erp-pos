@@ -8,7 +8,7 @@ use App\Models\Customer;
 class Transaction extends Model
 {
     protected $table = 'transaction';
-    protected $fillable = ['total', 'transaction_date', 'created_at', 'updated_at'];
+    protected $fillable = ['total', 'transaction_date', 'created_at', 'updated_at', 'customer_id'];
 
     public function details()
     {
@@ -31,6 +31,7 @@ class Transaction extends Model
     public function getColumn($index)
     {
         $fillable = $this->getFillable();
+
         return $fillable[$index] ?? null;
     }
 

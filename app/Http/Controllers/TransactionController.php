@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Transaction;
+use App\Models\TransactionDetail;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use App\Models\Transaction;
-use App\Models\TransactionDetail;
 use App\Models\Customer;
 use App\Services\CustomerService;
 
@@ -41,7 +41,7 @@ class TransactionController extends Controller
         $sort = array_key_exists($sortParam, $sortColumns) ? $sortParam : 'date';
         $direction = $request->query('direction') === 'asc' ? 'asc' : 'desc';
 
-        $transactions = Transaction::with(['details.product', 'details.returnDetails', 'payments'])
+        $transactions = Transaction::with(['details.product', 'details.returnDetails', 'payments', 'customer'])
             ->withSum('details as items_total_quantity', 'quantity')
             ->when($validated['date'] ?? null, function ($query, $date) {
                 $query->whereDate('created_at', $date);
@@ -49,7 +49,7 @@ class TransactionController extends Controller
             ->orderBy($sortColumns[$sort], $direction)
             ->get();
 
-        if (!$request->expectsJson() && !$request->ajax()) {
+        if (! $request->expectsJson() && ! $request->ajax()) {
             return view('transactions.index', [
                 'transactions' => $transactions,
                 'selectedDate' => $validated['date'] ?? null,
@@ -77,8 +77,8 @@ class TransactionController extends Controller
 
         $fileName = 'detail-transaksi';
 
-        if (!empty($validated['date'])) {
-            $fileName .= '-' . $validated['date'];
+        if (! empty($validated['date'])) {
+            $fileName .= '-'.$validated['date'];
         }
 
         return response()->streamDownload(function () use ($transactions) {
@@ -104,7 +104,7 @@ class TransactionController extends Controller
 
             foreach ($transactions as $transaction) {
                 $payment = $transaction->payments->first();
-                $transactionCode = 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT);
+                $transactionCode = 'TRX-'.str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT);
                 $subtotal = $transaction->details->sum('amount');
                 $discount = min((int) ($payment?->discount_amount ?? 0), (int) $subtotal);
                 $allocatedDiscount = 0;
@@ -128,7 +128,7 @@ class TransactionController extends Controller
                         $transaction->created_at?->format('H:i'),
                         $payment?->payment_method ?? 'cash',
                         $detail->product?->sku ?? '-',
-                        $detail->product?->name ?? 'Produk #' . $detail->product_id,
+                        $detail->product?->name ?? 'Produk #'.$detail->product_id,
                         $detail->quantity,
                         $detail->price,
                         $itemSubtotal,
@@ -141,7 +141,7 @@ class TransactionController extends Controller
             }
 
             fclose($handle);
-        }, $fileName . '.csv', [
+        }, $fileName.'.csv', [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
@@ -206,7 +206,7 @@ class TransactionController extends Controller
             foreach ($productQuantities as $productId => $quantity) {
                 $product = $lockedProducts->get((int) $productId);
 
-                if (!$product || $product->stock_quantity < $quantity) {
+                if (! $product || $product->stock_quantity < $quantity) {
                     $productName = $product?->name ?? 'produk';
                     $remainingStock = $product?->stock_quantity ?? 0;
 
@@ -272,7 +272,7 @@ class TransactionController extends Controller
             'message' => 'Transaction created successfully',
             'data' => [
                 'id' => $transaction->id,
-                'transaction_number' => 'TRX-' . now()->format('YmdHis') . '-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
+                'transaction_number' => 'TRX-'.now()->format('YmdHis').'-'.str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
                 'subtotal' => $subtotal,
                 'discount_amount' => $discountAmount,
                 'total_amount' => $totalAmount,
@@ -287,36 +287,37 @@ class TransactionController extends Controller
 
     public function store(Request $request)
     {
-            $request->validate([
-                'total' => 'required|numeric',
-                'details' => 'required|array'
+        $request->validate([
+            'total' => 'required|numeric',
+            'details' => 'required|array',
+            'customer_id' => 'nullable|integer|exists:customers,id',
+        ]);
+
+        $transaction = Transaction::create([
+            'customer_id' => $request->customer_id,
+            'total' => $request->total,
+        ]);
+
+        $transaction->payments()->create([
+            'payment_method' => 'cash',
+            'amount' => $request->total,
+        ]);
+
+        foreach ($request->details as $detail) {
+            TransactionDetail::create([
+                'transaction_id' => $transaction->id,
+                'product_id' => $detail['product_id'],
+                'quantity' => $detail['quantity'],
+                'price' => $detail['price'],
+                'amount' => $detail['quantity'] * $detail['price'],
             ]);
-
-            $transaction = Transaction::create([
-                'customer_id' => $request->customer_id,
-                'total' => $request->total
-            ]);
-
-            $transaction->payments()->create([
-                'payment_method' => 'cash',
-                'amount' => $request->total,
-            ]);
-
-            foreach ($request->details as $detail) {
-                TransactionDetail::create([
-                    'transaction_id' => $transaction->id,
-                    'product_id' => $detail['product_id'],
-                    'quantity' => $detail['quantity'],
-                    'price' => $detail['price'],
-                    'amount' => $detail['quantity'] * $detail['price']
-                ]);
-            }
-
-            return response()->json([
-                'message' => 'Transaction berhasil ditambahkan',
-                'data' => $transaction
-            ], 201);
         }
+
+        return response()->json([
+            'message' => 'Transaction berhasil ditambahkan',
+            'data' => $transaction,
+        ], 201);
+    }
 
     public function salesNotes(Request $request)
     {
@@ -364,7 +365,7 @@ class TransactionController extends Controller
 
         return $query->get()->map(function ($transaction) {
             return [
-                'transaction_code' => 'TRX-' . $transaction->created_at->format('YmdHis') . '-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
+                'transaction_code' => 'TRX-'.$transaction->created_at->format('YmdHis').'-'.str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
                 'date' => $transaction->created_at,
                 'item_count' => $transaction->details->sum('quantity'),
                 'total' => $transaction->total,

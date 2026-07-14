@@ -79,6 +79,7 @@ Route::post('/customers', [CustomerController::class,'store']);
 Route::get('/customers/search', [CustomerController::class,'search'])
     ->name('customers.search');
 Route::get('/customers/{id}', [CustomerController::class,'show']);
+Route::get('/customers/{id}/repeat-products', [CustomerController::class,'repeatProducts']);
 Route::put('/customers/{id}', [CustomerController::class,'update']);
 Route::delete('/customers/{id}', [CustomerController::class,'destroy']);
 
