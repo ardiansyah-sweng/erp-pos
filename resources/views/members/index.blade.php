@@ -247,6 +247,52 @@
 
 </div>
 </div>
+<div id="editModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-[#0a1628] via-[#0c1a2e] to-[#08111f] p-8 shadow-2xl w-full max-w-md mx-4">
+        <h2 class="text-2xl font-bold text-white mb-6">Edit Data Member</h2>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Nama Member</label>
+                <div class="relative">
+                    <i data-lucide="user" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editName" class="input" placeholder="Masukkan nama member">
+                </div>
+            </div>
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Nomor HP</label>
+                <div class="relative">
+                    <i data-lucide="phone" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editPhone" class="input" placeholder="08xxxxxxxxxx">
+                </div>
+            </div>
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Email</label>
+                <div class="relative">
+                    <i data-lucide="mail" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editEmail" class="input" placeholder="email@gmail.com">
+                </div>
+            </div>
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Alamat</label>
+                <div class="relative">
+                    <i data-lucide="map-pin" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editAddress" class="input" placeholder="Alamat lengkap">
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 flex gap-3 justify-end">
+            <button id="cancelEdit" class="rounded-xl border border-slate-500/30 px-6 py-3 font-semibold text-slate-300 hover:bg-slate-500/10 transition">
+                Batal
+            </button>
+            <button id="submitEdit" class="flex items-center gap-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 px-6 py-3 font-semibold text-slate-950 transition">
+                <i data-lucide="save" class="w-[18px] h-[18px]"></i>
+                Simpan Perubahan
+            </button>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -264,6 +310,31 @@ const silverMember = document.getElementById("silverMember");
 const goldMember = document.getElementById("goldMember");
 const totalPoint = document.getElementById("totalPoint");
 const memberCountBadge = document.getElementById("memberCountBadge");
+
+const editModal = document.getElementById("editModal");
+const editNameInput = document.getElementById("editName");
+const editPhoneInput = document.getElementById("editPhone");
+const editEmailInput = document.getElementById("editEmail");
+const editAddressInput = document.getElementById("editAddress");
+const submitEditBtn = document.getElementById("submitEdit");
+const cancelEditBtn = document.getElementById("cancelEdit");
+
+let currentEditId = null;
+
+function openEditModal(id, name, phone, email, address){
+    currentEditId = id;
+    editNameInput.value = name || "";
+    editPhoneInput.value = phone || "";
+    editEmailInput.value = email || "";
+    editAddressInput.value = address || "";
+    editModal.classList.remove("hidden");
+    editNameInput.focus();
+}
+
+function closeEditModal(){
+    editModal.classList.add("hidden");
+    currentEditId = null;
+}
 
 function bannerClock(){
 
@@ -371,7 +442,7 @@ async function loadCustomers(keyword = ""){
 
             <td class="text-right pr-4">
 
-                <button class="btn-edit rounded-lg border border-cyan-500/30 p-2 text-cyan-300 hover:bg-cyan-500/10" data-id="${customer.id}">
+                <button class="btn-edit rounded-lg border border-cyan-500/30 p-2 text-cyan-300 hover:bg-cyan-500/10" data-id="${customer.id}" data-name="${customer.name}" data-phone="${customer.phone}" data-email="${customer.email ?? ""}" data-address="${customer.address ?? ""}">
                     <i data-lucide="pencil" class="w-4 h-4"></i>
                 </button>
 
@@ -444,77 +515,81 @@ document.getElementById("saveMember")
 // route kamu berbeda.
 
 memberTable.addEventListener("click", async function(e){
-
     const editBtn = e.target.closest(".btn-edit");
     const deleteBtn = e.target.closest(".btn-delete");
-
+    
     if(editBtn){
-
         const id = editBtn.dataset.id;
-
-        const newName = prompt("Edit nama member:");
-
-        if(newName === null || newName.trim() === "") return;
-
-        const response = await fetch("/customers/" + id, {
-
-            method:"PUT",
-
-            headers:{
-                "Content-Type":"application/json",
-                "Accept":"application/json",
-                "X-CSRF-TOKEN":"{{ csrf_token() }}"
-            },
-
-            body: JSON.stringify({ name: newName.trim() })
-
-        });
-
-        const result = await response.json();
-
-        if(result.success){
-            alert("Member berhasil diperbarui!");
-            loadCustomers();
-        }else{
-            alert(result.message ?? "Gagal mengubah member.");
-        }
-
+        const name = editBtn.dataset.name;
+        const phone = editBtn.dataset.phone;
+        const email = editBtn.dataset.email;
+        const address = editBtn.dataset.address;
+        openEditModal(id, name, phone, email, address);
     }
-
+    
     if(deleteBtn){
-
         const id = deleteBtn.dataset.id;
-
         if(!confirm("Hapus member ini? Tindakan tidak bisa dibatalkan.")) return;
-
         const response = await fetch("/customers/" + id, {
-
             method:"DELETE",
-
             headers:{
                 "Accept":"application/json",
                 "X-CSRF-TOKEN":"{{ csrf_token() }}"
             }
-
         });
-
         const result = await response.json();
-
         if(result.success){
             loadCustomers();
         }else{
             alert(result.message ?? "Gagal menghapus member.");
         }
-
     }
+});
 
+cancelEditBtn.addEventListener("click", closeEditModal);
+
+submitEditBtn.addEventListener("click", async function(){
+    if(!currentEditId) return;
+    
+    const name = editNameInput.value.trim();
+    const phone = editPhoneInput.value.trim();
+    const email = editEmailInput.value.trim();
+    const address = editAddressInput.value.trim();
+    
+    if(name == "" || phone == ""){
+        alert("Nama dan Nomor HP wajib diisi.");
+        return;
+    }
+    
+    const response = await fetch("/customers/" + currentEditId, {
+        method:"PUT",
+        headers:{
+            "Content-Type":"application/json",
+            "Accept":"application/json",
+            "X-CSRF-TOKEN":"{{ csrf_token() }}"
+        },
+        body: JSON.stringify({ name, phone, email, address })
+    });
+    
+    const result = await response.json();
+    if(result.success){
+        alert("Member berhasil diperbarui!");
+        closeEditModal();
+        loadCustomers();
+    }else{
+        alert(result.message ?? "Gagal mengubah member.");
+    }
+});
+
+editModal.addEventListener("click", function(e){
+    if(e.target === editModal){
+        closeEditModal();
+    }
 });
 
 document.getElementById("searchMember")
 .addEventListener("keyup", function(){
-
     loadCustomers(this.value);
-
 });
 
 loadCustomers();
