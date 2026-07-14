@@ -12,14 +12,17 @@ use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\Customer;
 use App\Services\CustomerService;
+use App\Services\SyncService;
 
 class TransactionController extends Controller
 {
     protected $customerService;
+    protected $syncService;
 
-    public function __construct(CustomerService $customerService)
+    public function __construct(CustomerService $customerService, SyncService $syncService)
     {
         $this->customerService = $customerService;
+        $this->syncService = $syncService;
     }
 
     public function getTransaction(Request $request)
@@ -267,6 +270,12 @@ class TransactionController extends Controller
             return $transaction;
         });
 
+        $this->syncService->log(
+            'Transaction',
+            'Berhasil',
+            "CREATE - Transaksi berhasil dibuat. ID: {$transaction->id}"
+        );
+
         return response()->json([
             'success' => true,
             'message' => 'Transaction created successfully',
@@ -311,6 +320,12 @@ class TransactionController extends Controller
                     'amount' => $detail['quantity'] * $detail['price']
                 ]);
             }
+
+            $this->syncService->log(
+                'Transaction',
+                'Berhasil',
+                "CREATE - Transaksi berhasil dibuat. ID: {$transaction->id}"
+            );
 
             return response()->json([
                 'message' => 'Transaction berhasil ditambahkan',
