@@ -114,12 +114,23 @@ class CustomerController extends Controller
 
         $customer = Customer::find($id);
         
+    public function update(Request $request, $id)
+    {
+        $customer = Customer::find($id);
+
         if (!$customer) {
             return response()->json([
                 'success' => false,
                 'message' => 'Customer tidak ditemukan'
             ], 404);
         }
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:100',
+            'phone' => 'sometimes|required|string|max:20',
+            'email' => 'nullable|email',
+            'address' => 'nullable|string'
+        ]);
 
         $customer->update($validated);
 
