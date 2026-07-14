@@ -195,6 +195,16 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="mt-3">
+                        <label class="text-sm text-slate-300" for="sortFilter">Urutkan</label>
+                        <select id="sortFilter" class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none focus:border-cyan-400">
+                            <option value="">Default</option>
+                            <option value="price_asc">Harga: Termurah ke Termahal</option>
+                            <option value="price_desc">Harga: Termahal ke Termurah</option>
+                            <option value="name_asc">Nama: A ke Z</option>
+                            <option value="name_desc">Nama: Z ke A</option>
+                        </select>
+                    </div>
                     <p id="productsStatus" class="mt-3 text-sm text-slate-400">Memuat produk...</p>
                 </div>
 
@@ -588,6 +598,7 @@
             cardBank: document.getElementById('cardBank'),
             approvalCode: document.getElementById('approvalCode'),
             categoryFilter: document.getElementById('categoryFilter'),
+            sortFilter: document.getElementById('sortFilter'),
         };
 
         const formatMoney = (value) => moneyFormatter.format(Number(value || 0));
@@ -1041,13 +1052,14 @@
             updateSummary();
         };
 
-        const loadProducts = async (search = '', categoryId = '') => {
+        const loadProducts = async (search = '', categoryId = '', sort = '') => {
             refs.productsStatus.textContent = 'Memuat produk...';
 
             try {
                 const params = new URLSearchParams();
                 if (search) params.set('search', search);
                 if (categoryId) params.set('category_id', categoryId);
+                if (sort) params.set('sort', sort);
                 const queryString = params.toString() ? `?${params.toString()}` : '';
                 const response = await fetchJson(`/products${queryString}`);
                 state.products = response.data ?? [];
@@ -1242,7 +1254,7 @@
                 setCurrencyInputValue(refs.cashTendered, 0);
                 refs.notes.value = '';
                 renderCart();
-                await loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value);
+                await loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value, refs.sortFilter.value);
                 await loadTransactions();
                 setCheckoutStatus('Transaksi berhasil disimpan.', 'success');
                 if (state.printAfterCheckout) {
@@ -1343,11 +1355,25 @@
 
         let searchTimer = null;
 
+       // 1) di refs.productSearch input listener
         refs.productSearch.addEventListener('input', () => {
             window.clearTimeout(searchTimer);
             searchTimer = window.setTimeout(() => {
-                loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value);
+                loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value, refs.sortFilter.value);
             }, 250);
+        });
+
+        // 2) di refs.refreshProducts click
+        refs.refreshProducts.addEventListener('click', () => {
+            loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value, refs.sortFilter.value);
+        });
+
+        // 3) di refs.categoryFilter change
+        refs.categoryFilter.addEventListener('change', () => {
+            loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value, refs.sortFilter.value);
+        });
+        refs.sortFilter.addEventListener('change', () => {
+            loadProducts(refs.productSearch.value.trim(), refs.categoryFilter.value, refs.sortFilter.value);
         });
 
         refs.barcodeSearch.addEventListener('keydown', async (event) => {
@@ -1510,7 +1536,7 @@
         applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
         setCurrencyInputValue(refs.discountAmount, getDiscount());
         setCurrencyInputValue(refs.cashTendered, getCashTendered());
-        loadProducts(null, refs.categoryFilter.value);
+        loadProducts(null, refs.categoryFilter.value, refs.sortFilter.value);
         loadTransactions();
 
         let selectedCustomer = null;
