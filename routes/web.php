@@ -15,102 +15,102 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnTransactionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 
 use App\Http\Controllers\DashboardController;
 
-Route::get('/', function () {
-
-
-
-
-    return redirect()->route('pos.index');
-});
-
-Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
-
-Route::get('/jalankan-schedule', [ScheduleController::class, 'index'])
-    ->name('jalankan-schedule-index');
-
-Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])
-    ->name('jalankan-schedule');
-
-Route::get('/products', [ProductController::class, 'getProducts'])
-    ->name('products.index');
-
-Route::get('/products/sku/{sku}', [ProductController::class, 'getItemBySKU']);
-
-Route::get('/products/manage', [ProductController::class, 'manage'])->name('products.manage');
-Route::post('/products/manage', [ProductController::class, 'store'])->name('products.store');
-Route::put('/products/manage/{product}', [ProductController::class, 'update'])->name('products.update');
-Route::delete('/products/manage/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-
-Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index'])
-    ->name('stock-adjustments.index');
-
-Route::put('/stock-adjustments/{product}', [StockAdjustmentController::class, 'update'])
-    ->name('stock-adjustments.update');
-
-Route::get('/transactions/export/csv', [TransactionController::class, 'exportCsv'])->name('transactions.export');
-Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
-
+/*
+|--------------------------------------------------------------------------
+| Rute publik (tanpa login)
+|--------------------------------------------------------------------------
+*/
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::post('/pos/checkout', [TransactionController::class, 'checkout']);
+/*
+|--------------------------------------------------------------------------
+| Rute terproteksi (wajib login sebagai kasir)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('cashier')->group(function () {
 
-Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
-Route::post('/transaction/store', [TransactionController::class, 'store']);
+    Route::get('/', function () {
+        return redirect()->route('pos.index');
+    });
 
-Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
-Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
-Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
-Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+    Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
 
+    Route::get('/jalankan-schedule', [ScheduleController::class, 'index'])
+        ->name('jalankan-schedule-index');
 
+    Route::post('/jalankan-schedule', [ScheduleController::class, 'run'])
+        ->name('jalankan-schedule');
 
+    Route::get('/products', [ProductController::class, 'getProducts'])
+        ->name('products.index');
 
-Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.index');
-Route::post('/cashier/add', [CashierController::class, 'add'])->name('cashier.add');
-Route::post('/cashier/checkout', [CashierController::class, 'checkout'])->name('cashier.checkout');
+    Route::get('/products/sku/{sku}', [ProductController::class, 'getItemBySKU']);
 
-Route::get('/customers', [CustomerController::class,'getCustomers']);
-Route::post('/customers', [CustomerController::class,'store']);
-Route::get('/customers/search', [CustomerController::class,'search'])
-    ->name('customers.search');
-Route::get('/customers/{id}', [CustomerController::class,'show']);
-Route::put('/customers/{id}', [CustomerController::class,'update']);
-Route::delete('/customers/{id}', [CustomerController::class,'destroy']);
+    Route::get('/products/manage', [ProductController::class, 'manage'])->name('products.manage');
+    Route::post('/products/manage', [ProductController::class, 'store'])->name('products.store');
+    Route::put('/products/manage/{product}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/manage/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
-Route::get('/members', [CustomerController::class, 'index'])->name('members.index');
-Route::post('/members/store', [CustomerController::class, 'store'])->name('members.store');
-Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
-Route::post('/transaction/store', [TransactionController::class, 'store']);
-Route::get('/transactions/{id}/receipt', [ReceiptController::class, 'generate'])->name('transactions.receipt');
-Route::get('/sales-notes', [TransactionController::class, 'salesNotes'])->name('sales-notes');
-Route::get('/sales-notes/pdf', [TransactionController::class, 'downloadSalesReportPdf'])->name('sales-notes.pdf');
-Route::get('/returns', [ReturnTransactionController::class, 'index'])->name('returns.index');
-Route::post('/returns/{transaction}', [ReturnTransactionController::class, 'store'])->name('returns.store');
+    Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index'])
+        ->name('stock-adjustments.index');
 
-Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
-Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
-Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::put('/stock-adjustments/{product}', [StockAdjustmentController::class, 'update'])
+        ->name('stock-adjustments.update');
 
+    Route::get('/transactions/export/csv', [TransactionController::class, 'exportCsv'])->name('transactions.export');
+    Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
 
+    Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
+    Route::post('/transaction/store', [TransactionController::class, 'store']);
 
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
+    Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.index');
+    Route::post('/cashier/add', [CashierController::class, 'add'])->name('cashier.add');
+    Route::post('/cashier/checkout', [CashierController::class, 'checkout'])->name('cashier.checkout');
 
+    Route::get('/customers', [CustomerController::class, 'getCustomers']);
+    Route::post('/customers', [CustomerController::class, 'store']);
+    Route::get('/customers/search', [CustomerController::class, 'search'])
+        ->name('customers.search');
+    Route::get('/customers/{id}', [CustomerController::class, 'show']);
+    Route::put('/customers/{id}', [CustomerController::class, 'update']);
+    Route::delete('/customers/{id}', [CustomerController::class, 'destroy']);
 
+    Route::get('/members', [CustomerController::class, 'index'])->name('members.index');
+    Route::post('/members/store', [CustomerController::class, 'store'])->name('members.store');
+    Route::get('/transactions/{id}/receipt', [ReceiptController::class, 'generate'])->name('transactions.receipt');
+    Route::get('/sales-notes', [TransactionController::class, 'salesNotes'])->name('sales-notes');
+    Route::get('/sales-notes/pdf', [TransactionController::class, 'downloadSalesReportPdf'])->name('sales-notes.pdf');
+    Route::get('/returns', [ReturnTransactionController::class, 'index'])->name('returns.index');
+    Route::post('/returns/{transaction}', [ReturnTransactionController::class, 'store'])->name('returns.store');
 
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
+    Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-
-
-
-
-
-
-
-
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    /*
+    |----------------------------------------------------------------------
+    | Manajemen User / Kasir (khusus admin)
+    |----------------------------------------------------------------------
+    */
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::delete('/users/{cashier}', [UserController::class, 'destroy'])->name('users.destroy');
+    });
+});

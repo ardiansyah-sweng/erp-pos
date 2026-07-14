@@ -36,22 +36,22 @@
                 </div>
             @endif
 
-            <form class="mt-8 space-y-6" action="{{ route('login') }}" method="POST">
+            <form class="mt-8 space-y-6" action="{{ route('login.attempt') }}" method="POST">
                 @csrf
                 <div class="space-y-4">
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">
-                            Email Address
+                        <label for="username" class="block text-sm font-medium text-gray-700">
+                            Username
                         </label>
-                        <input 
-                            id="email" 
-                            name="email" 
-                            type="email" 
-                            autocomplete="email" 
-                            required 
+                        <input
+                            id="username"
+                            name="username"
+                            type="text"
+                            autocomplete="username"
+                            required
                             class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                            placeholder="Enter your email"
-                            value="{{ old('email') }}"
+                            placeholder="Masukkan username"
+                            value="{{ old('username') }}"
                         >
                     </div>
 
@@ -92,6 +92,12 @@
                     </button>
                 </div>
             </form>
+
+            <div class="text-center text-xs text-gray-500 border-t border-gray-200 pt-4">
+                <p class="font-semibold text-gray-600">Akun demo</p>
+                <p>Admin — <span class="font-mono">admin</span> / <span class="font-mono">admin123</span></p>
+                <p>Kasir — <span class="font-mono">kasir1</span> / <span class="font-mono">kasir123</span></p>
+            </div>
         </div>
     </div>
 </body>
