@@ -11,8 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Wajib login untuk semua halaman web (login/logout dikecualikan di middleware).
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsureCashierAuthenticated::class,
+        ]);
+
         $middleware->alias([
-            'cashier' => \App\Http\Middleware\EnsureCashierAuthenticated::class,
             'role' => \App\Http\Middleware\EnsureRole::class,
         ]);
     })
