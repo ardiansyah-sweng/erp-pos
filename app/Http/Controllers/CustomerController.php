@@ -102,6 +102,18 @@ class CustomerController extends Controller
             'data' => $customers
         ]);
     }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email',
+            'address' => 'nullable|string'
+        ]);
+
+        $customer = Customer::find($id);
+        
     public function update(Request $request, $id)
     {
         $customer = Customer::find($id);
@@ -128,6 +140,7 @@ class CustomerController extends Controller
             'data' => $customer
         ]);
     }
+
     public function destroy($id)
     {
         $customer = Customer::find($id);
