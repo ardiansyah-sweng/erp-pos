@@ -356,12 +356,22 @@
                 <div class="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
                     <h2 class="text-lg font-semibold text-white">Pembayaran</h2>
                     <div class="mt-4 space-y-4">
+                        {{-- Diskon Otomatis dari Database --}}
                         <div>
-                            <label class="text-sm text-slate-300" for="discountAmount">Diskon Manual</label>
+                            <label class="text-sm text-slate-300">Diskon Produk Otomatis</label>
+                            <div id="autoDiscountBox" class="mt-2 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 min-h-[48px] flex items-center justify-between gap-3">
+                                <span id="discountInfo" class="text-sm text-amber-200">Belum ada diskon aktif untuk produk di keranjang.</span>
+                                <span id="autoDiscountValue" class="text-sm font-semibold text-amber-300 whitespace-nowrap"></span>
+                            </div>
+                        </div>
+
+                        {{-- Diskon Manual --}}
+                        <div>
+                            <label class="text-sm text-slate-300" for="discountAmount">Diskon Manual (Tambahan)</label>
                             <div class="mt-2 flex overflow-hidden rounded-2xl border border-white/10 bg-slate-950/70 focus-within:border-cyan-400">
                                 <input id="discountAmount" type="text" inputmode="numeric" value="Rp 0"
                                     class="min-w-0 flex-1 bg-transparent px-4 py-3 text-white outline-none placeholder:text-slate-500"
-                                    aria-label="Jumlah diskon">
+                                    aria-label="Jumlah diskon manual">
                                 <div class="flex-shrink-0 border-l border-white/10">
                                     <select id="discountType"
                                         class="h-full appearance-none bg-slate-900/80 px-3 py-3 text-sm font-medium text-slate-200 outline-none cursor-pointer hover:bg-slate-800/80 focus:bg-slate-800/80 transition-colors"
@@ -371,15 +381,7 @@
                                     </select>
                                 </div>
                             </div>
-
-                            {{-- Tombol diskon otomatis dari database --}}
-                            <div class="mt-3">
-                                <button id="applyProductDiscount" type="button"
-                                    class="w-full rounded-2xl border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-sm font-medium text-amber-200 transition hover:bg-amber-400/20">
-                                    ✦ Terapkan Diskon Produk Otomatis
-                                </button>
-                                <p id="discountInfo" class="mt-2 text-xs text-slate-400 hidden"></p>
-                            </div>
+                            <p class="mt-1 text-xs text-slate-500">Isi jika ada diskon tambahan di luar promo produk.</p>
                         </div>
                     </div>
                 </div>
@@ -1090,14 +1092,8 @@
 
         const applyAutoDiscount = async () => {
             if (state.cart.length === 0) {
-                document.getElementById('discountAmount').value = 'Rp 0';
-                document.getElementById('discountType').value = 'nominal';
-                document.getElementById('discountAmount').dispatchEvent(new Event('input'));
-                const info = document.getElementById('discountInfo');
-                if (info) {
-                    info.textContent = '';
-                    info.classList.add('hidden');
-                }
+                document.getElementById('discountInfo').textContent = 'Belum ada diskon aktif untuk produk di keranjang.';
+                document.getElementById('autoDiscountValue').textContent = '';
                 return;
             }
 
@@ -1108,11 +1104,8 @@
                 const result = await response.json();
 
                 if (!result.success || Object.keys(result.data).length === 0) {
-                    const info = document.getElementById('discountInfo');
-                    if (info) {
-                        info.textContent = 'Tidak ada diskon aktif untuk produk ini.';
-                        info.classList.remove('hidden');
-                    }
+                    document.getElementById('discountInfo').textContent = 'Tidak ada diskon aktif untuk produk di keranjang.';
+                    document.getElementById('autoDiscountValue').textContent = '';
                     return;
                 }
 
@@ -1132,17 +1125,19 @@
                 });
 
                 if (totalDiscount > 0) {
+                    document.getElementById('discountInfo').textContent =
+                        `✓ ${[...new Set(appliedNames)].join(', ')}`;
+                    document.getElementById('autoDiscountValue').textContent =
+                        `- Rp${totalDiscount.toLocaleString('id-ID')}`;
+
+                    // Terapkan ke field diskon
                     document.getElementById('discountAmount').value = totalDiscount;
                     document.getElementById('discountType').value = 'nominal';
                     document.getElementById('discountAmount').dispatchEvent(new Event('input'));
-                    const info = document.getElementById('discountInfo');
-                    if (info) {
-                        info.textContent = `✓ Diskon: ${[...new Set(appliedNames)].join(', ')} — Rp${totalDiscount.toLocaleString('id-ID')}`;
-                        info.classList.remove('hidden');
-                    }
                 }
             } catch (e) {
                 console.error('Gagal mengambil diskon:', e);
+                document.getElementById('discountInfo').textContent = 'Gagal memuat diskon.';
             }
         };
 
