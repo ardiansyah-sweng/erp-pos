@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Customer;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -45,6 +46,78 @@ class ReportController extends Controller
             'endDate',
             'start',
             'end'
+        ));
+    }
+
+    public function memberReport(Request $request)
+    {
+        $level = $request->get('level', '');
+
+        // ── Summary Cards ──
+        $totalMembers = Customer::count();
+        $newThisMonth = Customer::whereMonth('created_at', Carbon::now()->month)
+            ->whereYear('created_at', Carbon::now()->year)
+            ->count();
+        $totalPoints = Customer::sum('points');
+        $avgSpending = Customer::join('transaction', 'customers.id', '=', 'transaction.customer_id')
+            ->avg('transaction.total') ?? 0;
+
+        // ── Distribusi Level (Pie) ──
+        $levelDistribution = Customer::selectRaw('member_level, COUNT(*) as total')
+            ->groupBy('member_level')
+            ->orderBy('member_level')
+            ->get();
+
+        // ── Pertumbuhan Member per Bulan (6 bulan) ──
+        $monthlyGrowth = Customer::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as bulan, COUNT(*) as total")
+            ->where('created_at', '>=', Carbon::now()->subMonths(6)->startOfMonth())
+            ->groupBy('bulan')
+            ->orderBy('bulan')
+            ->get();
+
+        // ── Top 10 Member by Total Belanja ──
+        $topSpenders = Customer::withSum('transactions', 'total')
+            ->withCount('transactions')
+            ->having('transactions_sum_total', '>', 0)
+            ->orderBy('transactions_sum_total', 'desc')
+            ->limit(10)
+            ->get();
+
+        // ── Top 10 Member by Poin ──
+        $topPoints = Customer::orderBy('points', 'desc')
+            ->limit(10)
+            ->get();
+
+        // ── Top 10 Member by Jumlah Transaksi ──
+        $topFrequent = Customer::withCount('transactions')
+            ->having('transactions_count', '>', 0)
+            ->orderBy('transactions_count', 'desc')
+            ->limit(10)
+            ->get();
+
+        // ── Tabel semua member ──
+        $memberQuery = Customer::withCount('transactions')
+            ->withSum('transactions', 'total')
+            ->orderBy('transactions_sum_total', 'desc');
+
+        if ($level) {
+            $memberQuery->where('member_level', $level);
+        }
+
+        $members = $memberQuery->paginate(20)->withQueryString();
+
+        return view('reports.members', compact(
+            'totalMembers',
+            'newThisMonth',
+            'totalPoints',
+            'avgSpending',
+            'levelDistribution',
+            'monthlyGrowth',
+            'topSpenders',
+            'topPoints',
+            'topFrequent',
+            'members',
+            'level',
         ));
     }
 

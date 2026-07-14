@@ -6,6 +6,16 @@
 
 @section('content')
 
+<style>
+    .input-error {
+        border-color: #f43f5e !important;
+    }
+    .field-error {
+        margin-top: 4px;
+        font-size: 12px;
+        color: #fb7185;
+    }
+</style>
 <div class="p-8">
 
 <!-- ===================== HEADER BANNER ===================== -->
@@ -391,6 +401,69 @@
 
 @endsection
 
+<!-- ===================== TOAST NOTIFICATION ===================== -->
+<div id="toast"
+     class="fixed top-4 right-4 z-[100] hidden rounded-2xl border px-5 py-3 text-sm font-medium shadow-2xl backdrop-blur transition-opacity duration-300">
+</div>
+
+<!-- ===================== MODAL EDIT MEMBER ===================== -->
+<div id="editModal"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm">
+    <div class="w-full max-w-md rounded-3xl border border-white/10 bg-slate-950 p-6 text-slate-100 shadow-2xl shadow-black/40">
+        <div class="flex items-center justify-between gap-4">
+            <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">Edit Member</p>
+                <h2 class="mt-1 text-xl font-semibold text-white">Ubah Data Member</h2>
+            </div>
+            <button id="closeEditModal" type="button"
+                    class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300 transition hover:text-white">
+                Tutup
+            </button>
+        </div>
+        <div class="mt-5 space-y-4">
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Nama Member</label>
+                <div class="relative">
+                    <i data-lucide="user" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editName" class="input" placeholder="Masukkan nama member">
+                </div>
+            </div>
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Nomor HP</label>
+                <div class="relative">
+                    <i data-lucide="phone" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editPhone" class="input" placeholder="08xxxxxxxxxx">
+                </div>
+            </div>
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Email</label>
+                <div class="relative">
+                    <i data-lucide="mail" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editEmail" class="input" placeholder="email@gmail.com">
+                </div>
+            </div>
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Alamat</label>
+                <div class="relative">
+                    <i data-lucide="map-pin" class="input-icon w-[18px] h-[18px]"></i>
+                    <textarea id="editAddress" class="input min-h-[80px] resize-none" placeholder="Alamat lengkap"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="mt-6 flex flex-col gap-2">
+            <button id="saveEditBtn" type="button"
+                    class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110">
+                <i data-lucide="save" class="w-[18px] h-[18px]"></i>
+                Simpan Perubahan
+            </button>
+            <button id="cancelEditBtn" type="button"
+                    class="w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-slate-300 transition hover:text-white">
+                Batal
+            </button>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 
 <script>
@@ -406,6 +479,95 @@ const silverMember = document.getElementById("silverMember");
 const goldMember = document.getElementById("goldMember");
 const totalPoint = document.getElementById("totalPoint");
 const memberCountBadge = document.getElementById("memberCountBadge");
+
+let editingId = null;
+
+function showToast(message, type = "success") {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.className =
+        "fixed top-4 right-4 z-[100] rounded-2xl border px-5 py-3 text-sm font-medium shadow-2xl backdrop-blur transition-opacity duration-300 " +
+        (type === "success"
+            ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-100"
+            : "border-rose-400/30 bg-rose-400/10 text-rose-100");
+    toast.classList.remove("hidden");
+    setTimeout(() => toast.classList.add("hidden"), 3000);
+}
+
+function openModal(id) {
+    document.getElementById(id).classList.remove("hidden");
+    document.getElementById(id).classList.add("flex");
+    document.body.style.overflow = "hidden";
+}
+
+function showFieldError(inputId, message) {
+    const input = document.getElementById(inputId);
+    const existing = input.parentElement.nextElementSibling;
+    if (existing && existing.classList.contains("field-error") && existing.dataset.field === inputId) {
+        existing.textContent = "⚠ " + message;
+        return;
+    }
+    input.classList.add("input-error");
+    const error = document.createElement("p");
+    error.className = "field-error";
+    error.dataset.field = inputId;
+    error.textContent = "⚠ " + message;
+    input.parentElement.after(error);
+}
+
+function clearFieldErrors() {
+    document.querySelectorAll(".field-error").forEach(el => el.remove());
+    document.querySelectorAll(".input-error").forEach(el => el.classList.remove("input-error"));
+}
+
+function removeFieldError(fieldId) {
+    const input = document.getElementById(fieldId);
+    const error = input.parentElement.nextElementSibling;
+    if (error && error.classList.contains("field-error") && error.dataset.field === fieldId) {
+        error.remove();
+        input.classList.remove("input-error");
+    }
+}
+
+function validateNameRealtime() {
+    const input = document.getElementById("name");
+    const value = input.value.trim();
+    if (value === "") return;
+    if (value.length < 2) {
+        showFieldError("name", "Nama harus diisi minimal 2 karakter.");
+    } else {
+        removeFieldError("name");
+    }
+}
+
+function validatePhoneRealtime() {
+    const input = document.getElementById("phone");
+    input.value = input.value.replace(/\D/g, "");
+    const value = input.value.trim();
+    if (value === "") return;
+    if (!/^08\d{8,13}$/.test(value)) {
+        showFieldError("phone", "Nomor HP harus diawali 08 dan minimal 10 digit.");
+    } else {
+        removeFieldError("phone");
+    }
+}
+
+function validateEmailRealtime() {
+    const input = document.getElementById("email");
+    const value = input.value.trim();
+    if (value === "") return;
+    if (!value.includes("@")) {
+        showFieldError("email", "Masukkan email yang valid (contoh: email@domain.com).");
+    } else {
+        removeFieldError("email");
+    }
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.add("hidden");
+    document.getElementById(id).classList.remove("flex");
+    document.body.style.overflow = "";
+}
 
 function bannerClock(){
 
@@ -534,57 +696,64 @@ async function loadCustomers(keyword = ""){
 
 }
 
+document.getElementById("name").addEventListener("input", validateNameRealtime);
+document.getElementById("phone").addEventListener("input", validatePhoneRealtime);
+document.getElementById("email").addEventListener("input", validateEmailRealtime);
+
 document.getElementById("saveMember")
 .addEventListener("click", async function () {
+    clearFieldErrors();
 
-    const name = document.getElementById("name").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const email = document.getElementById("email").value.trim();
+    const name    = document.getElementById("name").value.trim();
+    const phone   = document.getElementById("phone").value.trim();
+    const email   = document.getElementById("email").value.trim();
     const address = document.getElementById("address").value.trim();
 
-    if(name=="" || phone==""){
-        alert("Nama dan Nomor HP wajib diisi.");
-        return;
+    let valid = true;
+
+    if (!name || name.length < 2) {
+        showFieldError("name", "Nama harus diisi minimal 2 karakter.");
+        valid = false;
     }
 
+    if (!phone) {
+        showFieldError("phone", "Nomor HP wajib diisi.");
+        valid = false;
+    } else if (!/^08\d{8,13}$/.test(phone)) {
+        showFieldError("phone", "Nomor HP harus diawali 08 dan minimal 10 digit.");
+        valid = false;
+    }
+
+    if (email && !email.includes("@")) {
+        showFieldError("email", "Masukkan email yang valid (contoh: email@domain.com).");
+        valid = false;
+    }
+
+    if (!valid) return;
+
     const response = await fetch("/customers",{
-
         method:"POST",
-
         headers:{
             "Content-Type":"application/json",
             "Accept":"application/json",
             "X-CSRF-TOKEN":"{{ csrf_token() }}"
         },
-
         body:JSON.stringify({ name, phone, email, address })
-
     });
 
     const result = await response.json();
 
     if(result.success){
-
-        alert("Member berhasil ditambahkan.");
-
+        showToast("Member berhasil ditambahkan!", "success");
         document.getElementById("name").value="";
         document.getElementById("phone").value="";
         document.getElementById("email").value="";
         document.getElementById("address").value="";
-
         loadCustomers();
-
     }else{
-
-        alert(result.message);
-
+        showToast(result.message ?? "Gagal menambahkan member.", "error");
     }
-
 });
-
-// NOTE: endpoint edit & delete di bawah ini mengikuti konvensi REST Laravel
-// (PUT /customers/{id} dan DELETE /customers/{id}). Sesuaikan kalau nama
-// route kamu berbeda.
 
 memberTable.addEventListener("click", async function(e){
 
@@ -605,10 +774,7 @@ memberTable.addEventListener("click", async function(e){
         document.getElementById("editEmail").value = customer.email ?? "";
         document.getElementById("editAddress").value = customer.address ?? "";
         
-        const modal = document.getElementById("editModal");
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
-
+        openModal("editModal");
     }
 
     if(deleteBtn){
@@ -700,6 +866,49 @@ document.getElementById("saveEdit")
 
     }
 
+});
+
+document.getElementById("saveEditBtn").addEventListener("click", async function(){
+    const name    = document.getElementById("editName").value.trim();
+    const phone   = document.getElementById("editPhone").value.trim();
+    const email   = document.getElementById("editEmail").value.trim();
+    const address = document.getElementById("editAddress").value.trim();
+
+    if (!name || !phone) {
+        showToast("Nama dan No HP wajib diisi.", "error");
+        return;
+    }
+
+    const res = await fetch("/customers/" + editingId, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({ name, phone, email, address }),
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+        showToast("Member berhasil diperbarui!", "success");
+        closeModal("editModal");
+        loadCustomers();
+    } else {
+        showToast(result.message ?? "Gagal memperbarui member.", "error");
+    }
+});
+
+function closeEditModal() {
+    editingId = null;
+    closeModal("editModal");
+}
+
+document.getElementById("closeEditModal").addEventListener("click", closeEditModal);
+document.getElementById("cancelEditBtn").addEventListener("click", closeEditModal);
+document.getElementById("editModal").addEventListener("click", function(e) {
+    if (e.target === this) closeEditModal();
 });
 
 loadCustomers();

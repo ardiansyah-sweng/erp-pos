@@ -96,6 +96,7 @@ Route::get('/returns', [ReturnTransactionController::class, 'index'])->name('ret
 Route::post('/returns/{transaction}', [ReturnTransactionController::class, 'store'])->name('returns.store');
 
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+Route::get('/reports/members', [ReportController::class, 'memberReport'])->name('reports.members');
 Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
 Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
 Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
