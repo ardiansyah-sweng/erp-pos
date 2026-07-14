@@ -334,6 +334,11 @@
                 <span class="nav-text">Supplier</span>
             </a>
 
+            <a href="{{ route('discounts.index') }}" class="nav-link {{ request()->is('discounts*') ? 'active' : '' }}">
+                <i data-lucide="percent" class="w-[18px] h-[18px]"></i>
+                <span class="nav-text">Diskon</span>
+            </a>
+
             <p class="nav-section nav-text">Transaksi</p>
 
             <a href="{{ route('transactions.index') }}" class="nav-link {{ request()->is('transactions') ? 'active' : '' }}">

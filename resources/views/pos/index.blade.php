@@ -373,11 +373,23 @@
                     <h2 class="text-lg font-semibold text-white">Pembayaran</h2>
                     <div class="mt-4 space-y-4">
                         {{-- Diskon Otomatis dari Database --}}
-                        <div>
-                            <label class="text-sm text-slate-300">Diskon Produk Otomatis</label>
-                            <div id="autoDiscountBox" class="mt-2 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 min-h-[48px] flex items-center justify-between gap-3">
-                                <span id="discountInfo" class="text-sm text-amber-200">Belum ada diskon aktif untuk produk di keranjang.</span>
-                                <span id="autoDiscountValue" class="text-sm font-semibold text-amber-300 whitespace-nowrap"></span>
+                        <div id="autoDiscountSection">
+                            {{-- State: tidak ada diskon --}}
+                            <div id="autoDiscountEmpty" class="rounded-2xl border border-dashed border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-slate-500">
+                                Belum ada diskon aktif untuk produk di keranjang.
+                            </div>
+                            {{-- State: ada diskon (awalnya hidden) --}}
+                            <div id="autoDiscountActive" class="hidden rounded-2xl border border-amber-400/30 bg-amber-400/[0.07] overflow-hidden">
+                                {{-- Header --}}
+                                <div class="flex items-center justify-between gap-3 px-4 py-2.5 bg-amber-400/10 border-b border-amber-400/20">
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-amber-400 shrink-0"><circle cx="9" cy="9" r="2"/><circle cx="15" cy="15" r="2"/><path d="m15.5 8.5-7 7"/><rect width="20" height="20" x="2" y="2" rx="4"/></svg>
+                                        <span class="text-xs font-bold uppercase tracking-widest text-amber-400">Promo Aktif</span>
+                                    </div>
+                                    <span id="autoDiscountValue" class="text-sm font-bold text-amber-300 whitespace-nowrap"></span>
+                                </div>
+                                {{-- Daftar item --}}
+                                <div id="discountBreakdown" class="divide-y divide-amber-400/10 px-4 py-1"></div>
                             </div>
                         </div>
 
@@ -529,6 +541,7 @@
                 <div class="mt-5 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
                     <div class="flex items-center justify-between"><span>Subtotal</span><span id="subtotalValue" class="font-semibold text-white">Rp0</span></div>
                     <div class="flex items-center justify-between"><span>Diskon</span><span id="discountValue" class="font-semibold text-white">Rp0</span></div>
+                    <div id="discountDetailRows" class="hidden space-y-1 border-t border-white/5 pt-2"></div>
                     <div class="flex items-center justify-between"><span>Total</span><span id="grandTotalValue" class="font-semibold text-emerald-300">Rp0</span></div>
                     <div id="changeRow" class="flex items-center justify-between"><span>Kembalian</span><span id="changeValue" class="font-semibold text-cyan-300">Rp0</span></div>
                 </div>
@@ -688,6 +701,7 @@
         const state = {
             products: [],
             cart: [],
+            allProductDiscounts: {},
             receipt: null,
             selectedEwallet: null,
             pendingQrisPayload: null,
@@ -1120,12 +1134,20 @@
 
             refs.productGrid.innerHTML = state.products.map((product) => {
                 const stockBadge = getStockBadge(product);
+                const discount = state.allProductDiscounts[String(product.id)];
+                const discountBadge = discount
+                    ? `<span class="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/15 px-2.5 py-1 text-xs font-bold text-amber-300">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="2"/><circle cx="15" cy="15" r="2"/><path d="m15.5 8.5-7 7"/></svg>
+                           ${discount.type === 'percentage' ? discount.value + '%' : 'Rp' + Number(discount.value).toLocaleString('id-ID')}
+                       </span>`
+                    : '';
 
                 return `
-                    <button type="button" data-product-id="${product.id}" class="group flex min-h-44 flex-col justify-between rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left transition hover:-translate-y-1 hover:border-cyan-400/50 hover:bg-slate-900/90 hover:shadow-xl hover:shadow-cyan-950/30">
+                    <button type="button" data-product-id="${product.id}" class="group flex min-h-44 flex-col justify-between rounded-2xl border ${discount ? 'border-amber-400/30' : 'border-white/10'} bg-slate-950/70 p-4 text-left transition hover:-translate-y-1 ${discount ? 'hover:border-amber-400/60' : 'hover:border-cyan-400/50'} hover:bg-slate-900/90 hover:shadow-xl hover:shadow-cyan-950/30">
                         <div>
                             <div class="flex items-start justify-between gap-3">
                                 <span class="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">${product.sku || '-'}</span>
+                                ${discountBadge}
                             </div>
                             <h3 class="mt-4 line-clamp-2 text-lg font-semibold leading-snug text-white">${product.name}</h3>
                             <p class="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-400">${product.description || 'Tanpa deskripsi'}</p>
@@ -1156,11 +1178,19 @@
         };
 
         const applyAutoDiscount = async () => {
-            if (state.cart.length === 0) {
-                document.getElementById('discountInfo').textContent = 'Belum ada diskon aktif untuk produk di keranjang.';
-                document.getElementById('autoDiscountValue').textContent = '';
-                return;
-            }
+            const discountBreakdown = document.getElementById('discountBreakdown');
+            const discountDetailRows = document.getElementById('discountDetailRows');
+            const autoDiscountEmpty = document.getElementById('autoDiscountEmpty');
+            const autoDiscountActive = document.getElementById('autoDiscountActive');
+
+            const showEmpty = () => {
+                if (autoDiscountEmpty) autoDiscountEmpty.classList.remove('hidden');
+                if (autoDiscountActive) autoDiscountActive.classList.add('hidden');
+                if (discountBreakdown) discountBreakdown.innerHTML = '';
+                if (discountDetailRows) { discountDetailRows.innerHTML = ''; discountDetailRows.classList.add('hidden'); }
+            };
+
+            if (state.cart.length === 0) { showEmpty(); return; }
 
             const productIds = state.cart.map(item => item.id).join(',');
 
@@ -1168,41 +1198,72 @@
                 const response = await fetch(`/discounts/active-for-products?ids=${productIds}`);
                 const result = await response.json();
 
-                if (!result.success || Object.keys(result.data).length === 0) {
-                    document.getElementById('discountInfo').textContent = 'Tidak ada diskon aktif untuk produk di keranjang.';
-                    document.getElementById('autoDiscountValue').textContent = '';
-                    return;
-                }
+                if (!result.success || Object.keys(result.data).length === 0) { showEmpty(); return; }
 
                 let totalDiscount = 0;
-                let appliedNames = [];
+                const itemDiscounts = [];
 
                 state.cart.forEach(item => {
                     const discount = result.data[String(item.id)];
                     if (!discount) return;
                     const subtotal = item.quantity * item.selling_price;
+                    let discountAmt = 0;
+                    let pctLabel = '';
                     if (discount.type === 'percentage') {
-                        totalDiscount += Math.round(subtotal * discount.value / 100);
+                        discountAmt = Math.round(subtotal * discount.value / 100);
+                        pctLabel = `${discount.value}%`;
                     } else {
-                        totalDiscount += discount.value * item.quantity;
+                        discountAmt = discount.value * item.quantity;
+                        pctLabel = `Rp${discount.value.toLocaleString('id-ID')}/item`;
                     }
-                    appliedNames.push(discount.name);
+                    totalDiscount += discountAmt;
+                    itemDiscounts.push({ productName: item.name, discountAmt, pctLabel, type: discount.type });
                 });
 
                 if (totalDiscount > 0) {
-                    document.getElementById('discountInfo').textContent =
-                        `✓ ${[...new Set(appliedNames)].join(', ')}`;
-                    document.getElementById('autoDiscountValue').textContent =
-                        `- Rp${totalDiscount.toLocaleString('id-ID')}`;
+                    // Tampilkan panel aktif
+                    if (autoDiscountEmpty) autoDiscountEmpty.classList.add('hidden');
+                    if (autoDiscountActive) autoDiscountActive.classList.remove('hidden');
+
+                    // Header: total hemat
+                    const totalEl = document.getElementById('autoDiscountValue');
+                    if (totalEl) totalEl.textContent = `Hemat Rp${totalDiscount.toLocaleString('id-ID')}`;
+
+                    // Per-item rows — hanya nama produk + label diskon, tanpa mengulang nama promo
+                    if (discountBreakdown) {
+                        discountBreakdown.innerHTML = itemDiscounts.map(d => `
+                            <div class="flex items-center justify-between gap-3 py-2">
+                                <div class="min-w-0">
+                                    <div class="text-sm font-medium text-white truncate">${d.productName}</div>
+                                    <div class="text-xs text-amber-400/70 mt-0.5">${d.pctLabel}</div>
+                                </div>
+                                <div class="shrink-0 text-sm font-semibold text-amber-300">- Rp${d.discountAmt.toLocaleString('id-ID')}</div>
+                            </div>
+                        `).join('');
+                    }
+
+                    // Ringkasan bawah: baris tipis per produk
+                    if (discountDetailRows) {
+                        discountDetailRows.innerHTML = itemDiscounts.map(d => `
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-slate-400 truncate">${d.productName} <span class="text-amber-400/70">${d.pctLabel}</span></span>
+                                <span class="shrink-0 ml-2 text-amber-300">- Rp${d.discountAmt.toLocaleString('id-ID')}</span>
+                            </div>
+                        `).join('');
+                        discountDetailRows.classList.remove('hidden');
+                    }
 
                     // Terapkan ke field diskon
                     document.getElementById('discountAmount').value = totalDiscount;
                     document.getElementById('discountType').value = 'nominal';
                     document.getElementById('discountAmount').dispatchEvent(new Event('input'));
+                } else {
+                    showEmpty();
                 }
             } catch (e) {
                 console.error('Gagal mengambil diskon:', e);
-                document.getElementById('discountInfo').textContent = 'Gagal memuat diskon.';
+                if (autoDiscountEmpty) { autoDiscountEmpty.textContent = 'Gagal memuat diskon.'; autoDiscountEmpty.classList.remove('hidden'); }
+                if (autoDiscountActive) autoDiscountActive.classList.add('hidden');
             }
         };
 
@@ -1275,6 +1336,21 @@
                 const queryString = params.toString() ? `?${params.toString()}` : '';
                 const response = await fetchJson(`/products${queryString}`);
                 state.products = response.data ?? [];
+
+                // Fetch diskon aktif untuk semua produk yang dimuat
+                if (state.products.length > 0) {
+                    try {
+                        const ids = state.products.map(p => p.id).join(',');
+                        const discRes = await fetch(`/discounts/active-for-products?ids=${ids}`);
+                        const discData = await discRes.json();
+                        state.allProductDiscounts = (discData.success ? discData.data : {}) ?? {};
+                    } catch (_) {
+                        state.allProductDiscounts = {};
+                    }
+                } else {
+                    state.allProductDiscounts = {};
+                }
+
                 renderProducts();
                 updateSummary();
                 refs.productsStatus.textContent = search ?

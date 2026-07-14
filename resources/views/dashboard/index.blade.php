@@ -207,6 +207,9 @@
                 <a href="{{ route('profile.show') }}" class="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-slate-900/60 p-3 text-center transition hover:border-cyan-400/50">
                     <span class="text-xs text-slate-300">Profil</span>
                 </a>
+                <a href="{{ route('discounts.index') }}" class="flex flex-col items-center gap-1 rounded-xl border border-amber-400/20 bg-amber-400/10 p-3 text-center transition hover:border-amber-400/50">
+                    <span class="text-xs text-amber-300">Diskon</span>
+                </a>
             </div>
         </div>
     </section>
