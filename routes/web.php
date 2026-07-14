@@ -117,3 +117,11 @@ Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->n
 
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+// ===== Supplier Management =====
+use App\Http\Controllers\SupplierController;
+
+Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
+Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
+Route::put('/suppliers/{id}', [SupplierController::class, 'update'])->name('suppliers.update');
+Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
