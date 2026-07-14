@@ -49,6 +49,44 @@ class ProductController extends Controller
         ]);
     }
 
+    /**
+     * Mengembalikan daftar produk aktif dengan opsi sorting berdasarkan nama atau harga.
+     */
+    public function sort(Request $request)
+    {
+        $allowedSortBy = ['name', 'selling_price'];
+
+        $sortBy = in_array($request->query('sort_by'), $allowedSortBy, true)
+            ? $request->query('sort_by')
+            : 'name';
+
+        $sortDir = strtolower((string) $request->query('sort_dir', 'asc')) === 'desc'
+            ? 'desc'
+            : 'asc';
+
+        $search = trim((string) $request->query('search', ''));
+
+        $products = Product::query()
+            ->where('is_active', true)
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($innerQuery) use ($search) {
+                    $innerQuery->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('sku', 'like', '%' . $search . '%')
+                        ->orWhere('barcode', 'like', '%' . $search . '%');
+                });
+            })
+            ->orderBy($sortBy, $sortDir)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'sort_by' => $sortBy,
+            'sort_dir' => $sortDir,
+            'total' => $products->count(),
+            'data' => $products,
+        ]);
+    }
+
     function getItemBySKU($sku)
     {
         $product = $this->productService->getItemBySKU($sku);
