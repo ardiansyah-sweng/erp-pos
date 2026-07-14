@@ -23,26 +23,29 @@ class ProductController extends Controller
     {
         $search = trim((string) $request->query('search', ''));
         $categoryId = $request->query('category_id');
+        $sort = $request->query('sort');
 
-        $products = Product::query()
-            ->with('category')
-            ->where('is_active', true)
-            ->when($categoryId, function ($query) use ($categoryId) {
-                $query->where('category_id', $categoryId);
+        $results = $this->productService->search($search)
+            ->when($categoryId, function ($collection) use ($categoryId) {
+                return $collection->where('category_id', (int) $categoryId);
             })
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($innerQuery) use ($search) {
-                    $innerQuery->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('sku', 'like', '%' . $search . '%')
-                        ->orWhere('barcode', 'like', '%' . $search . '%');
-                });
+            ->when($sort === 'price_asc', function ($collection) {
+                return $collection->sortBy('selling_price');
             })
-            ->orderBy('name')
-            ->get();
+            ->when($sort === 'price_desc', function ($collection) {
+                return $collection->sortByDesc('selling_price');
+            })
+            ->when($sort === 'name_asc', function ($collection) {
+                return $collection->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE);
+            })
+            ->when($sort === 'name_desc', function ($collection) {
+                return $collection->sortByDesc('name', SORT_NATURAL | SORT_FLAG_CASE);
+            })
+            ->values();
 
         return response()->json([
             'success' => true,
-            'data' => $this->productService->search($search),
+            'data' => $results,
         ]);
     }
 

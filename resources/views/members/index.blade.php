@@ -41,6 +41,7 @@
 
         </div>
 
+
     </div>
 
 </div>
@@ -243,6 +244,147 @@
         </table>
 
     </div>
+    <!-- ===================== MODAL EDIT MEMBER ===================== -->
+
+<div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm">
+
+    <div class="card w-full max-w-lg p-8">
+
+        <div class="flex items-center gap-4">
+            <div class="rounded-xl bg-cyan-500/15 p-3">
+                <i data-lucide="pencil" class="w-5 h-5 text-cyan-300"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold">Edit Member</h2>
+                <p class="text-sm text-slate-400">Perbarui data member.</p>
+            </div>
+        </div>
+
+        <input type="hidden" id="editId">
+
+        <div class="grid grid-cols-1 gap-5 mt-6">
+
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Nama Member</label>
+                <div class="relative">
+                    <i data-lucide="user" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editName" class="input" placeholder="Masukkan nama member">
+                </div>
+            </div>
+
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Nomor HP</label>
+                <div class="relative">
+                    <i data-lucide="phone" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editPhone" class="input" placeholder="08xxxxxxxxxx">
+                </div>
+            </div>
+
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Email</label>
+                <div class="relative">
+                    <i data-lucide="mail" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editEmail" class="input" placeholder="email@gmail.com">
+                </div>
+            </div>
+
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Alamat</label>
+                <div class="relative">
+                    <i data-lucide="map-pin" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editAddress" class="input" placeholder="Alamat lengkap">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3">
+
+            <button id="cancelEdit" class="rounded-xl border border-white/10 px-6 py-3 font-semibold text-slate-300 hover:bg-white/5 transition">
+                Batal
+            </button>
+
+            <button id="saveEdit" class="flex items-center gap-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 px-6 py-3 font-semibold text-slate-950 transition">
+                <i data-lucide="save" class="w-[18px] h-[18px]"></i>
+                Simpan Perubahan
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- ===================== MODAL EDIT MEMBER ===================== -->
+
+<div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm">
+
+    <div class="card w-full max-w-lg p-8">
+
+        <div class="flex items-center gap-4">
+            <div class="rounded-xl bg-cyan-500/15 p-3">
+                <i data-lucide="pencil" class="w-5 h-5 text-cyan-300"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold">Edit Member</h2>
+                <p class="text-sm text-slate-400">Perbarui data member.</p>
+            </div>
+        </div>
+
+        <input type="hidden" id="editId">
+
+        <div class="grid grid-cols-1 gap-5 mt-6">
+
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Nama Member</label>
+                <div class="relative">
+                    <i data-lucide="user" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editName" class="input" placeholder="Masukkan nama member">
+                </div>
+            </div>
+
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Nomor HP</label>
+                <div class="relative">
+                    <i data-lucide="phone" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editPhone" class="input" placeholder="08xxxxxxxxxx">
+                </div>
+            </div>
+
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Email</label>
+                <div class="relative">
+                    <i data-lucide="mail" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editEmail" class="input" placeholder="email@gmail.com">
+                </div>
+            </div>
+
+            <div>
+                <label class="mb-2 block text-sm text-slate-300">Alamat</label>
+                <div class="relative">
+                    <i data-lucide="map-pin" class="input-icon w-[18px] h-[18px]"></i>
+                    <input id="editAddress" class="input" placeholder="Alamat lengkap">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3">
+
+            <button id="cancelEdit" class="rounded-xl border border-white/10 px-6 py-3 font-semibold text-slate-300 hover:bg-white/5 transition">
+                Batal
+            </button>
+
+            <button id="saveEdit" class="flex items-center gap-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 px-6 py-3 font-semibold text-slate-950 transition">
+                <i data-lucide="save" class="w-[18px] h-[18px]"></i>
+                Simpan Perubahan
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
 
 </div>
 </div>
@@ -256,6 +398,7 @@
 const API = "/customers";
 
 const memberTable = document.getElementById("memberTable");
+let allCustomers = [];
 
 const totalMember = document.getElementById("totalMember");
 const regularMember = document.getElementById("regularMember");
@@ -305,6 +448,7 @@ async function loadCustomers(keyword = ""){
 
     const customers = result.data ?? [];
 
+    allCustomers = customers;
     memberTable.innerHTML = "";
 
     totalMember.textContent = customers.length;
@@ -463,35 +607,23 @@ memberTable.addEventListener("click", async function(e){
     const editBtn = e.target.closest(".btn-edit");
     const deleteBtn = e.target.closest(".btn-delete");
 
-    if(editBtn){
+   if(editBtn){
 
         const id = editBtn.dataset.id;
 
-        const newName = prompt("Edit nama member:");
+        const customer = allCustomers.find(c => String(c.id) === String(id));
 
-        if(newName === null || newName.trim() === "") return;
+        if(!customer) return;
 
-        const response = await fetch("/customers/" + id, {
-
-            method:"PUT",
-
-            headers:{
-                "Content-Type":"application/json",
-                "Accept":"application/json",
-                "X-CSRF-TOKEN":"{{ csrf_token() }}"
-            },
-
-            body: JSON.stringify({ name: newName.trim() })
-
-        });
-
-        const result = await response.json();
-
-        if(result.success){
-            loadCustomers();
-        }else{
-            alert(result.message ?? "Gagal mengubah member.");
-        }
+        document.getElementById("editId").value = customer.id;
+        document.getElementById("editName").value = customer.name ?? "";
+        document.getElementById("editPhone").value = customer.phone ?? "";
+        document.getElementById("editEmail").value = customer.email ?? "";
+        document.getElementById("editAddress").value = customer.address ?? "";
+        
+        const modal = document.getElementById("editModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
 
     }
 
@@ -660,8 +792,63 @@ function renderDetail(data){
 
 document.getElementById("searchMember")
 .addEventListener("keyup", function(){
-
     loadCustomers(this.value);
+});
+
+function closeEditModal(){
+
+    const modal = document.getElementById("editModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+
+}
+
+document.getElementById("cancelEdit")
+.addEventListener("click", closeEditModal);
+
+document.getElementById("saveEdit")
+.addEventListener("click", async function(){
+
+    const id = document.getElementById("editId").value;
+    const name = document.getElementById("editName").value.trim();
+    const phone = document.getElementById("editPhone").value.trim();
+    const email = document.getElementById("editEmail").value.trim();
+    const address = document.getElementById("editAddress").value.trim();
+
+    if(name=="" || phone==""){
+        alert("Nama dan Nomor HP wajib diisi.");
+        return;
+    }
+
+    const response = await fetch("/customers/" + id, {
+
+        method:"PUT",
+
+        headers:{
+            "Content-Type":"application/json",
+            "Accept":"application/json",
+            "X-CSRF-TOKEN":"{{ csrf_token() }}"
+        },
+
+        body: JSON.stringify({ name, phone, email, address })
+
+    });
+
+    const result = await response.json();
+
+    if(result.success){
+
+        alert("Member berhasil diperbarui.");
+
+        closeEditModal();
+
+        loadCustomers();
+
+    }else{
+
+        alert(result.message ?? "Gagal mengubah member.");
+
+    }
 
 });
 
