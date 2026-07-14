@@ -357,9 +357,15 @@ function openModal(id) {
 
 function showFieldError(inputId, message) {
     const input = document.getElementById(inputId);
+    const existing = input.parentElement.nextElementSibling;
+    if (existing && existing.classList.contains("field-error") && existing.dataset.field === inputId) {
+        existing.textContent = "⚠ " + message;
+        return;
+    }
     input.classList.add("input-error");
     const error = document.createElement("p");
     error.className = "field-error";
+    error.dataset.field = inputId;
     error.textContent = "⚠ " + message;
     input.parentElement.after(error);
 }
@@ -367,6 +373,49 @@ function showFieldError(inputId, message) {
 function clearFieldErrors() {
     document.querySelectorAll(".field-error").forEach(el => el.remove());
     document.querySelectorAll(".input-error").forEach(el => el.classList.remove("input-error"));
+}
+
+function removeFieldError(fieldId) {
+    const input = document.getElementById(fieldId);
+    const error = input.parentElement.nextElementSibling;
+    if (error && error.classList.contains("field-error") && error.dataset.field === fieldId) {
+        error.remove();
+        input.classList.remove("input-error");
+    }
+}
+
+function validateNameRealtime() {
+    const input = document.getElementById("name");
+    const value = input.value.trim();
+    if (value === "") return;
+    if (value.length < 2) {
+        showFieldError("name", "Nama harus diisi minimal 2 karakter.");
+    } else {
+        removeFieldError("name");
+    }
+}
+
+function validatePhoneRealtime() {
+    const input = document.getElementById("phone");
+    input.value = input.value.replace(/\D/g, "");
+    const value = input.value.trim();
+    if (value === "") return;
+    if (!/^08\d{8,13}$/.test(value)) {
+        showFieldError("phone", "Nomor HP harus diawali 08 dan minimal 10 digit.");
+    } else {
+        removeFieldError("phone");
+    }
+}
+
+function validateEmailRealtime() {
+    const input = document.getElementById("email");
+    const value = input.value.trim();
+    if (value === "") return;
+    if (!value.includes("@")) {
+        showFieldError("email", "Masukkan email yang valid (contoh: email@domain.com).");
+    } else {
+        removeFieldError("email");
+    }
 }
 
 function closeModal(id) {
@@ -500,6 +549,10 @@ async function loadCustomers(keyword = ""){
     lucide.createIcons();
 
 }
+
+document.getElementById("name").addEventListener("input", validateNameRealtime);
+document.getElementById("phone").addEventListener("input", validatePhoneRealtime);
+document.getElementById("email").addEventListener("input", validateEmailRealtime);
 
 document.getElementById("saveMember")
 .addEventListener("click", async function () {
