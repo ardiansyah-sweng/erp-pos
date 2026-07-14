@@ -363,20 +363,6 @@
                 <span class="nav-text">Laporan Member</span>
             </a>
 
-            @if (session('cashier_role') === 'admin')
-            <p class="nav-section nav-text">Pengaturan</p>
-
-            <a href="{{ url('/settings') }}" class="nav-link {{ request()->is('settings') ? 'active' : '' }}">
-                <i data-lucide="settings" class="w-[18px] h-[18px]"></i>
-                <span class="nav-text">Pengaturan</span>
-            </a>
-
-            <a href="{{ route('users.index') }}" class="nav-link {{ request()->is('users*') ? 'active' : '' }}">
-                <i data-lucide="user-cog" class="w-[18px] h-[18px]"></i>
-                <span class="nav-text">User Management</span>
-            </a>
-            @endif
-
         </nav>
 
         <div class="p-3 border-t border-white/5 space-y-1">

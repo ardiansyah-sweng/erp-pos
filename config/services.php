@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'hris' => [
+        'url' => env('HRIS_API_URL'),
+    ],
+
 ];

@@ -15,7 +15,6 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnTransactionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockAdjustmentController;
-use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -99,13 +98,6 @@ Route::get('/reports', [ReportController::class, 'index'])->name('reports.index'
 Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
 Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
 Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
-
-// Manajemen User / Kasir (khusus admin)
-Route::middleware('role:admin')->group(function () {
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::delete('/users/{cashier}', [UserController::class, 'destroy'])->name('users.destroy');
-});
 
 
 

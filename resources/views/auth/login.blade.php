@@ -95,8 +95,8 @@
 
             <div class="text-center text-xs text-gray-500 border-t border-gray-200 pt-4">
                 <p class="font-semibold text-gray-600">Akun demo</p>
-                <p>Admin — <span class="font-mono">admin@erp.test</span> / <span class="font-mono">admin123</span></p>
                 <p>Kasir — <span class="font-mono">kasir1@erp.test</span> / <span class="font-mono">kasir123</span></p>
+                <p class="mt-1 text-[11px] text-gray-400">Hanya kasir yang terdaftar aktif di HRIS yang dapat login.</p>
             </div>
         </div>
     </div>

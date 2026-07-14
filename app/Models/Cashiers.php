@@ -25,14 +25,6 @@ class Cashiers extends Authenticatable
     ];
 
     /**
-     * Cek apakah kasir memiliki peran admin.
-     */
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
-
-    /**
      * The attributes that should be hidden for serialization.
      *
      * @var list<string>
