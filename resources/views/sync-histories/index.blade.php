@@ -48,7 +48,6 @@
             border:1px solid #1e293b;
             border-radius:16px;
             padding:24px;
-            box-shadow:0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
             position:relative;
             overflow:hidden;
         }
@@ -68,13 +67,11 @@
             color:#94a3b8;
             font-size:14px;
             text-transform:uppercase;
-            letter-spacing:0.05em;
         }
 
         .card h2{
-            margin:12px 0 0 0;
+            margin:12px 0 0;
             font-size:32px;
-            font-weight:700;
             color:#ffffff;
         }
 
@@ -91,28 +88,24 @@
             color:#f8fafc;
             border-radius:10px;
             font-size:14px;
-            transition:all 0.2s ease;
         }
 
         .search-box input:focus{
             outline:none;
             border-color:#0ea5e9;
-            box-shadow:0 0 0 2px rgba(14,165,233,0.2);
         }
 
-        .table-responsive {
+        .table-responsive{
             width:100%;
             overflow-x:auto;
             background:#0b111e;
             border:1px solid #1e293b;
             border-radius:14px;
-            box-shadow:0 10px 15px -3px rgba(0,0,0,0.3);
         }
 
         table{
             width:100%;
             border-collapse:collapse;
-            background:transparent;
         }
 
         th,td{
@@ -125,19 +118,16 @@
             background:#0f172a;
             color:#94a3b8;
             text-align:left;
-            font-weight:600;
-            text-transform:uppercase;
             font-size:12px;
-            letter-spacing:0.05em;
+            text-transform:uppercase;
         }
 
-        tr:last-child td {
+        tr:last-child td{
             border-bottom:none;
         }
 
-        tr:hover td {
+        tr:hover td{
             background:rgba(30,41,59,0.3);
-            color:#ffffff;
         }
 
         .badge-success{
@@ -148,18 +138,6 @@
             font-size:12px;
             font-weight:600;
             display:inline-block;
-            border:1px solid rgba(16,185,129,0.2);
-        }
-
-        .badge-failed{
-            background:rgba(239,68,68,0.15);
-            color:#ef4444;
-            padding:6px 14px;
-            border-radius:8px;
-            font-size:12px;
-            font-weight:600;
-            display:inline-block;
-            border:1px solid rgba(239,68,68,0.2);
         }
 
         .empty{
@@ -169,15 +147,42 @@
             background:#0b111e;
             border:1px solid #1e293b;
             border-radius:14px;
-            font-size:15px;
         }
 
-        .pagination-wrapper {
+        .pagination-wrapper{
             margin-top:25px;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            gap:15px;
+        }
+
+        .pagination-wrapper a,
+        .pagination-wrapper span{
+            padding:10px 16px;
+            border-radius:8px;
+            border:1px solid #1e293b;
+            background:#0b111e;
+            color:#e2e8f0;
+            text-decoration:none;
+            font-size:14px;
+        }
+
+        .pagination-wrapper a:hover{
+            background:#1e293b;
+        }
+
+        .pagination-wrapper .disabled{
+            color:#64748b;
+        }
+
+        .page-info{
+            color:#94a3b8;
         }
 
     </style>
 </head>
+
 <body>
 
 <div class="header">
@@ -188,6 +193,7 @@
 <div class="container">
 
     <div class="cards">
+
         <div class="card">
             <h4>Total Sinkronisasi</h4>
             <h2>{{ $summary['total'] }}</h2>
@@ -198,11 +204,8 @@
             <h2>{{ $summary['success'] }}</h2>
         </div>
 
-        <div class="card">
-            <h4>Gagal</h4>
-            <h2>{{ $summary['failed'] }}</h2>
-        </div>
     </div>
+
 
     <form method="GET">
         <div class="search-box">
@@ -215,9 +218,13 @@
         </div>
     </form>
 
+
     @if($histories->count())
+
     <div class="table-responsive">
+
         <table>
+
             <thead>
                 <tr>
                     <th style="width:60px;">No</th>
@@ -227,38 +234,95 @@
                     <th>Waktu Sinkronisasi</th>
                 </tr>
             </thead>
+
+
             <tbody>
+
                 @foreach($histories as $history)
+
                 <tr>
-                    <td>{{ $histories->firstItem() + $loop->index }}</td>
-                    <td style="font-weight: 500;">{{ $history->module }}</td>
+
                     <td>
-                        @if($history->status == 'Berhasil')
-                            <span class="badge-success">
-                                {{ $history->status }}
-                            </span>
-                        @else
-                            <span class="badge-failed">
-                                {{ $history->status }}
-                            </span>
-                        @endif
+                        {{ $histories->firstItem() + $loop->index }}
                     </td>
-                    <td style="color:#cbd5e1;">{{ $history->message ?? '-' }}</td>
-                    <td style="color:#94a3b8;">{{ \Carbon\Carbon::parse($history->synced_at)->format('d M Y H:i') }}</td>
+
+                    <td style="font-weight:500;">
+                        {{ $history->module }}
+                    </td>
+
+                    <td>
+                        <span class="badge-success">
+                            {{ $history->status }}
+                        </span>
+                    </td>
+
+                    <td style="color:#cbd5e1;">
+                        {{ $history->message ?? '-' }}
+                    </td>
+
+                    <td style="color:#94a3b8;">
+                        {{ \Carbon\Carbon::parse($history->synced_at)->format('d M Y H:i') }}
+                    </td>
+
                 </tr>
+
                 @endforeach
+
             </tbody>
+
         </table>
+
     </div>
 
+
     <div class="pagination-wrapper">
-        {{ $histories->links() }}
+
+        @if($histories->onFirstPage())
+
+            <span class="disabled">
+                ← Sebelumnya
+            </span>
+
+        @else
+
+            <a href="{{ $histories->previousPageUrl() }}">
+                ← Sebelumnya
+            </a>
+
+        @endif
+
+
+        <span class="page-info">
+            Halaman {{ $histories->currentPage() }}
+            dari {{ $histories->lastPage() }}
+        </span>
+
+
+        @if($histories->hasMorePages())
+
+            <a href="{{ $histories->nextPageUrl() }}">
+                Selanjutnya →
+            </a>
+
+        @else
+
+            <span class="disabled">
+                Selanjutnya →
+            </span>
+
+        @endif
+
     </div>
+
+
     @else
+
     <div class="empty">
         Belum ada riwayat sinkronisasi.
     </div>
+
     @endif
+
 
 </div>
 
