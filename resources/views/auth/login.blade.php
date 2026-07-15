@@ -1,28 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
-<html>
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cashier Login - ERP POS System</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login | ERP POS</title>
+    <script>
+        try {
+            document.documentElement.dataset.theme = localStorage.getItem('erp-pos-theme') || 'dark';
+        } catch (error) {
+            document.documentElement.dataset.theme = 'dark';
+        }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Login</title>
+    <style>
+        html[data-theme="light"] body {
+            background: #f6f8fb !important;
+            color: #0f172a !important;
+        }
+
+        html[data-theme="light"] body > .absolute {
+            opacity: 0.45;
+        }
+
+        html[data-theme="light"] .bg-white\/5 {
+            background-color: rgba(255, 255, 255, 0.94) !important;
+        }
+
+        html[data-theme="light"] .bg-slate-950\/70 {
+            background-color: #ffffff !important;
+        }
+
+        html[data-theme="light"] .border-white\/10 {
+            border-color: #dbe3ea !important;
+        }
+
+        html[data-theme="light"] .text-white {
+            color: #0f172a !important;
+        }
+
+        html[data-theme="light"] .text-slate-300,
+        html[data-theme="light"] .text-slate-400 {
+            color: #64748b !important;
+        }
+
+        html[data-theme="light"] .text-rose-300 {
+            color: #e11d48 !important;
+        }
+
+        html[data-theme="light"] .text-cyan-300\/80 {
+            color: #0e7490 !important;
+        }
+
+        html[data-theme="light"] input {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+
+        html[data-theme="light"] input::placeholder {
+            color: #94a3b8 !important;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-    <div class="min-h-screen flex items-center justify-center">
-        <div class="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
-            <div>
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Cashier Login
-                </h2>
-                <p class="mt-2 text-center text-sm text-gray-600">
-                    ERP POS System
-                </p>
+<body class="min-h-screen bg-slate-950 text-slate-100">
+    <div class="absolute inset-x-0 top-0 h-72 bg-gradient-to-r from-emerald-500/30 via-cyan-500/20 to-transparent blur-3xl"></div>
+
+    <main class="relative flex min-h-screen items-center justify-center px-4 py-6">
+        <section class="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/30 backdrop-blur-xl">
+            <div class="text-center">
+                <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/80">ERP POS</p>
+                <h1 class="mt-2 text-2xl font-semibold text-white">Login Kasir</h1>
+                <p class="mt-2 text-sm text-slate-300">Masuk dengan username dan password kasir kamu.</p>
             </div>
 
             @if ($errors->any())
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                    <ul class="list-disc list-inside">
+                <div class="mt-6 rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-300">
+                    <ul class="list-disc list-inside space-y-1">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -31,68 +83,50 @@
             @endif
 
             @if (session('status'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                <div class="mt-6 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-200">
                     {{ session('status') }}
                 </div>
             @endif
 
-            <form class="mt-8 space-y-6" action="{{ route('login') }}" method="POST">
+            <form class="mt-6 space-y-4" action="{{ route('login.attempt') }}" method="POST">
                 @csrf
-                <div class="space-y-4">
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">
-                            Email Address
-                        </label>
-                        <input 
-                            id="email" 
-                            name="email" 
-                            type="email" 
-                            autocomplete="email" 
-                            required 
-                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                            placeholder="Enter your email"
-                            value="{{ old('email') }}"
-                        >
-                    </div>
 
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700">
-                            Password
-                        </label>
-                        <input 
-                            id="password" 
-                            name="password" 
-                            type="password" 
-                            autocomplete="current-password" 
-                            required 
-                            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                            placeholder="Enter your password"
-                        >
-                    </div>
-
-                    <div class="flex items-center">
-                        <input 
-                            id="remember" 
-                            name="remember" 
-                            type="checkbox" 
-                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                        >
-                        <label for="remember" class="ml-2 block text-sm text-gray-900">
-                            Remember me
-                        </label>
-                    </div>
+                <div>
+                    <label for="username" class="text-sm text-slate-300">Username</label>
+                    <input
+                        id="username"
+                        name="username"
+                        type="text"
+                        autocomplete="username"
+                        required
+                        autofocus
+                        value="{{ old('username') }}"
+                        placeholder="Masukkan username"
+                        class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
+                    >
                 </div>
 
                 <div>
-                    <button 
-                        type="submit" 
-                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    <label for="password" class="text-sm text-slate-300">Password</label>
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        autocomplete="current-password"
+                        required
+                        placeholder="Masukkan password"
+                        class="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
                     >
-                        Sign In
-                    </button>
                 </div>
+
+                <button
+                    type="submit"
+                    class="mt-2 w-full rounded-xl bg-cyan-400 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
+                >
+                    Masuk
+                </button>
             </form>
-        </div>
-    </div>
+        </section>
+    </main>
 </body>
 </html>

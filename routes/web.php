@@ -56,6 +56,7 @@ Route::get('/transactions/export/csv', [TransactionController::class, 'exportCsv
 Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
 
 Route::post('/pos/checkout', [TransactionController::class, 'checkout']);
 
