@@ -87,6 +87,7 @@ Route::delete('/customers/{id}', [CustomerController::class,'destroy']);
 
 Route::get('/members', [CustomerController::class, 'index'])->name('members.index');
 Route::post('/members/store', [CustomerController::class, 'store'])->name('members.store');
+Route::get('/members/{id}/transactions', [CustomerController::class, 'memberTransactions'])->name('members.transactions');
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
 Route::post('/transaction/store', [TransactionController::class, 'store']);
 Route::get('/transactions/{id}/receipt', [ReceiptController::class, 'generate'])->name('transactions.receipt');
