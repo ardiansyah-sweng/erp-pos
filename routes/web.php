@@ -59,6 +59,7 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 
 Route::post('/pos/checkout', [TransactionController::class, 'checkout']);
 
+Route::get('/api/low-stock', [ProductController::class, 'getLowStock'])->name('api.low-stock');
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
 Route::post('/transaction/store', [TransactionController::class, 'store']);
 

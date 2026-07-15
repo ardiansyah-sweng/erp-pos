@@ -130,4 +130,18 @@ class ProductController extends Controller
         $status = $product->is_active ? 'diaktifkan' : 'dinonaktifkan';
         return Redirect::route('products.manage')->with('success', "Produk berhasil {$status}.");
     }
+    
+    public function getLowStock()
+    {
+        $products = Product::where('is_active', true)
+            ->whereColumn('stock_quantity', '<=', 'min_stock')
+            ->orderBy('stock_quantity')
+            ->get(['id', 'name', 'sku', 'stock_quantity', 'min_stock', 'unit']);
+
+        return response()->json([
+            'success' => true,
+            'count'   => $products->count(),
+            'data'    => $products,
+        ]);
+    }
 }

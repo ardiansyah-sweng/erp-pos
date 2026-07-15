@@ -435,10 +435,34 @@
                     <i data-lucide="sun" class="w-5 h-5"></i>
                 </button>
 
-                <button class="relative text-slate-400 hover:text-white">
-                    <i data-lucide="bell" class="w-5 h-5"></i>
-                    <span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-500"></span>
-                </button>
+                <div class="relative" id="notifWrapper">
+                    <button id="notifToggle" class="relative text-slate-400 hover:text-white" title="Notifikasi Stok">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span id="notifBadge" class="absolute -top-1 -right-1 hidden min-w-[16px] h-4 rounded-full bg-rose-500 text-[10px] font-bold text-white items-center justify-center px-1"></span>
+                    </button>
+
+                    <!-- Dropdown Notifikasi -->
+                    <div id="notifDropdown" class="absolute right-0 top-10 z-50 hidden w-80 rounded-2xl border border-white/10 bg-[#070b14] shadow-2xl shadow-black/50">
+                        <div class="flex items-center justify-between border-b border-white/10 px-4 py-3">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
+                                <span class="text-sm font-semibold text-white">Stok Menipis</span>
+                            </div>
+                            <span id="notifCount" class="rounded-full bg-rose-500/15 px-2 py-0.5 text-xs font-bold text-rose-300">0</span>
+                        </div>
+
+                        <div id="notifList" class="max-h-72 overflow-y-auto divide-y divide-white/5 px-2 py-2">
+                            <p class="py-6 text-center text-sm text-slate-500">Memuat...</p>
+                        </div>
+
+                        <div class="border-t border-white/10 px-4 py-3">
+                            <a href="{{ route('products.manage') }}" class="flex items-center justify-center gap-2 rounded-xl bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/20">
+                                <i data-lucide="package" class="w-4 h-4"></i>
+                                Kelola Produk
+                            </a>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="rounded-full border border-cyan-400/40 p-1.5 text-cyan-300">
                     <i data-lucide="user" class="w-5 h-5"></i>
@@ -549,6 +573,89 @@
     sidebarThemeToggle.addEventListener('click', toggleTheme);
     if (topbarThemeToggle) {
         topbarThemeToggle.addEventListener('click', toggleTheme);
+    }
+
+    // ===================== NOTIFIKASI STOK MENIPIS =====================
+    const notifToggle   = document.getElementById('notifToggle');
+    const notifDropdown = document.getElementById('notifDropdown');
+    const notifBadge    = document.getElementById('notifBadge');
+    const notifCount    = document.getElementById('notifCount');
+    const notifList     = document.getElementById('notifList');
+
+    function methodLabel(method) {
+        const map = {
+            cash: 'Cash', card: 'Kartu', e_wallet: 'E-Wallet',
+            bank_transfer: 'Transfer', qris: 'QRIS',
+        };
+        return map[method] || method;
+    }
+
+    async function loadLowStock() {
+        try {
+            const res  = await fetch('/api/low-stock');
+            const data = await res.json();
+
+            const count    = data.count ?? 0;
+            const products = data.data  ?? [];
+
+            notifCount.textContent = count;
+
+            if (count > 0) {
+                notifBadge.textContent = count > 9 ? '9+' : count;
+                notifBadge.classList.remove('hidden');
+                notifBadge.classList.add('flex');
+            } else {
+                notifBadge.classList.add('hidden');
+                notifBadge.classList.remove('flex');
+            }
+
+            if (products.length === 0) {
+                notifList.innerHTML = `
+                    <p class="py-6 text-center text-sm text-slate-500">
+                        Semua stok dalam kondisi aman.
+                    </p>
+                `;
+                return;
+            }
+
+            notifList.innerHTML = products.map(p => `
+                <div class="flex items-center justify-between gap-3 rounded-xl px-3 py-3 hover:bg-white/5 transition">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="rounded-lg bg-amber-500/15 p-1.5 flex-shrink-0">
+                            <i data-lucide="package" class="w-4 h-4 text-amber-400"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="truncate text-sm font-medium text-white">${p.name}</div>
+                            <div class="text-xs text-slate-500">SKU: ${p.sku}</div>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 text-right">
+                        <div class="text-sm font-bold text-rose-400">${p.stock_quantity} ${p.unit}</div>
+                        <div class="text-xs text-slate-500">min ${p.min_stock}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        } catch (err) {
+            console.error('Gagal memuat notifikasi stok:', err);
+        }
+    }
+
+    if (notifToggle) {
+        notifToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            notifDropdown.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!notifDropdown.contains(e.target) && e.target !== notifToggle) {
+                notifDropdown.classList.add('hidden');
+            }
+        });
+
+        loadLowStock();
+        setInterval(loadLowStock, 60000);
     }
 
 </script>
