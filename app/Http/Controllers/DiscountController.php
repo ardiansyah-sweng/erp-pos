@@ -5,13 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\Discount;
 use App\Models\Product;
 use App\Services\DiscountService;
+use App\Services\SyncService; // Ditambahkan untuk mencatat log aktivitas
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DiscountController extends Controller
 {
-  public function __construct(protected DiscountService $discountService) {}
+  protected $discountService;
+  protected $syncService;
+
+  public function __construct(DiscountService $discountService, SyncService $syncService) 
+  {
+    $this->discountService = $discountService;
+    $this->syncService = $syncService;
+  }
 
   public function index(Request $request): View
   {
@@ -48,20 +56,63 @@ class DiscountController extends Controller
 
     $validated['is_active'] = $request->boolean('is_active', true);
 
-    $this->discountService->store($validated);
+    try {
+      $discount = $this->discountService->store($validated);
 
-    return redirect()
-      ->route('discounts.index')
-      ->with('success', 'Diskon berhasil ditambahkan.');
+      // Menggunakan SyncService persis seperti contoh CustomerController
+      $this->syncService->log(
+        'Diskon',
+        'Berhasil',
+        "CREATE - Diskon baru berhasil dibuat: {$validated['name']}"
+      );
+
+      return redirect()
+        ->route('discounts.index')
+        ->with('success', 'Diskon berhasil ditambahkan.');
+
+    } catch (\Exception $e) {
+      // Catat log jika gagal
+      $this->syncService->log(
+        'Diskon',
+        'Gagal',
+        "CREATE - Gagal menambahkan diskon '{$validated['name']}': " . $e->getMessage()
+      );
+
+      return redirect()
+        ->route('discounts.index')
+        ->with('error', 'Gagal menambahkan diskon.');
+    }
   }
 
   public function destroy(Discount $discount): RedirectResponse
   {
-    $this->discountService->delete($discount);
+    try {
+      $discountName = $discount->name;
+      $this->discountService->delete($discount);
 
-    return redirect()
-      ->route('discounts.index')
-      ->with('success', 'Diskon berhasil dihapus.');
+      // Menggunakan SyncService saat berhasil menghapus
+      $this->syncService->log(
+        'Diskon',
+        'Berhasil',
+        "DELETE - Diskon berhasil dihapus: {$discountName}"
+      );
+
+      return redirect()
+        ->route('discounts.index')
+        ->with('success', 'Diskon berhasil dihapus.');
+
+    } catch (\Exception $e) {
+      // Catat log jika gagal menghapus
+      $this->syncService->log(
+        'Diskon',
+        'Gagal',
+        "DELETE - Gagal menghapus diskon: " . $e->getMessage()
+      );
+
+      return redirect()
+        ->route('discounts.index')
+        ->with('error', 'Gagal menghapus diskon.');
+    }
   }
 
   public function getActiveForProducts(Request $request)
@@ -82,5 +133,3 @@ class DiscountController extends Controller
     ]);
   }
 }
-
-
