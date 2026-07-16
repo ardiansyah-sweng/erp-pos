@@ -21,7 +21,6 @@ class Cashiers extends Authenticatable
         'name',
         'username',
         'password',
-        'role',
     ];
 
     /**

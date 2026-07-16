@@ -20,7 +20,6 @@ class CashierSeeder extends Seeder
                 'name'       => 'Kasir 1',
                 'username'   => 'kasir1@erp.test',
                 'password'   => Hash::make('kasir123'),
-                'role'       => 'kasir',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
