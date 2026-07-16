@@ -21,6 +21,8 @@ return new class extends Migration
             $table->bigInteger('discount_amount')->default(0);
             $table->bigInteger('cash_tendered')->default(0);
             $table->bigInteger('change_amount')->default(0);
+            $table->unsignedBigInteger('parking_fee')->default(0);
+            $table->enum('parking_type', ['none', 'motor', 'mobil'])->default('none');
             $table->timestamps();
 
             $table->index(['transaction_id', 'payment_method']);
