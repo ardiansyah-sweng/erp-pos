@@ -19,7 +19,7 @@ class Cashiers extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email',
+        'username',
         'password',
     ];
 

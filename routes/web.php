@@ -57,6 +57,8 @@ Route::get('/transactions/export/csv', [TransactionController::class, 'exportCsv
 Route::get('/transactions', [TransactionController::class, 'getTransaction'])->name('transactions.index');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::post('/pos/checkout', [TransactionController::class, 'checkout']);
 
@@ -106,15 +108,6 @@ Route::get('/discounts', [DiscountController::class, 'index'])->name('discounts.
 Route::post('/discounts', [DiscountController::class, 'store'])->name('discounts.store');
 Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
 Route::get('/discounts/active-for-products', [DiscountController::class, 'getActiveForProducts']);
-
-
-
-
-
-
-
-
-
 
 
 

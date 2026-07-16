@@ -368,18 +368,6 @@
                 <span class="nav-text">Laporan Member</span>
             </a>
 
-            <p class="nav-section nav-text">Pengaturan</p>
-
-            <a href="{{ url('/settings') }}" class="nav-link {{ request()->is('settings') ? 'active' : '' }}">
-                <i data-lucide="settings" class="w-[18px] h-[18px]"></i>
-                <span class="nav-text">Pengaturan</span>
-            </a>
-
-            <a href="{{ url('/users') }}" class="nav-link {{ request()->is('users*') ? 'active' : '' }}">
-                <i data-lucide="user-cog" class="w-[18px] h-[18px]"></i>
-                <span class="nav-text">User Management</span>
-            </a>
-
         </nav>
 
         <div class="p-3 border-t border-white/5 space-y-1">
@@ -445,8 +433,14 @@
                     <span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-500"></span>
                 </button>
 
-                <div class="rounded-full border border-cyan-400/40 p-1.5 text-cyan-300">
-                    <i data-lucide="user" class="w-5 h-5"></i>
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block leading-tight">
+                        <div class="text-sm font-semibold text-white">{{ session('cashier_name', 'Tamu') }}</div>
+                        <div class="text-xs text-slate-400 capitalize">{{ session('cashier_role', '-') }}</div>
+                    </div>
+                    <div class="rounded-full border border-cyan-400/40 p-1.5 text-cyan-300">
+                        <i data-lucide="user" class="w-5 h-5"></i>
+                    </div>
                 </div>
 
             </div>

@@ -4,10 +4,13 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use App\Services\JobroleService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
 class JobroleServiceTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_update_cashier_berhasil()
     {
         DB::table('cashiers')->insert([

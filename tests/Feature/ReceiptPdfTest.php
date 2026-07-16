@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ReceiptPdfTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_receipt_pdf_returns_200_and_pdf_content_type()
     {
         $storeResponse = $this->postJson('/transaction/store', [
