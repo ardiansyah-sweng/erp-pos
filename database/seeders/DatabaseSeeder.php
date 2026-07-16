@@ -9,7 +9,9 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             CashierSeeder::class,
             ProductSeeder::class,
+            CustomerSeeder::class,
             TransactionSeeder::class,
+            SupplierSeeder::class,
         ]);
     }
 }

@@ -48,9 +48,9 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'phone' => 'required|string|max:20',
-            'email' => 'nullable|email',
+            'name'    => 'required|string|max:100',
+            'phone'   => 'required|string|max:15|regex:/^08\d+$/',
+            'email'   => 'nullable|email',
             'address' => 'nullable|string'
         ]);
 
@@ -77,6 +77,50 @@ class CustomerController extends Controller
         return response()->json([
             'success'=>true,
             'data'=>$customer
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'name'    => 'required|string|max:100',
+            'phone'   => 'nullable|string|max:15|regex:/^08\d+$/|unique:customers,phone,' . $id,
+            'email'   => 'nullable|email',
+            'address' => 'nullable|string',
+        ]);
+
+        $customer = $this->customerService->updateCustomer($id, $validated);
+
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Customer tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Member berhasil diperbarui',
+            'data'    => $customer
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        $customer = $this->customerService->getCustomerById($id);
+
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Customer tidak ditemukan'
+            ], 404);
+        }
+
+        $customer->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Customer berhasil dihapus'
         ]);
     }
 

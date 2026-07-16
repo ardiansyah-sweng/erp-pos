@@ -15,6 +15,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnTransactionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\DiscountController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -40,6 +41,9 @@ Route::get('/products', [ProductController::class, 'getProducts'])
     ->name('products.index');
 
 Route::get('/products/sku/{sku}', [ProductController::class, 'getItemBySKU']);
+
+Route::get('/products/detail/{sku}', fn (string $sku) => view('products.show', ['sku' => $sku]))
+    ->name('products.show');
 
 Route::get('/products/manage', [ProductController::class, 'manage'])->name('products.manage');
 Route::post('/products/manage', [ProductController::class, 'store'])->name('products.store');
@@ -71,8 +75,11 @@ Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name(
 
 
 Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.index');
+Route::get('/cashier/check-username', [CashierController::class, 'checkUsername'])->name('cashier.check-username');
 Route::post('/cashier/add', [CashierController::class, 'add'])->name('cashier.add');
 Route::post('/cashier/checkout', [CashierController::class, 'checkout'])->name('cashier.checkout');
+Route::get('/cashier/{id}/edit', [CashierController::class, 'edit'])->name('cashier.edit');
+Route::put('/cashier/{id}', [CashierController::class, 'update'])->name('cashier.update');
 
 Route::get('/customers', [CustomerController::class,'getCustomers']);
 Route::post('/customers', [CustomerController::class,'store']);
@@ -93,10 +100,15 @@ Route::get('/returns', [ReturnTransactionController::class, 'index'])->name('ret
 Route::post('/returns/{transaction}', [ReturnTransactionController::class, 'store'])->name('returns.store');
 
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+Route::get('/reports/members', [ReportController::class, 'memberReport'])->name('reports.members');
 Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
 Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
 Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
+Route::get('/discounts', [DiscountController::class, 'index'])->name('discounts.index');
+Route::post('/discounts', [DiscountController::class, 'store'])->name('discounts.store');
+Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
+Route::get('/discounts/active-for-products', [DiscountController::class, 'getActiveForProducts']);
 
 
 
@@ -114,3 +126,11 @@ Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->n
 
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+// ===== Supplier Management =====
+use App\Http\Controllers\SupplierController;
+
+Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
+Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
+Route::put('/suppliers/{id}', [SupplierController::class, 'update'])->name('suppliers.update');
+Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
