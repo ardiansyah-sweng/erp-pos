@@ -42,6 +42,9 @@ Route::get('/products', [ProductController::class, 'getProducts'])
 
 Route::get('/products/sku/{sku}', [ProductController::class, 'getItemBySKU']);
 
+Route::get('/products/detail/{sku}', fn (string $sku) => view('products.show', ['sku' => $sku]))
+    ->name('products.show');
+
 Route::get('/products/manage', [ProductController::class, 'manage'])->name('products.manage');
 Route::post('/products/manage', [ProductController::class, 'store'])->name('products.store');
 Route::put('/products/manage/{product}', [ProductController::class, 'update'])->name('products.update');
