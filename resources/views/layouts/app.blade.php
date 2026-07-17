@@ -380,6 +380,11 @@
                 <span class="nav-text">User Management</span>
             </a>
 
+            <a href="{{ route('sync-histories.index') }}" class="nav-link {{ request()->routeIs('sync-histories*') ? 'active' : '' }}">
+                <i data-lucide="refresh-cw" class="w-[18px] h-[18px]"></i>
+                <span class="nav-text">Log Histories</span>
+            </a>
+
         </nav>
 
         <div class="p-3 border-t border-white/5 space-y-1">
@@ -561,5 +566,4 @@
 @stack('scripts')
 
 </body>
-
 </html>

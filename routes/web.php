@@ -15,6 +15,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnTransactionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\SyncHistoryController;
 use App\Http\Controllers\DiscountController;
 use Illuminate\Support\Facades\Route;
 
@@ -110,6 +111,7 @@ Route::post('/discounts', [DiscountController::class, 'store'])->name('discounts
 Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
 Route::get('/discounts/active-for-products', [DiscountController::class, 'getActiveForProducts']);
 
+Route::get('/sync-histories', [SyncHistoryController::class, 'index'])->name('sync-histories.index');
 
 
 

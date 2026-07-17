@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Services\ProductService;
 use App\Services\StockAdjustmentService;
+use App\Services\SyncService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,6 +13,13 @@ use Illuminate\View\View;
 
 class StockAdjustmentController extends Controller
 {
+    protected $syncService;
+
+    public function __construct(SyncService $syncService)
+    {
+        $this->syncService = $syncService;
+    }
+
     public function index(Request $request, ProductService $productService): View
     {
         $search = trim((string) $request->query('search', ''));
@@ -45,6 +53,12 @@ class StockAdjustmentController extends Controller
             (int) $validated['quantity'],
             $validated['movement_type'],
             $validated['notes'] ?? null,
+        );
+
+        $this->syncService->log(
+            'Product',
+            'Berhasil',
+            "UPDATE - Penyesuaian stok berhasil untuk produk: {$product->name}"
         );
 
         if ($request->expectsJson()) {

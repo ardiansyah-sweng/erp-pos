@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Services\CategoryService;
+use App\Services\SyncService;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
     protected CategoryService $categoryService;
+    protected SyncService $syncService;
 
-    public function __construct(CategoryService $categoryService)
+    public function __construct(CategoryService $categoryService, SyncService $syncService)
     {
         $this->categoryService = $categoryService;
+        $this->syncService = $syncService;
     }
 
     public function index()
@@ -30,7 +33,13 @@ class CategoryController extends Controller
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        $this->categoryService->create($validated);
+        $category = $this->categoryService->create($validated);
+
+        $this->syncService->log(
+            'Category',
+            'Berhasil',
+            "CREATE - Kategori baru berhasil ditambahkan: {$validated['name']}"
+        );
 
         return redirect()->route('categories.index')
             ->with('success', 'Kategori berhasil ditambahkan.');
@@ -53,6 +62,12 @@ class CategoryController extends Controller
                 ->with('error', 'Kategori tidak ditemukan.');
         }
 
+        $this->syncService->log(
+            'Category',
+            'Berhasil',
+            "UPDATE - Kategori berhasil diperbarui: {$validated['name']}"
+        );
+
         return redirect()->route('categories.index')
             ->with('success', 'Kategori berhasil diperbarui.');
     }
@@ -65,6 +80,12 @@ class CategoryController extends Controller
             return redirect()->route('categories.index')
                 ->with('error', 'Kategori tidak ditemukan.');
         }
+
+        $this->syncService->log(
+            'Category',
+            'Berhasil',
+            "DELETE - Kategori berhasil dihapus. ID: {$id}"
+        );
 
         return redirect()->route('categories.index')
             ->with('success', 'Kategori berhasil dihapus.');

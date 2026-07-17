@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\ReturnTransaction;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
+use App\Services\SyncService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,13 @@ use Illuminate\View\View;
 
 class ReturnTransactionController extends Controller
 {
+    protected SyncService $syncService;
+
+    public function __construct(SyncService $syncService)
+    {
+        $this->syncService = $syncService;
+    }
+
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search', ''));
@@ -111,6 +119,12 @@ class ReturnTransactionController extends Controller
 
             return $returnTransaction;
         });
+
+        $this->syncService->log(
+            'Return',
+            'Berhasil',
+            "CREATE - Retur transaksi berhasil diproses dengan kode: {$returnTransaction->return_code}"
+        );
 
         return redirect()
             ->route('returns.index')
