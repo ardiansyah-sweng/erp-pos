@@ -1,330 +1,152 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Sinkronisasi - ERP POS</title>
+@extends('layouts.app')
 
-    <style>
-        body{
-            font-family:'Segoe UI',sans-serif;
-            background:#060b13;
-            color:#e2e8f0;
-            margin:0;
-            padding-bottom:60px;
-        }
+@section('title', 'Riwayat Sinkronisasi')
+@section('breadcrumb-prefix', 'Laporan')
+@section('breadcrumb', 'Riwayat Sinkronisasi')
 
-        .header{
-            background:#161b22;
-            border-bottom:1px solid #21262d;
-            padding:24px 32px;
-        }
+@push('styles')
+<style>
+    html[data-theme="light"] .card,
+    html[data-theme="light"] .bg-\\[\\#0d1424\\] {
+        background: #ffffff !important;
+        border-color: #dbe3ea !important;
+    }
+    html[data-theme="light"] .text-slate-400 { color: #64748b !important; }
+    html[data-theme="light"] .text-white     { color: #0f172a !important; }
+    html[data-theme="light"] table thead     { background: #f1f5f9 !important; }
+    html[data-theme="light"] tbody tr        { border-color: #e2e8f0 !important; }
+</style>
+@endpush
 
-        .header h1{
-            margin:0;
-            font-size:28px;
-        }
+@section('content')
+<div class="p-6 lg:p-8 space-y-6">
 
-        .header p{
-            color:#8b949e;
-            margin-top:8px;
-        }
-
-        .container{
-            max-width:1400px;
-            margin:auto;
-            padding:30px;
-        }
-
-        .cards{
-            display:grid;
-            grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
-            gap:20px;
-            margin-bottom:30px;
-        }
-
-        .card{
-            background:#0b111e;
-            border:1px solid #1e293b;
-            border-radius:16px;
-            padding:24px;
-            position:relative;
-            overflow:hidden;
-        }
-
-        .card::before {
-            content:'';
-            position:absolute;
-            top:0;
-            left:0;
-            width:4px;
-            height:100%;
-            background:linear-gradient(to bottom, #06b6d4, #0ea5e9);
-        }
-
-        .card h4{
-            margin:0;
-            color:#94a3b8;
-            font-size:14px;
-            text-transform:uppercase;
-        }
-
-        .card h2{
-            margin:12px 0 0;
-            font-size:32px;
-            color:#ffffff;
-        }
-
-        .search-box{
-            margin-bottom:25px;
-        }
-
-        .search-box input{
-            width:100%;
-            max-width:360px;
-            padding:12px 16px;
-            background:#0b111e;
-            border:1px solid #1e293b;
-            color:#f8fafc;
-            border-radius:10px;
-            font-size:14px;
-        }
-
-        .search-box input:focus{
-            outline:none;
-            border-color:#0ea5e9;
-        }
-
-        .table-responsive{
-            width:100%;
-            overflow-x:auto;
-            background:#0b111e;
-            border:1px solid #1e293b;
-            border-radius:14px;
-        }
-
-        table{
-            width:100%;
-            border-collapse:collapse;
-        }
-
-        th,td{
-            padding:16px 20px;
-            border-bottom:1px solid #1e293b;
-            font-size:14px;
-        }
-
-        th{
-            background:#0f172a;
-            color:#94a3b8;
-            text-align:left;
-            font-size:12px;
-            text-transform:uppercase;
-        }
-
-        tr:last-child td{
-            border-bottom:none;
-        }
-
-        tr:hover td{
-            background:rgba(30,41,59,0.3);
-        }
-
-        .badge-success{
-            background:rgba(16,185,129,0.15);
-            color:#10b981;
-            padding:6px 14px;
-            border-radius:8px;
-            font-size:12px;
-            font-weight:600;
-            display:inline-block;
-        }
-
-        .empty{
-            text-align:center;
-            padding:60px 20px;
-            color:#64748b;
-            background:#0b111e;
-            border:1px solid #1e293b;
-            border-radius:14px;
-        }
-
-        .pagination-wrapper{
-            margin-top:25px;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            gap:15px;
-        }
-
-        .pagination-wrapper a,
-        .pagination-wrapper span{
-            padding:10px 16px;
-            border-radius:8px;
-            border:1px solid #1e293b;
-            background:#0b111e;
-            color:#e2e8f0;
-            text-decoration:none;
-            font-size:14px;
-        }
-
-        .pagination-wrapper a:hover{
-            background:#1e293b;
-        }
-
-        .pagination-wrapper .disabled{
-            color:#64748b;
-        }
-
-        .page-info{
-            color:#94a3b8;
-        }
-
-    </style>
-</head>
-
-<body>
-
-<div class="header">
-    <h1>Riwayat Sinkronisasi</h1>
-    <p>Monitoring proses sinkronisasi data ERP POS.</p>
-</div>
-
-<div class="container">
-
-    <div class="cards">
-
-        <div class="card">
-            <h4>Total Sinkronisasi</h4>
-            <h2>{{ $summary['total'] }}</h2>
+    {{-- Page Header --}}
+    <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-white">Riwayat Sinkronisasi</h1>
+            <p class="mt-1 text-sm text-slate-400">Monitoring proses sinkronisasi data ERP POS.</p>
         </div>
-
-        <div class="card">
-            <h4>Berhasil</h4>
-            <h2>{{ $summary['success'] }}</h2>
-        </div>
-
     </div>
 
+    {{-- Stat Cards --}}
+    <div class="grid gap-6 grid-cols-1 sm:grid-cols-2">
+        <div class="card p-6">
+            <h4 class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Sinkronisasi</h4>
+            <h2 class="text-3xl font-bold text-white mt-2">{{ $summary['total'] }}</h2>
+        </div>
+        <div class="card p-6">
+            <h4 class="text-xs font-medium text-slate-400 uppercase tracking-wider">Berhasil</h4>
+            <h2 class="text-3xl font-bold text-white mt-2">{{ $summary['success'] }}</h2>
+        </div>
+    </div>
 
-    <form method="GET">
-        <div class="search-box">
-            <input
-                type="text"
-                name="search"
-                placeholder="Cari module..."
-                value="{{ $search }}"
-            >
+    {{-- Search Box --}}
+    <form method="GET" class="card p-4">
+        <div class="flex flex-col gap-3 sm:flex-row">
+            <div class="relative flex-1">
+                <i data-lucide="search" class="input-icon w-4 h-4"></i>
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Cari module..."
+                    value="{{ $search }}"
+                    class="input pl-10"
+                >
+            </div>
+            <button class="flex items-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-400 transition">
+                <i data-lucide="search" class="w-4 h-4"></i>
+                Cari
+            </button>
         </div>
     </form>
 
-
+    {{-- Table Data --}}
     @if($histories->count())
+    <div class="card overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="bg-white/[0.03] text-slate-400 text-xs uppercase tracking-wider">
+                        <th class="px-5 py-3.5 text-left font-medium" style="width:60px;">No</th>
+                        <th class="px-5 py-3.5 text-left font-medium">Module</th>
+                        <th class="px-5 py-3.5 text-left font-medium">Status</th>
+                        <th class="px-5 py-3.5 text-left font-medium">Pesan</th>
+                        <th class="px-5 py-3.5 text-left font-medium">Waktu Sinkronisasi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    @foreach($histories as $history)
+                    <tr class="hover:bg-white/[0.02] transition">
+                        <td class="px-5 py-4 text-slate-400">
+                            {{ $histories->firstItem() + $loop->index }}
+                        </td>
+                        <td class="px-5 py-4 font-medium text-white">
+                            {{ $history->module }}
+                        </td>
+                        <td class="px-5 py-4">
+                            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-300">
+                                <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                {{ $history->status }}
+                            </span>
+                        </td>
+                        <td class="px-5 py-4 text-slate-300">
+                            {{ $history->message ?? '-' }}
+                        </td>
+                        <td class="px-5 py-4 text-slate-400">
+                            {{ \Carbon\Carbon::parse($history->synced_at)->format('d M Y H:i') }}
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
-    <div class="table-responsive">
+        @if ($histories->hasPages())
+        <div class="px-5 py-4 border-t border-white/5 flex items-center justify-between bg-white/[0.01]">
+            <div class="flex-1 flex justify-between sm:hidden">
+                @if($histories->onFirstPage())
+                    <span class="text-xs text-slate-500 cursor-not-allowed">Sebelumnya</span>
+                @else
+                    <a href="{{ $histories->previousPageUrl() }}" class="text-xs text-cyan-400">Sebelumnya</a>
+                @endif
+                @if($histories->hasMorePages())
+                    <a href="{{ $histories->nextPageUrl() }}" class="text-xs text-cyan-400">Selanjutnya</a>
+                @else
+                    <span class="text-xs text-slate-500 cursor-not-allowed">Selanjutnya</span>
+                @endif
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between gap-4">
+                <div>
+                    <p class="text-xs text-slate-400">
+                        Halaman <span class="font-semibold text-white">{{ $histories->currentPage() }}</span> dari <span class="font-semibold text-white">{{ $histories->lastPage() }}</span>
+                    </p>
+                </div>
+                <div class="flex gap-2">
+                    @if($histories->onFirstPage())
+                        <span class="px-3 py-1.5 text-xs border border-white/10 rounded-xl text-slate-500 cursor-not-allowed">← Sebelumnya</span>
+                    @else
+                        <a href="{{ $histories->previousPageUrl() }}" class="px-3 py-1.5 text-xs border border-white/10 rounded-xl text-slate-300 hover:text-white transition">← Sebelumnya</a>
+                    @endif
 
-        <table>
-
-            <thead>
-                <tr>
-                    <th style="width:60px;">No</th>
-                    <th>Module</th>
-                    <th>Status</th>
-                    <th>Pesan</th>
-                    <th>Waktu Sinkronisasi</th>
-                </tr>
-            </thead>
-
-
-            <tbody>
-
-                @foreach($histories as $history)
-
-                <tr>
-
-                    <td>
-                        {{ $histories->firstItem() + $loop->index }}
-                    </td>
-
-                    <td style="font-weight:500;">
-                        {{ $history->module }}
-                    </td>
-
-                    <td>
-                        <span class="badge-success">
-                            {{ $history->status }}
-                        </span>
-                    </td>
-
-                    <td style="color:#cbd5e1;">
-                        {{ $history->message ?? '-' }}
-                    </td>
-
-                    <td style="color:#94a3b8;">
-                        {{ \Carbon\Carbon::parse($history->synced_at)->format('d M Y H:i') }}
-                    </td>
-
-                </tr>
-
-                @endforeach
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-
-    <div class="pagination-wrapper">
-
-        @if($histories->onFirstPage())
-
-            <span class="disabled">
-                ← Sebelumnya
-            </span>
-
-        @else
-
-            <a href="{{ $histories->previousPageUrl() }}">
-                ← Sebelumnya
-            </a>
-
+                    @if($histories->hasMorePages())
+                        <a href="{{ $histories->nextPageUrl() }}" class="px-3 py-1.5 text-xs border border-white/10 rounded-xl text-slate-300 hover:text-white transition">Selanjutnya →</a>
+                    @else
+                        <span class="px-3 py-1.5 text-xs border border-white/10 rounded-xl text-slate-500 cursor-not-allowed">Selanjutnya →</span>
+                    @endif
+                </div>
+            </div>
+        </div>
         @endif
-
-
-        <span class="page-info">
-            Halaman {{ $histories->currentPage() }}
-            dari {{ $histories->lastPage() }}
-        </span>
-
-
-        @if($histories->hasMorePages())
-
-            <a href="{{ $histories->nextPageUrl() }}">
-                Selanjutnya →
-            </a>
-
-        @else
-
-            <span class="disabled">
-                Selanjutnya →
-            </span>
-
-        @endif
-
     </div>
-
-
     @else
-
-    <div class="empty">
-        Belum ada riwayat sinkronisasi.
+    <div class="card p-16 text-center">
+        <div class="flex flex-col items-center gap-3 text-slate-500">
+            <i data-lucide="refresh-cw" class="w-10 h-10 opacity-30 animate-spin-slow"></i>
+            <p class="text-sm">Belum ada riwayat sinkronisasi.</p>
+        </div>
     </div>
-
     @endif
 
-
 </div>
-
-</body>
-</html>
+@endsection
