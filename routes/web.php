@@ -15,6 +15,8 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnTransactionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\SyncHistoryController;
+use App\Http\Controllers\DiscountController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -40,6 +42,9 @@ Route::get('/products', [ProductController::class, 'getProducts'])
     ->name('products.index');
 
 Route::get('/products/sku/{sku}', [ProductController::class, 'getItemBySKU']);
+
+Route::get('/products/detail/{sku}', fn (string $sku) => view('products.show', ['sku' => $sku]))
+    ->name('products.show');
 
 Route::get('/products/manage', [ProductController::class, 'manage'])->name('products.manage');
 Route::post('/products/manage', [ProductController::class, 'store'])->name('products.store');
@@ -102,7 +107,12 @@ Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile
 Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
 Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
+Route::get('/discounts', [DiscountController::class, 'index'])->name('discounts.index');
+Route::post('/discounts', [DiscountController::class, 'store'])->name('discounts.store');
+Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
+Route::get('/discounts/active-for-products', [DiscountController::class, 'getActiveForProducts']);
 
+Route::get('/sync-histories', [SyncHistoryController::class, 'index'])->name('sync-histories.index');
 
 
 

@@ -86,6 +86,10 @@
                         </td>
                         <td class="px-5 py-5">
                             <div class="flex gap-2">
+                                <a
+                                    href="{{ route('products.show', $product->sku) }}"
+                                    class="rounded-lg border border-white/10 px-3 py-1.5 text-sm hover:border-cyan-400 hover:text-cyan-300"
+                                >Detail</a>
                                 <button
                                     onclick="openEditModal({{ $product->id }}, @js($product->name), @js($product->sku), @js($product->barcode), {{ $product->selling_price }}, @js($product->unit), {{ $product->stock_quantity }}, {{ $product->min_stock }}, @js($product->description ?? ''))"
                                     class="rounded-lg border border-white/10 px-3 py-1.5 text-sm hover:border-cyan-400 hover:text-cyan-300"

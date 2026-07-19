@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Supplier;
+use App\Services\SyncService;
 use Illuminate\Http\Request;
 
 class SupplierController extends Controller
 {
-    /**
-     * Tampilkan daftar semua supplier.
-     */
+    protected SyncService $syncService;
+
+    public function __construct(SyncService $syncService)
+    {
+        $this->syncService = $syncService;
+    }
+
     public function index()
     {
         $suppliers = Supplier::orderBy('name')->get();
@@ -17,9 +22,6 @@ class SupplierController extends Controller
         return view('supplier.index', compact('suppliers'));
     }
 
-    /**
-     * Simpan supplier baru ke database.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -30,15 +32,18 @@ class SupplierController extends Controller
             'address'        => ['nullable', 'string'],
         ]);
 
-        Supplier::create($validated);
+        $supplier = Supplier::create($validated);
+
+        $this->syncService->log(
+            'Supplier',
+            'Berhasil',
+            "CREATE - Supplier berhasil ditambahkan: {$supplier->name}"
+        );
 
         return redirect()->route('suppliers.index')
             ->with('success', 'Supplier berhasil ditambahkan.');
     }
 
-    /**
-     * Perbarui data supplier yang sudah ada.
-     */
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
@@ -50,7 +55,6 @@ class SupplierController extends Controller
             'is_active'      => ['nullable', 'boolean'],
         ]);
 
-        // Konversi input is_active menjadi boolean dengan benar
         $validated['is_active'] = $request->boolean('is_active');
 
         $supplier = Supplier::find($id);
@@ -62,13 +66,16 @@ class SupplierController extends Controller
 
         $supplier->update($validated);
 
+        $this->syncService->log(
+            'Supplier',
+            'Berhasil',
+            "UPDATE - Supplier berhasil diperbarui: {$supplier->name}"
+        );
+
         return redirect()->route('suppliers.index')
             ->with('success', 'Supplier berhasil diperbarui.');
     }
 
-    /**
-     * Hapus supplier dari database.
-     */
     public function destroy($id)
     {
         $supplier = Supplier::find($id);
@@ -78,7 +85,15 @@ class SupplierController extends Controller
                 ->with('error', 'Supplier tidak ditemukan.');
         }
 
+        $supplierName = $supplier->name;
+
         $supplier->delete();
+
+        $this->syncService->log(
+            'Supplier',
+            'Berhasil',
+            "DELETE - Supplier berhasil dihapus: {$supplierName}"
+        );
 
         return redirect()->route('suppliers.index')
             ->with('success', 'Supplier berhasil dihapus.');

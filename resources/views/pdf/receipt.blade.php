@@ -181,7 +181,9 @@
     </table>
 
     @php
-        $subtotal = $transaction->total + ($payment?->discount_amount ?? 0);
+        $parkingFeeAmount = (int) ($payment?->parking_fee ?? 0);
+        $parkingFeeLabel  = ucfirst($payment?->parking_type ?? '');
+        $subtotal = $transaction->total - $parkingFeeAmount + ($payment?->discount_amount ?? 0);
     @endphp
 
     <table class="summary">
@@ -193,6 +195,12 @@
         <tr>
             <td class="label">Diskon</td>
             <td class="value" style="color:#e74c3c;">- Rp {{ number_format($payment->discount_amount, 0, ',', '.') }}</td>
+        </tr>
+        @endif
+        @if ($parkingFeeAmount > 0)
+        <tr>
+            <td class="label">Parkir ({{ $parkingFeeLabel }})</td>
+            <td class="value" style="color:#d97706;">+ Rp {{ number_format($parkingFeeAmount, 0, ',', '.') }}</td>
         </tr>
         @endif
         <tr class="total">

@@ -8,15 +8,18 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use App\Models\Product;
+use App\Services\SyncService;
 use App\Services\ProductService;
 
 class ProductController extends Controller
 {
     protected $productService;
+    protected $syncService;
 
-    public function __construct(ProductService $productService)
+    public function __construct(ProductService $productService, SyncService $syncService)
     {
         $this->productService = $productService;
+        $this->syncService = $syncService;
     }
 
     public function getProducts(Request $request)
@@ -100,7 +103,12 @@ class ProductController extends Controller
             'description' => ['nullable', 'string', 'max:500'],
         ]);
 
-        Product::create($validated);
+        $product = Product::create($validated);
+
+        $this->syncService->log(
+            'Product', 
+            'Berhasil', 
+            "CREATE - Produk berhasil ditambahkan: {$product->name}");
 
         return Redirect::route('products.manage')->with('success', 'Produk berhasil ditambahkan.');
     }
@@ -120,6 +128,10 @@ class ProductController extends Controller
 
         $product->update($validated);
 
+        $this->syncService->log(
+            'Product', 
+            'Berhasil', 
+            "UPDATE - Produk berhasil diperbarui: {$product->name}");
         return Redirect::route('products.manage')->with('success', 'Produk berhasil diperbarui.');
     }
 
@@ -128,6 +140,10 @@ class ProductController extends Controller
         $product->update(['is_active' => !$product->is_active]);
 
         $status = $product->is_active ? 'diaktifkan' : 'dinonaktifkan';
+        $this->syncService->log(
+            'Product', 
+            'Berhasil', 
+            "UPDATE - Produk berhasil {$status}: {$product->name}");
         return Redirect::route('products.manage')->with('success', "Produk berhasil {$status}.");
     }
     
@@ -144,4 +160,5 @@ class ProductController extends Controller
             'data'    => $products,
         ]);
     }
+}
 }

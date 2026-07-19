@@ -4,15 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\CustomerService;
+use App\Services\SyncService;
 use App\Models\Customer;
 
 class CustomerController extends Controller
 {
     protected $customerService;
+    protected $syncService;
 
-    public function __construct(CustomerService $customerService)
+    public function __construct(CustomerService $customerService, SyncService $syncService)
     {
         $this->customerService = $customerService;
+        $this->syncService = $syncService;
     }
 
     public function index()
@@ -56,6 +59,12 @@ class CustomerController extends Controller
 
         $customer = $this->customerService->createCustomer($validated);
 
+        $this->syncService->log(
+            'Member',
+            'Berhasil',
+            "CREATE - Member baru berhasil dibuat: {$customer->name}"
+        );
+
         return response()->json([
             'success' => true,
             'message' => 'Customer berhasil ditambahkan',
@@ -98,6 +107,12 @@ class CustomerController extends Controller
             ], 404);
         }
 
+        $this->syncService->log(
+            'Member',
+            'Berhasil',
+            "UPDATE - Data member berhasil diperbarui: {$customer->name}"
+        );
+
         return response()->json([
             'success' => true,
             'message' => 'Member berhasil diperbarui',
@@ -116,7 +131,14 @@ class CustomerController extends Controller
             ], 404);
         }
 
+        $customerName = $customer->name;
         $customer->delete();
+
+        $this->syncService->log(
+            'Member',
+            'Berhasil',
+            "DELETE - Member berhasil dihapus: {$customerName}"
+        );
 
         return response()->json([
             'success' => true,

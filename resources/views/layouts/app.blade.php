@@ -334,6 +334,11 @@
                 <span class="nav-text">Supplier</span>
             </a>
 
+            <a href="{{ route('discounts.index') }}" class="nav-link {{ request()->is('discounts*') ? 'active' : '' }}">
+                <i data-lucide="percent" class="w-[18px] h-[18px]"></i>
+                <span class="nav-text">Diskon</span>
+            </a>
+
             <p class="nav-section nav-text">Transaksi</p>
 
             <a href="{{ route('transactions.index') }}" class="nav-link {{ request()->is('transactions') ? 'active' : '' }}">
@@ -373,6 +378,11 @@
             <a href="{{ url('/users') }}" class="nav-link {{ request()->is('users*') ? 'active' : '' }}">
                 <i data-lucide="user-cog" class="w-[18px] h-[18px]"></i>
                 <span class="nav-text">User Management</span>
+            </a>
+
+            <a href="{{ route('sync-histories.index') }}" class="nav-link {{ request()->routeIs('sync-histories*') ? 'active' : '' }}">
+                <i data-lucide="refresh-cw" class="w-[18px] h-[18px]"></i>
+                <span class="nav-text">Log Histories</span>
             </a>
 
         </nav>
@@ -663,5 +673,4 @@
 @stack('scripts')
 
 </body>
-
 </html>
