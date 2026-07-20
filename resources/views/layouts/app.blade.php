@@ -448,7 +448,7 @@
                               : 'border-cyan-400/40 text-cyan-300 hover:border-cyan-400 hover:bg-cyan-400/10' }}">
                     @if(session('cashier_name'))
                         <span class="w-5 h-5 text-xs font-bold leading-none flex items-center justify-center">
-                            {{ strtoupper(substr(session('cashier_name'), 0, 1)) }}
+                            {{ mb_strtoupper(mb_substr(session('cashier_name'), 0, 1, 'UTF-8'), 'UTF-8') }}
                         </span>
                     @else
                         <i data-lucide="user" class="w-5 h-5"></i>
