@@ -20,15 +20,15 @@ class CashierController extends Controller
      */
     public function checkUsername(Request $request)
     {
-        $username  = trim($request->get('username', ''));
-        $excludeId = $request->get('exclude_id'); // untuk mode edit
+        $username  = trim((string) $request->get('username', ''));
+        $excludeId = $request->integer('exclude_id'); // untuk mode edit
 
-        if (empty($username)) {
+        if ($username === '') {
             return response()->json(['available' => null]);
         }
 
         $query = Cashiers::where('username', $username);
-        if ($excludeId) {
+        if ($excludeId !== null) {
             $query->where('id', '!=', $excludeId);
         }
 
