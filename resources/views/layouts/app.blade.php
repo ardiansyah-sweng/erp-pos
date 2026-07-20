@@ -441,7 +441,7 @@
                 </button>
 
                 <a href="{{ route('profile.show') }}"
-                   title="Lihat Profil"
+                   title="Lihat Profil" aria-label="Lihat Profil"
                    class="rounded-full border p-1.5 transition-all duration-200 flex items-center justify-center
                           {{ request()->is('profile*')
                               ? 'border-cyan-400 bg-cyan-400/15 text-cyan-300'
