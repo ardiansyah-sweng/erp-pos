@@ -30,12 +30,14 @@ class CashierService
     /**
      * Update data kasir (nama & username saja)
      */
-    public function updateCashier(int $id, array $data): bool
+    public function updateCashier(int $id, array $data): Cashiers
     {
         $cashier = Cashiers::findOrFail($id);
-        return $cashier->update([
+        $cashier->update([
             'name'     => $data['name'],
             'username' => $data['username'],
         ]);
+
+        return $cashier->refresh();
     }
 }
