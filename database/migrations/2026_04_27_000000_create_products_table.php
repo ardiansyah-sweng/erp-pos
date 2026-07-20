@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('stock_quantity')->default(0);
             $table->integer('min_stock')->default(0);
             $table->boolean('is_active')->default(true);
+            $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->timestamps();
         });
     }
