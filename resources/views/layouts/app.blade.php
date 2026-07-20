@@ -375,9 +375,9 @@
                 <span class="nav-text">Pengaturan</span>
             </a>
 
-            <a href="{{ url('/users') }}" class="nav-link {{ request()->is('users*') ? 'active' : '' }}">
+            <a href="{{ route('cashier.index') }}" class="nav-link {{ request()->routeIs('cashier.*') ? 'active' : '' }}">
                 <i data-lucide="user-cog" class="w-[18px] h-[18px]"></i>
-                <span class="nav-text">User Management</span>
+                <span class="nav-text">Manajemen Kasir</span>
             </a>
 
             <a href="{{ route('sync-histories.index') }}" class="nav-link {{ request()->routeIs('sync-histories*') ? 'active' : '' }}">
