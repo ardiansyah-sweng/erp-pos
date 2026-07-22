@@ -45,11 +45,11 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('settings.update') }}" class="mt-6 grid gap-6 xl:grid-cols-3">
+    <form method="POST" action="{{ route('settings.update') }}" class="mt-6 grid gap-6 xl:grid-cols-5">
         @csrf
         @method('PUT')
 
-        <div class="space-y-6 xl:col-span-2">
+        <div class="space-y-6 xl:col-span-3">
             <section class="rounded-2xl border border-white/10 bg-[#0d1b2a] p-5 sm:p-6">
                 <div class="flex items-center gap-3 border-b border-white/10 pb-4">
                     <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300">
@@ -132,7 +132,7 @@
             </div>
         </div>
 
-        <aside class="xl:col-span-1">
+        <aside class="xl:col-span-2">
             <div class="sticky top-6 rounded-2xl border border-white/10 bg-[#0d1b2a] p-5 sm:p-6">
                 <div class="flex items-center justify-between gap-3">
                     <div>
@@ -142,44 +142,73 @@
                     <span class="rounded-full bg-emerald-400/10 px-2.5 py-1 text-xs font-semibold text-emerald-300">Live</span>
                 </div>
 
-                <div class="mt-5 rounded-xl bg-[#f8fafc] p-5 font-mono text-xs text-slate-700 shadow-inner">
-                    <div class="border-b border-dashed border-slate-300 pb-4 text-center">
-                        <p id="store-name" class="text-base font-bold uppercase text-slate-950">{{ old('store_name', $setting->store_name) }}</p>
-                        <p id="store-address" class="mt-1 whitespace-pre-line text-slate-500">{{ old('address', $setting->address) ?: 'Alamat toko belum diatur' }}</p>
-                        <p id="store-phone" class="mt-1 text-slate-500">{{ old('phone', $setting->phone) ?: 'Telepon belum diatur' }}</p>
+                <div class="mt-5 rounded-sm bg-white px-5 py-7 font-sans text-[9px] text-slate-700 shadow-inner sm:px-7">
+                    <div class="border-b-4 border-double border-slate-700 pb-3 text-center">
+                        <p data-preview-output="store-name" class="text-lg font-extrabold text-slate-950">{{ old('store_name', $setting->store_name) }}</p>
+                        <p data-preview-output="store-address" class="mt-1 whitespace-pre-line text-slate-500">{{ old('address', $setting->address) ?: 'Alamat toko belum diatur' }}</p>
+                        <p class="mt-1 text-slate-500">Telp: <span data-preview-output="store-phone">{{ old('phone', $setting->phone) ?: 'Belum diatur' }}</span></p>
                     </div>
 
-                    <div class="space-y-1 border-b border-dashed border-slate-300 py-4 text-slate-500">
-                        <div class="flex justify-between gap-3"><span>No. Transaksi</span><span class="text-right text-slate-700">TRX-000001</span></div>
-                        <div class="flex justify-between gap-3"><span>Tanggal</span><span class="text-right text-slate-700">22/07/2026 20:30</span></div>
-                        <div class="flex justify-between gap-3"><span>Kasir</span><span class="text-right text-slate-700">Contoh Kasir</span></div>
+                    <div class="grid grid-cols-[85px_1fr] gap-x-2 gap-y-1 py-4">
+                        <span class="text-slate-500">No. Invoice</span><strong class="text-slate-900">: TRX-20260722222028-0008</strong>
+                        <span class="text-slate-500">Tanggal</span><strong class="text-slate-900">: 22 July 2026</strong>
+                        <span class="text-slate-500">Jam</span><strong class="text-slate-900">: 22:20 WIB</strong>
+                        <span class="text-slate-500">Status</span><strong class="text-slate-900">: LUNAS</strong>
                     </div>
 
-                    <div class="space-y-2 border-b border-dashed border-slate-300 py-4">
-                        <div>
-                            <div class="flex justify-between gap-3"><span>Contoh Produk A</span><span>Rp 30.000</span></div>
-                            <p class="mt-0.5 text-slate-400">2 × Rp 15.000</p>
+                    <div class="border-y border-slate-300 py-1.5 text-center text-[10px] font-extrabold text-slate-900">RINCIAN BELANJA</div>
+
+                    <div class="mt-2 overflow-hidden">
+                        <table class="w-full table-fixed text-left text-[8px]">
+                            <thead class="bg-slate-700 text-white">
+                                <tr>
+                                    <th class="w-[7%] px-1 py-2">NO</th>
+                                    <th class="w-[16%] px-1 py-2">SKU</th>
+                                    <th class="w-[31%] px-1 py-2">NAMA ITEM</th>
+                                    <th class="w-[10%] px-1 py-2 text-right">QTY</th>
+                                    <th class="w-[18%] px-1 py-2 text-right">HARGA</th>
+                                    <th class="w-[18%] px-1 py-2 text-right">SUBTOTAL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-slate-200">
+                                    <td class="px-1 py-2">1</td>
+                                    <td class="px-1 py-2">PRD-001</td>
+                                    <td class="px-1 py-2">Aqua 600ml</td>
+                                    <td class="px-1 py-2 text-right">3</td>
+                                    <td class="px-1 py-2 text-right">Rp 4.000</td>
+                                    <td class="px-1 py-2 text-right">Rp 12.000</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="ml-auto mt-3 w-3/5 space-y-1">
+                        <div class="flex justify-between gap-2"><span>Subtotal</span><strong>Rp 12.000</strong></div>
+                        <div class="flex justify-between gap-2"><span>Diskon</span><strong>- Rp 1.000</strong></div>
+                        <div class="flex justify-between gap-2"><span>Biaya Parkir</span><strong>+ Rp 2.000</strong></div>
+                        <div class="flex justify-between gap-2 border-t-2 border-slate-700 pt-2 text-[11px] font-extrabold text-slate-900"><span>Total Bayar</span><span>Rp 13.000</span></div>
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-[120px_1fr] gap-y-1 rounded bg-slate-100 p-3">
+                        <span>Metode Pembayaran</span><strong>: CASH</strong>
+                        <span>Status</span><strong>: PAID</strong>
+                        <span>Tunai</span><strong>: Rp 50.000</strong>
+                        <span>Kembalian</span><strong>: Rp 37.000</strong>
+                    </div>
+
+                    <div class="mt-6 grid grid-cols-2 gap-10">
+                        <div class="text-center">
+                            <p>Hormat Kami,</p>
+                            <div class="mt-9 border-t border-slate-500 pt-1">( <span data-preview-output="store-name">{{ old('store_name', $setting->store_name) }}</span> )</div>
                         </div>
-                        <div>
-                            <div class="flex justify-between gap-3"><span>Contoh Produk B</span><span>Rp 20.000</span></div>
-                            <p class="mt-0.5 text-slate-400">1 × Rp 20.000</p>
+                        <div class="text-center">
+                            <p>Pelanggan,</p>
+                            <div class="mt-9 border-t border-slate-500 pt-1">( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</div>
                         </div>
                     </div>
 
-                    <div class="space-y-2 border-b border-dashed border-slate-300 py-4">
-                        <div class="flex justify-between"><span>Subtotal</span><span>Rp 50.000</span></div>
-                        <div class="flex justify-between"><span>Diskon</span><span>- Rp 5.000</span></div>
-                        <div class="flex justify-between"><span>Biaya Parkir</span><span>+ Rp 2.000</span></div>
-                        <div class="flex justify-between border-t border-dashed border-slate-300 pt-2 font-bold text-slate-950"><span>Total</span><span>Rp 47.000</span></div>
-                    </div>
-
-                    <div class="space-y-2 border-b border-dashed border-slate-300 py-4">
-                        <div class="flex justify-between"><span>Metode Pembayaran</span><span>TUNAI</span></div>
-                        <div class="flex justify-between"><span>Uang Dibayar</span><span>Rp 50.000</span></div>
-                        <div class="flex justify-between font-bold text-slate-950"><span>Kembalian</span><span>Rp 3.000</span></div>
-                    </div>
-
-                    <p id="receipt-footer" class="whitespace-pre-line pt-4 text-center text-slate-500">{{ old('receipt_footer', $setting->receipt_footer) ?: 'Terima kasih telah berbelanja.' }}</p>
+                    <p data-preview-output="receipt-footer" class="mt-7 whitespace-pre-line border-t border-slate-200 pt-3 text-center text-slate-400">{{ old('receipt_footer', $setting->receipt_footer) ?: 'Terima kasih telah berbelanja.' }}</p>
                 </div>
 
                 <div class="mt-5 rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-xs leading-relaxed text-amber-200/80">
@@ -202,8 +231,9 @@
 
             document.querySelectorAll('[data-preview]').forEach((input) => {
                 input.addEventListener('input', () => {
-                    const target = document.getElementById(input.dataset.preview);
-                    target.textContent = input.value.trim() || fallback[input.dataset.preview];
+                    document.querySelectorAll(`[data-preview-output="${input.dataset.preview}"]`).forEach((target) => {
+                        target.textContent = input.value.trim() || fallback[input.dataset.preview];
+                    });
                 });
             });
         });
