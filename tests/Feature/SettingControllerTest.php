@@ -19,8 +19,11 @@ class SettingControllerTest extends TestCase
             ->assertSee('ERP POS')
             ->assertSee('Diskon')
             ->assertSee('Biaya Parkir')
-            ->assertSee('Uang Dibayar')
-            ->assertSee('Kembalian');
+            ->assertSee('Tunai')
+            ->assertSee('Kembalian')
+            ->assertSee('RINCIAN BELANJA')
+            ->assertSee('No. Invoice')
+            ->assertSee('Hormat Kami');
 
         $this->assertDatabaseCount('store_settings', 0);
     }
