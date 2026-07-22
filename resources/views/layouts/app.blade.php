@@ -370,7 +370,7 @@
 
             <p class="nav-section nav-text">Pengaturan</p>
 
-            <a href="{{ url('/settings') }}" class="nav-link {{ request()->is('settings') ? 'active' : '' }}">
+            <a href="{{ route('settings.index') }}" class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
                 <i data-lucide="settings" class="w-[18px] h-[18px]"></i>
                 <span class="nav-text">Pengaturan</span>
             </a>
