@@ -100,6 +100,20 @@
                     </td>
                     <td class="px-6 py-4 text-center">
                         <div class="flex justify-center gap-2">
+                            <!-- Tombol Detail -->
+                            <button
+                                id="btn-detail-{{ $supplier->id }}"
+                                data-name="{{ $supplier->name }}"
+                                data-contact="{{ $supplier->contact_person ?? '' }}"
+                                data-phone="{{ $supplier->phone ?? '' }}"
+                                data-email="{{ $supplier->email ?? '' }}"
+                                data-address="{{ $supplier->address ?? '' }}"
+                                data-active="{{ $supplier->is_active ? '1' : '0' }}"
+                                onclick="bukaModalDetail(this)"
+                                class="rounded-lg bg-cyan-500/20 px-3 py-1.5 text-xs font-semibold text-cyan-400 transition hover:bg-cyan-500/30"
+                            >
+                                Detail
+                            </button>
                             <!-- Tombol Edit -->
                             <button
                                 id="btn-edit-{{ $supplier->id }}"
@@ -143,6 +157,73 @@
             @endforelse
         </tbody>
     </table>
+</div>
+
+<!-- ===================== MODAL DETAIL ===================== -->
+
+<div
+    id="modal-detail"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="detail-title"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+    onclick="if (event.target === this) tutupModalDetail()"
+>
+    <div class="w-full max-w-lg rounded-2xl border border-slate-700 bg-[#0d1b2a] p-8 shadow-2xl">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400">Detail Supplier</p>
+                <h2 id="detail-title" class="mt-1 text-2xl font-bold text-white">Informasi Supplier</h2>
+            </div>
+            <button
+                type="button"
+                aria-label="Tutup detail supplier"
+                onclick="tutupModalDetail()"
+                class="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-400 transition hover:border-slate-500 hover:text-white"
+            >
+                &times;
+            </button>
+        </div>
+
+        <dl class="mt-6 grid gap-4 sm:grid-cols-2">
+            <div class="rounded-xl bg-slate-800/70 p-4 sm:col-span-2">
+                <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Nama Supplier</dt>
+                <dd id="detail-name" class="mt-1 text-lg font-semibold text-white">-</dd>
+            </div>
+            <div class="rounded-xl bg-slate-800/70 p-4">
+                <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Kontak Person</dt>
+                <dd id="detail-contact" class="mt-1 text-sm text-slate-200">-</dd>
+            </div>
+            <div class="rounded-xl bg-slate-800/70 p-4">
+                <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Status</dt>
+                <dd class="mt-1">
+                    <span id="detail-status" class="inline-flex rounded-full px-3 py-1 text-xs font-semibold">-</span>
+                </dd>
+            </div>
+            <div class="rounded-xl bg-slate-800/70 p-4">
+                <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Telepon</dt>
+                <dd id="detail-phone" class="mt-1 break-words text-sm text-slate-200">-</dd>
+            </div>
+            <div class="rounded-xl bg-slate-800/70 p-4">
+                <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Email</dt>
+                <dd id="detail-email" class="mt-1 break-words text-sm text-slate-200">-</dd>
+            </div>
+            <div class="rounded-xl bg-slate-800/70 p-4 sm:col-span-2">
+                <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Alamat</dt>
+                <dd id="detail-address" class="mt-1 whitespace-pre-line text-sm text-slate-200">-</dd>
+            </div>
+        </dl>
+
+        <div class="mt-6 flex justify-end">
+            <button
+                type="button"
+                onclick="tutupModalDetail()"
+                class="rounded-xl bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-400"
+            >
+                Tutup
+            </button>
+        </div>
+    </div>
 </div>
 
 <!-- ===================== MODAL TAMBAH ===================== -->
@@ -252,6 +333,38 @@
 </div>
 
 <script>
+    function nilaiDetail(value) {
+        return value && value.trim() !== '' ? value : '-';
+    }
+
+    function bukaModalDetail(button) {
+        const isActive = button.dataset.active === '1';
+        const status = document.getElementById('detail-status');
+
+        document.getElementById('detail-name').textContent = nilaiDetail(button.dataset.name);
+        document.getElementById('detail-contact').textContent = nilaiDetail(button.dataset.contact);
+        document.getElementById('detail-phone').textContent = nilaiDetail(button.dataset.phone);
+        document.getElementById('detail-email').textContent = nilaiDetail(button.dataset.email);
+        document.getElementById('detail-address').textContent = nilaiDetail(button.dataset.address);
+
+        status.textContent = isActive ? 'Aktif' : 'Nonaktif';
+        status.className = isActive
+            ? 'inline-flex rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-400'
+            : 'inline-flex rounded-full bg-rose-500/20 px-3 py-1 text-xs font-semibold text-rose-400';
+
+        document.getElementById('modal-detail').classList.remove('hidden');
+    }
+
+    function tutupModalDetail() {
+        document.getElementById('modal-detail').classList.add('hidden');
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            tutupModalDetail();
+        }
+    });
+
     /**
      * Buka modal edit dan isi field dengan data supplier yang dipilih.
      */
