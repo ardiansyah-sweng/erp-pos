@@ -358,7 +358,7 @@
                 <span class="nav-text">Laporan Penjualan</span>
             </a>
 
-            <a href="{{ url('/reports/products') }}" class="nav-link {{ request()->is('reports/products') ? 'active' : '' }}">
+            <a href="{{ route('reports.products') }}" class="nav-link {{ request()->routeIs('reports.products') ? 'active' : '' }}">
                 <i data-lucide="pie-chart" class="w-[18px] h-[18px]"></i>
                 <span class="nav-text">Laporan Produk</span>
             </a>

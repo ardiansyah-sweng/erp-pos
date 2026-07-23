@@ -10,9 +10,23 @@ use Illuminate\View\View;
 use App\Models\Product;
 use App\Services\SyncService;
 use App\Services\ProductService;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
 {
+    private const PRODUCT_CSV_HEADERS = [
+        'sku',
+        'name',
+        'barcode',
+        'category',
+        'unit',
+        'selling_price',
+        'stock_quantity',
+        'min_stock',
+        'description',
+        'is_active',
+    ];
+
     protected $productService;
     protected $syncService;
 
@@ -111,6 +125,47 @@ class ProductController extends Controller
             "CREATE - Produk berhasil ditambahkan: {$product->name}");
 
         return Redirect::route('products.manage')->with('success', 'Produk berhasil ditambahkan.');
+    }
+
+    public function exportCsv(Request $request): StreamedResponse
+    {
+        $search = trim((string) $request->query('search', ''));
+        $products = Product::query()
+            ->with('category:id,name')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($innerQuery) use ($search) {
+                    $innerQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%")
+                        ->orWhere('barcode', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('name')
+            ->get();
+
+        return response()->streamDownload(function () use ($products): void {
+            $output = fopen('php://output', 'wb');
+            fwrite($output, "\xEF\xBB\xBF");
+            fputcsv($output, self::PRODUCT_CSV_HEADERS, ',', '"', '');
+
+            foreach ($products as $product) {
+                fputcsv($output, [
+                    $product->sku,
+                    $product->name,
+                    $product->barcode,
+                    $product->category?->name,
+                    $product->unit,
+                    $product->selling_price,
+                    $product->stock_quantity,
+                    $product->min_stock,
+                    $product->description,
+                    $product->is_active ? '1' : '0',
+                ], ',', '"', '');
+            }
+
+            fclose($output);
+        }, 'produk-'.now()->format('Y-m-d').'.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     public function update(Request $request, Product $product): RedirectResponse
