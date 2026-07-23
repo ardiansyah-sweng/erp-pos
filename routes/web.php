@@ -1,31 +1,24 @@
 <?php
 
+use App\Http\Controllers\CashierController;
 use App\Http\Controllers\CategoryController;
-
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\ScheduleController;
-use App\Http\Controllers\CashierController;
-use App\Http\Controllers\CustomerController;
-
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnTransactionController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\StockAdjustmentController;
 use App\Http\Controllers\SyncHistoryController;
-use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
-
-use App\Http\Controllers\DashboardController;
-
 Route::get('/', function () {
-
-
-
 
     return redirect()->route('pos.index');
 });
@@ -72,9 +65,6 @@ Route::post('/categories', [CategoryController::class, 'store'])->name('categori
 Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
 Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
-
-
-
 Route::get('/cashier', [CashierController::class, 'index'])->name('cashier.index');
 Route::get('/cashier/check-username', [CashierController::class, 'checkUsername'])->name('cashier.check-username');
 Route::post('/cashier/add', [CashierController::class, 'add'])->name('cashier.add');
@@ -82,13 +72,13 @@ Route::post('/cashier/checkout', [CashierController::class, 'checkout'])->name('
 Route::get('/cashier/{id}/edit', [CashierController::class, 'edit'])->name('cashier.edit');
 Route::put('/cashier/{id}', [CashierController::class, 'update'])->name('cashier.update');
 
-Route::get('/customers', [CustomerController::class,'getCustomers']);
-Route::post('/customers', [CustomerController::class,'store']);
-Route::get('/customers/search', [CustomerController::class,'search'])
+Route::get('/customers', [CustomerController::class, 'getCustomers']);
+Route::post('/customers', [CustomerController::class, 'store']);
+Route::get('/customers/search', [CustomerController::class, 'search'])
     ->name('customers.search');
-Route::get('/customers/{id}', [CustomerController::class,'show']);
-Route::put('/customers/{id}', [CustomerController::class,'update']);
-Route::delete('/customers/{id}', [CustomerController::class,'destroy']);
+Route::get('/customers/{id}', [CustomerController::class, 'show']);
+Route::put('/customers/{id}', [CustomerController::class, 'update']);
+Route::delete('/customers/{id}', [CustomerController::class, 'destroy']);
 
 Route::get('/members', [CustomerController::class, 'index'])->name('members.index');
 Route::post('/members/store', [CustomerController::class, 'store'])->name('members.store');
@@ -101,6 +91,7 @@ Route::get('/returns', [ReturnTransactionController::class, 'index'])->name('ret
 Route::post('/returns/{transaction}', [ReturnTransactionController::class, 'store'])->name('returns.store');
 
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+Route::get('/reports/products', [ReportController::class, 'productReport'])->name('reports.products');
 Route::get('/reports/members', [ReportController::class, 'memberReport'])->name('reports.members');
 Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
 Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
@@ -112,20 +103,6 @@ Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])->
 Route::get('/discounts/active-for-products', [DiscountController::class, 'getActiveForProducts']);
 
 Route::get('/sync-histories', [SyncHistoryController::class, 'index'])->name('sync-histories.index');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
