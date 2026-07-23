@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\StockMovement;
 use App\Services\ProductService;
 use App\Services\StockAdjustmentService;
 use App\Services\SyncService;
@@ -34,7 +35,17 @@ class StockAdjustmentController extends Controller
             ],
         );
 
-        return view('stock-adjustments.index', compact('products', 'search'));
+        $stockMovements = StockMovement::query()
+            ->with('product:id,name,sku,unit')
+            ->latest()
+            ->paginate(10, ['*'], 'history_page')
+            ->withQueryString();
+
+        return view('stock-adjustments.index', compact(
+            'products',
+            'search',
+            'stockMovements',
+        ));
     }
 
     public function update(

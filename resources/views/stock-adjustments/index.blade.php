@@ -109,6 +109,66 @@
 
 <div class="mt-6">{{ $products->links() }}</div>
 
+<div class="mt-10 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+    <div class="border-b border-white/10 px-5 py-4">
+        <h2 class="text-lg font-semibold">Riwayat Perubahan Stok</h2>
+        <p class="mt-1 text-sm text-slate-400">Catatan stok masuk, keluar, dan koreksi terbaru.</p>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-white/10">
+            <thead class="bg-white/5 text-left text-xs uppercase tracking-wider text-slate-400">
+                <tr>
+                    <th class="px-5 py-4">Waktu</th>
+                    <th class="px-5 py-4">Produk</th>
+                    <th class="px-5 py-4">Jenis</th>
+                    <th class="px-5 py-4 text-right">Perubahan</th>
+                    <th class="px-5 py-4 text-right">Sebelum</th>
+                    <th class="px-5 py-4 text-right">Sesudah</th>
+                    <th class="px-5 py-4">Catatan</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/10">
+                @forelse ($stockMovements as $movement)
+                    <tr>
+                        <td class="whitespace-nowrap px-5 py-4 text-sm text-slate-300">
+                            {{ $movement->created_at->translatedFormat('d M Y, H:i') }}
+                        </td>
+                        <td class="px-5 py-4">
+                            <div class="font-semibold text-white">{{ $movement->product->name }}</div>
+                            <div class="text-xs text-slate-400">{{ $movement->product->sku }}</div>
+                        </td>
+                        <td class="px-5 py-4">
+                            @if ($movement->movement_type === 'in')
+                                <span class="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-300">Stok Masuk</span>
+                            @elseif ($movement->movement_type === 'out')
+                                <span class="rounded-full bg-rose-400/15 px-3 py-1 text-xs font-semibold text-rose-300">Stok Keluar</span>
+                            @else
+                                <span class="rounded-full bg-cyan-400/15 px-3 py-1 text-xs font-semibold text-cyan-300">Koreksi</span>
+                            @endif
+                        </td>
+                        <td class="px-5 py-4 text-right font-semibold {{ $movement->quantity > 0 ? 'text-emerald-300' : 'text-rose-300' }}">
+                            {{ $movement->quantity > 0 ? '+' : '' }}{{ $movement->quantity }}
+                        </td>
+                        <td class="px-5 py-4 text-right text-slate-300">{{ $movement->stock_before }}</td>
+                        <td class="px-5 py-4 text-right font-semibold text-white">{{ $movement->stock_after }}</td>
+                        <td class="max-w-xs px-5 py-4 text-sm text-slate-400">
+                            {{ $movement->notes ?: '-' }}
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="px-5 py-12 text-center text-slate-400">
+                            Belum ada riwayat perubahan stok.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="mt-6">{{ $stockMovements->links() }}</div>
+
 </div>
 
 @endsection

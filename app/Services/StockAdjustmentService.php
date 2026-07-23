@@ -34,16 +34,24 @@ class StockAdjustmentService
             }
 
             $lockedProduct->update(['stock_quantity' => $newStock]);
+            $movement = $lockedProduct->stockMovements()->create([
+                'movement_type' => $movementType,
+                'quantity' => $stockChange,
+                'stock_before' => $oldStock,
+                'stock_after' => $newStock,
+                'notes' => $notes,
+            ]);
 
             return [
                 'product_id' => $lockedProduct->id,
                 'old_stock' => $oldStock,
                 'new_stock' => $newStock,
                 'movement' => [
+                    'id' => $movement->id,
                     'movement_type' => $movementType,
                     'quantity' => $stockChange,
                     'notes' => $notes,
-                    'created_at' => now()->toISOString(),
+                    'created_at' => $movement->created_at->toISOString(),
                 ],
             ];
         });
