@@ -13,9 +13,14 @@
         <h1 class="text-3xl font-bold">Penyesuaian Stok</h1>
         <p class="mt-2 text-sm text-slate-400">Tambah, kurangi, atau koreksi stok produk secara manual.</p>
     </div>
-    <a href="{{ route('pos.index') }}" class="rounded-xl border border-white/10 px-4 py-2 text-center text-sm font-semibold hover:border-cyan-400 hover:text-cyan-300">
-        Kembali ke POS
-    </a>
+    <div class="flex flex-col gap-2 sm:flex-row">
+        <a href="{{ route('stock-opname.print') }}" class="rounded-xl bg-emerald-400 px-4 py-2 text-center text-sm font-semibold text-slate-950 hover:bg-emerald-300">
+            Cetak Stok Opname
+        </a>
+        <a href="{{ route('pos.index') }}" class="rounded-xl border border-white/10 px-4 py-2 text-center text-sm font-semibold hover:border-cyan-400 hover:text-cyan-300">
+            Kembali ke POS
+        </a>
+    </div>
 </div>
 
 @if (session('success'))

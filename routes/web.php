@@ -48,6 +48,9 @@ Route::delete('/products/manage/{product}', [ProductController::class, 'destroy'
 Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index'])
     ->name('stock-adjustments.index');
 
+Route::get('/stock-opname/print', [StockAdjustmentController::class, 'printStockOpname'])
+    ->name('stock-opname.print');
+
 Route::put('/stock-adjustments/{product}', [StockAdjustmentController::class, 'update'])
     ->name('stock-adjustments.update');
 

@@ -37,6 +37,16 @@ class StockAdjustmentController extends Controller
         return view('stock-adjustments.index', compact('products', 'search'));
     }
 
+    public function printStockOpname(): View
+    {
+        $products = Product::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('stock-adjustments.print-opname', compact('products'));
+    }
+
     public function update(
         Request $request,
         Product $product,
