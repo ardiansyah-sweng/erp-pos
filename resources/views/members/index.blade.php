@@ -214,6 +214,14 @@
 
         <div class="flex items-center gap-2">
 
+            <select id="filterMemberLevel" class="input sm:w-44" aria-label="Filter level member">
+                <option value="">Semua Level</option>
+                <option value="Regular">Regular</option>
+                <option value="Silver">Silver</option>
+                <option value="Gold">Gold</option>
+                <option value="Platinum">Platinum</option>
+            </select>
+
             <div class="relative sm:w-64">
                 <i data-lucide="search" class="input-icon w-[18px] h-[18px]"></i>
                 <input type="text" id="searchMember" placeholder="Cari member..." class="input">
@@ -598,11 +606,18 @@ function levelBadge(level){
 
 }
 
-async function loadCustomers(keyword = ""){
+async function loadCustomers(){
+
+    const params = new URLSearchParams();
+    const keyword = document.getElementById("searchMember").value.trim();
+    const level = document.getElementById("filterMemberLevel").value;
+
+    if (keyword) params.set("search", keyword);
+    if (level) params.set("level", level);
 
     const response = await fetch(
 
-        API + (keyword ? "?search=" + encodeURIComponent(keyword) : "")
+        API + (params.toString() ? "?" + params.toString() : "")
 
     );
 
@@ -807,8 +822,13 @@ memberTable.addEventListener("click", async function(e){
 });
 
 document.getElementById("searchMember")
-.addEventListener("keyup", function(){
-    loadCustomers(this.value);
+.addEventListener("input", function(){
+    loadCustomers();
+});
+
+document.getElementById("filterMemberLevel")
+.addEventListener("change", function(){
+    loadCustomers();
 });
 
 function closeEditModal(){

@@ -38,6 +38,12 @@ class CustomerController extends Controller
 
         }
 
+        $allowedLevels = ['Regular', 'Silver', 'Gold', 'Platinum'];
+
+        if (in_array($request->query('level'), $allowedLevels, true)) {
+            $query->where('member_level', $request->query('level'));
+        }
+
         return response()->json([
 
             'success'=>true,
