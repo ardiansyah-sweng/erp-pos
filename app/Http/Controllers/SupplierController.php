@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Supplier;
 use App\Services\SyncService;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SupplierController extends Controller
 {
@@ -20,6 +21,42 @@ class SupplierController extends Controller
         $suppliers = Supplier::orderBy('name')->get();
 
         return view('supplier.index', compact('suppliers'));
+    }
+
+    public function exportCsv(): StreamedResponse
+    {
+        $suppliers = Supplier::orderBy('name')->get();
+        $fileName = 'supplier-'.now()->format('Y-m-d').'.csv';
+
+        return response()->streamDownload(function () use ($suppliers) {
+            $output = fopen('php://output', 'w');
+
+            echo "\xEF\xBB\xBF";
+
+            fputcsv($output, [
+                'Nama Supplier',
+                'Kontak Person',
+                'Telepon',
+                'Email',
+                'Alamat',
+                'Status',
+            ]);
+
+            foreach ($suppliers as $supplier) {
+                fputcsv($output, [
+                    $supplier->name,
+                    $supplier->contact_person,
+                    $supplier->phone,
+                    $supplier->email,
+                    $supplier->address,
+                    $supplier->is_active ? 'Aktif' : 'Nonaktif',
+                ]);
+            }
+
+            fclose($output);
+        }, $fileName, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     public function store(Request $request)

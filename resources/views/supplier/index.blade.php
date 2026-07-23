@@ -58,7 +58,13 @@
 
 <!-- ===================== TOMBOL TAMBAH ===================== -->
 
-<div class="mt-6 flex justify-end">
+<div class="mt-6 flex flex-col justify-end gap-3 sm:flex-row">
+    <a
+        href="{{ route('suppliers.export') }}"
+        class="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-5 py-2.5 text-center text-sm font-semibold text-emerald-300 transition hover:border-emerald-400 hover:bg-emerald-500/20"
+    >
+        Export CSV
+    </a>
     <button
         id="btn-tambah-supplier"
         onclick="document.getElementById('modal-tambah').classList.remove('hidden')"
