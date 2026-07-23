@@ -15,11 +15,42 @@ class SupplierController extends Controller
         $this->syncService = $syncService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $suppliers = Supplier::orderBy('name')->get();
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', 'in:semua,aktif,nonaktif'],
+        ]);
 
-        return view('supplier.index', compact('suppliers'));
+        $search = trim((string) ($validated['search'] ?? ''));
+        $status = (string) ($validated['status'] ?? 'semua');
+
+        $suppliers = Supplier::query()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('contact_person', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->when($status === 'aktif', fn ($query) => $query->where('is_active', true))
+            ->when($status === 'nonaktif', fn ($query) => $query->where('is_active', false))
+            ->orderBy('name')
+            ->get();
+
+        $supplierSummary = [
+            'total' => Supplier::count(),
+            'aktif' => Supplier::where('is_active', true)->count(),
+            'nonaktif' => Supplier::where('is_active', false)->count(),
+        ];
+
+        return view('supplier.index', compact(
+            'suppliers',
+            'search',
+            'status',
+            'supplierSummary',
+        ));
     }
 
     public function store(Request $request)

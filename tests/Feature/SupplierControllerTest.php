@@ -59,6 +59,70 @@ class SupplierControllerTest extends TestCase
         $this->assertCount(0, $response->viewData('suppliers'));
     }
 
+    public function test_supplier_index_can_search_supplier_details(): void
+    {
+        Supplier::create([
+            'name' => 'PT Sumber Makmur',
+            'contact_person' => 'Budi',
+            'phone' => '08123456789',
+            'email' => 'budi@sumber.test',
+        ]);
+        Supplier::create([
+            'name' => 'CV Berkah',
+            'contact_person' => 'Siti',
+            'phone' => '08987654321',
+            'email' => 'siti@berkah.test',
+        ]);
+
+        $response = $this->get('/suppliers?search=081234');
+
+        $response->assertOk()
+            ->assertViewHas('search', '081234')
+            ->assertSee('PT Sumber Makmur')
+            ->assertDontSee('CV Berkah');
+    }
+
+    public function test_supplier_index_can_filter_by_active_status(): void
+    {
+        Supplier::create(['name' => 'Supplier Aktif', 'is_active' => true]);
+        Supplier::create(['name' => 'Supplier Nonaktif', 'is_active' => false]);
+
+        $response = $this->get('/suppliers?status=aktif');
+
+        $response->assertOk()
+            ->assertViewHas('status', 'aktif')
+            ->assertSee('Supplier Aktif')
+            ->assertDontSee('Supplier Nonaktif');
+    }
+
+    public function test_supplier_search_and_status_filter_can_be_combined(): void
+    {
+        Supplier::create(['name' => 'Maju Aktif', 'is_active' => true]);
+        Supplier::create(['name' => 'Maju Nonaktif', 'is_active' => false]);
+        Supplier::create(['name' => 'Berkah Aktif', 'is_active' => true]);
+
+        $response = $this->get('/suppliers?search=Maju&status=nonaktif');
+
+        $response->assertOk()
+            ->assertSee('Maju Nonaktif')
+            ->assertDontSee('Maju Aktif')
+            ->assertDontSee('Berkah Aktif');
+    }
+
+    public function test_supplier_summary_is_not_affected_by_filters(): void
+    {
+        Supplier::create(['name' => 'Supplier Aktif', 'is_active' => true]);
+        Supplier::create(['name' => 'Supplier Nonaktif', 'is_active' => false]);
+
+        $response = $this->get('/suppliers?status=aktif');
+
+        $response->assertViewHas('supplierSummary', [
+            'total' => 2,
+            'aktif' => 1,
+            'nonaktif' => 1,
+        ]);
+    }
+
     // =========================================================
     // STORE
     // =========================================================

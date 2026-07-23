@@ -5,11 +5,6 @@
 @section('breadcrumb', 'Supplier')
 
 @section('content')
-@php
-    $totalSupplier  = $suppliers->count();
-    $activeCount    = $suppliers->where('is_active', true)->count();
-    $inactiveCount  = $totalSupplier - $activeCount;
-@endphp
 
 <!-- ===================== HEADER BANNER ===================== -->
 
@@ -25,15 +20,15 @@
 
         <div class="flex items-center gap-6">
             <div class="text-right">
-                <p class="text-3xl font-bold text-white">{{ $totalSupplier }}</p>
+                <p class="text-3xl font-bold text-white">{{ $supplierSummary['total'] }}</p>
                 <p class="text-xs text-slate-400">Total Supplier</p>
             </div>
             <div class="text-right">
-                <p class="text-3xl font-bold text-emerald-400">{{ $activeCount }}</p>
+                <p class="text-3xl font-bold text-emerald-400">{{ $supplierSummary['aktif'] }}</p>
                 <p class="text-xs text-slate-400">Aktif</p>
             </div>
             <div class="text-right">
-                <p class="text-3xl font-bold text-rose-400">{{ $inactiveCount }}</p>
+                <p class="text-3xl font-bold text-rose-400">{{ $supplierSummary['nonaktif'] }}</p>
                 <p class="text-xs text-slate-400">Tidak Aktif</p>
             </div>
         </div>
@@ -56,13 +51,41 @@
     </div>
 @endif
 
-<!-- ===================== TOMBOL TAMBAH ===================== -->
+<!-- ===================== FILTER & TOMBOL TAMBAH ===================== -->
 
-<div class="mt-6 flex justify-end">
+<div class="mt-6 flex flex-col gap-3 rounded-2xl border border-slate-700 bg-[#0d1b2a] p-4 lg:flex-row lg:items-end">
+    <form method="GET" action="{{ route('suppliers.index') }}" class="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-end">
+        <label class="min-w-0 flex-1">
+            <span class="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-400">Cari Supplier</span>
+            <input
+                name="search"
+                value="{{ $search }}"
+                maxlength="100"
+                placeholder="Nama, PIC, telepon, atau email..."
+                class="w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-2.5 text-sm text-white outline-none focus:border-cyan-500"
+            >
+        </label>
+        <label>
+            <span class="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-400">Status</span>
+            <select name="status" class="w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-2.5 text-sm text-white outline-none focus:border-cyan-500 sm:w-40">
+                <option value="semua" @selected($status === 'semua')>Semua</option>
+                <option value="aktif" @selected($status === 'aktif')>Aktif</option>
+                <option value="nonaktif" @selected($status === 'nonaktif')>Nonaktif</option>
+            </select>
+        </label>
+        <button class="rounded-xl bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-400">
+            Terapkan
+        </button>
+        @if ($search !== '' || $status !== 'semua')
+            <a href="{{ route('suppliers.index') }}" class="rounded-xl border border-slate-600 px-5 py-2.5 text-center text-sm font-semibold text-slate-300 transition hover:border-slate-500 hover:text-white">
+                Reset
+            </a>
+        @endif
+    </form>
     <button
         id="btn-tambah-supplier"
         onclick="document.getElementById('modal-tambah').classList.remove('hidden')"
-        class="rounded-xl bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-cyan-400 transition"
+        class="rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-emerald-400"
     >
         + Tambah Supplier
     </button>
@@ -137,7 +160,11 @@
             @empty
                 <tr>
                     <td colspan="7" class="px-6 py-10 text-center text-slate-500">
-                        Belum ada data supplier. Klik <strong>Tambah Supplier</strong> untuk menambahkan.
+                        @if ($search !== '' || $status !== 'semua')
+                            Supplier tidak ditemukan. Coba ubah kata pencarian atau status.
+                        @else
+                            Belum ada data supplier. Klik <strong>Tambah Supplier</strong> untuk menambahkan.
+                        @endif
                     </td>
                 </tr>
             @endforelse
