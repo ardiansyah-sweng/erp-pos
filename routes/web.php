@@ -48,6 +48,7 @@ Route::get('/products/detail/{sku}', fn (string $sku) => view('products.show', [
 
 Route::get('/products/manage', [ProductController::class, 'manage'])->name('products.manage');
 Route::post('/products/manage', [ProductController::class, 'store'])->name('products.store');
+Route::get('/products/export/csv', [ProductController::class, 'exportCsv'])->name('products.export');
 Route::put('/products/manage/{product}', [ProductController::class, 'update'])->name('products.update');
 Route::delete('/products/manage/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 

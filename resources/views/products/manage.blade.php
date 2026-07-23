@@ -13,8 +13,9 @@
         <h1 class="text-3xl font-bold">Kelola Produk</h1>
         <p class="mt-2 text-sm text-slate-400">Tambah, edit, atau nonaktifkan produk.</p>
     </div>
-    <div class="flex items-center gap-3">
+    <div class="flex flex-wrap items-center gap-3">
         <a href="{{ route('pos.index') }}" class="rounded-xl border border-white/10 px-4 py-2 text-center text-sm font-semibold hover:border-cyan-400 hover:text-cyan-300">Kembali ke POS</a>
+        <a href="{{ route('products.export', ['search' => $search]) }}" class="rounded-xl border border-violet-400/40 px-4 py-2 text-center text-sm font-semibold text-violet-300 hover:border-violet-300 hover:text-violet-200">Export CSV</a>
         <button onclick="openCreateModal()" class="rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-300">+ Tambah Produk</button>
     </div>
 </div>
