@@ -56,7 +56,7 @@
                 <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/80">Dashboard</p>
                 <h1 class="mt-2 text-3xl font-semibold text-white md:text-4xl">Halo, {{ session('cashier_name', 'Admin') }}</h1>
                 <p class="mt-2 max-w-2xl text-sm text-slate-300">
-                    Ringkasan penjualan hari ini, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
+                    Ringkasan penjualan {{ $periodLabel }}
                 </p>
             </div>
             <div class="flex items-center gap-4">
@@ -71,6 +71,51 @@
         </div>
     </section>
 
+    {{-- PERIOD FILTER --}}
+    <section class="mb-6 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
+        <form method="GET" action="{{ route('dashboard') }}" class="grid gap-3 md:grid-cols-5 md:items-end">
+            <label class="md:col-span-1">
+                <span class="mb-1 block text-xs font-medium text-slate-400">Periode</span>
+                <select name="period" id="dashboardPeriod" class="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white outline-none focus:border-cyan-400">
+                    <option value="hari_ini" @selected($period === 'hari_ini')>Hari Ini</option>
+                    <option value="7_hari" @selected($period === '7_hari')>7 Hari Terakhir</option>
+                    <option value="30_hari" @selected($period === '30_hari')>30 Hari Terakhir</option>
+                    <option value="kustom" @selected($period === 'kustom')>Periode Khusus</option>
+                </select>
+            </label>
+            <label class="md:col-span-1">
+                <span class="mb-1 block text-xs font-medium text-slate-400">Tanggal Awal</span>
+                <input
+                    type="date"
+                    name="start_date"
+                    value="{{ request('start_date', $startDate->format('Y-m-d')) }}"
+                    class="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white outline-none focus:border-cyan-400"
+                >
+            </label>
+            <label class="md:col-span-1">
+                <span class="mb-1 block text-xs font-medium text-slate-400">Tanggal Akhir</span>
+                <input
+                    type="date"
+                    name="end_date"
+                    value="{{ request('end_date', $endDate->format('Y-m-d')) }}"
+                    class="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white outline-none focus:border-cyan-400"
+                >
+            </label>
+            <button class="rounded-xl bg-cyan-400 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
+                Terapkan
+            </button>
+            <a href="{{ route('dashboard') }}" class="rounded-xl border border-white/10 px-4 py-2.5 text-center text-sm font-semibold text-slate-300 transition hover:border-white/30 hover:text-white">
+                Reset
+            </a>
+        </form>
+
+        @if ($errors->has('start_date') || $errors->has('end_date'))
+            <div class="mt-3 rounded-xl border border-rose-400/30 bg-rose-400/10 px-4 py-2 text-sm text-rose-300">
+                {{ $errors->first('start_date') ?: $errors->first('end_date') }}
+            </div>
+        @endif
+    </section>
+
     {{-- SUMMARY CARDS --}}
     <section class="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
         <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
@@ -80,21 +125,21 @@
             <div class="mt-1 text-2xl font-bold text-emerald-300">
                 Rp{{ number_format($summary['revenue'], 0, ',', '.') }}
             </div>
-            <div class="mt-1 text-xs text-slate-500">Hari ini</div>
+            <div class="mt-1 text-xs text-slate-500">{{ ucfirst($periodLabel) }}</div>
         </div>
         <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
             <div class="flex items-center gap-2">
                 <span class="text-xs text-slate-400">Transaksi</span>
             </div>
             <div class="mt-1 text-2xl font-bold text-white">{{ $summary['count'] }}</div>
-            <div class="mt-1 text-xs text-slate-500">transaksi hari ini</div>
+            <div class="mt-1 text-xs text-slate-500">transaksi {{ $periodLabel }}</div>
         </div>
         <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
             <div class="flex items-center gap-2">
                 <span class="text-xs text-slate-400">Item Terjual</span>
             </div>
             <div class="mt-1 text-2xl font-bold text-cyan-300">{{ $summary['items'] }}</div>
-            <div class="mt-1 text-xs text-slate-500">unit terjual hari ini</div>
+            <div class="mt-1 text-xs text-slate-500">unit terjual {{ $periodLabel }}</div>
         </div>
         <div class="rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3">
             <div class="flex items-center gap-2">
@@ -109,7 +154,7 @@
     <section class="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
         <div class="lg:col-span-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
             <div class="mb-4 flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-white">Penjualan 7 Hari Terakhir</h2>
+                <h2 class="text-sm font-semibold text-white">Penjualan {{ ucfirst($periodLabel) }}</h2>
                 <a href="{{ route('reports.index') }}" class="text-xs text-cyan-300 hover:underline">Lihat detail →</a>
             </div>
             <div class="relative h-64">
