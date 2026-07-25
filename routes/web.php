@@ -9,6 +9,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnTransactionController;
@@ -104,6 +105,23 @@ Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])->
 Route::get('/discounts/active-for-products', [DiscountController::class, 'getActiveForProducts']);
 
 Route::get('/sync-histories', [SyncHistoryController::class, 'index'])->name('sync-histories.index');
+
+Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
