@@ -168,4 +168,33 @@ class CustomerController extends Controller
             'data' => $customers
         ]);
     }
+
+    public function memberTransactions($id)
+    {
+        $customer = Customer::find($id);
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Member tidak ditemukan'
+            ], 404);
+        }
+
+        $transactions = $customer->transactions()
+            ->with(['details.product', 'payments'])
+            ->latest()
+            ->get()
+            ->map(fn ($t) => [
+                'id'         => $t->id,
+                'code'       => 'TRX-' . str_pad((string) $t->id, 4, '0', STR_PAD_LEFT),
+                'date'       => $t->created_at?->translatedFormat('d M Y, H.i'),
+                'total'      => $t->total,
+                'items'      => $t->details->sum('quantity'),
+                'method'     => $t->payments->first()?->payment_method ?? 'cash',
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $transactions,
+        ]);
+    }
 }

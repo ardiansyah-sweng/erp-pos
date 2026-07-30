@@ -464,6 +464,25 @@
     </div>
 </div>
 
+<!-- ===================== MODAL RIWAYAT TRANSAKSI MEMBER ===================== -->
+<div id="historyModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 px-4 py-6 backdrop-blur-sm">
+    <div class="w-full max-w-xl rounded-3xl border border-white/10 bg-slate-950 p-6 text-slate-100 shadow-2xl shadow-black/40 max-h-[85vh] flex flex-col">
+        <div class="flex items-center justify-between gap-4 flex-shrink-0">
+            <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">Riwayat Transaksi</p>
+                <h2 id="historyModalName" class="mt-1 text-xl font-semibold text-white">-</h2>
+            </div>
+            <button id="closeHistoryModal" type="button" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-300 transition hover:text-white">
+                Tutup
+            </button>
+        </div>
+        <div id="historyStats" class="mt-4 grid grid-cols-3 gap-3 flex-shrink-0"></div>
+        <div id="historyList" class="mt-4 overflow-y-auto flex-1 space-y-2 pr-1">
+            <p class="py-6 text-center text-sm text-slate-500">Memuat...</p>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 
 <script>
@@ -675,6 +694,9 @@ async function loadCustomers(keyword = ""){
             <td class="text-slate-400">${joined}</td>
 
             <td class="text-right pr-4">
+                <button class="btn-history rounded-lg border border-slate-500/30 p-2 text-slate-300 hover:bg-slate-500/10 mr-1" data-id="${customer.id}" data-name="${customer.name}" title="Riwayat Transaksi">
+                    <i data-lucide="history" class="w-4 h-4"></i>
+                </button>
 
                 <button class="btn-edit rounded-lg border border-cyan-500/30 p-2 text-cyan-300 hover:bg-cyan-500/10" data-id="${customer.id}">
                     <i data-lucide="pencil" class="w-4 h-4"></i>
@@ -759,6 +781,7 @@ memberTable.addEventListener("click", async function(e){
 
     const editBtn = e.target.closest(".btn-edit");
     const deleteBtn = e.target.closest(".btn-delete");
+    const historyBtn = e.target.closest(".btn-history");
 
    if(editBtn){
 
@@ -802,6 +825,12 @@ memberTable.addEventListener("click", async function(e){
             alert(result.message ?? "Gagal menghapus member.");
         }
 
+    }
+
+    if(historyBtn){
+        const id   = historyBtn.dataset.id;
+        const name = historyBtn.dataset.name;
+        await openHistoryModal(id, name);
     }
 
 });
@@ -909,6 +938,108 @@ document.getElementById("closeEditModal").addEventListener("click", closeEditMod
 document.getElementById("cancelEditBtn").addEventListener("click", closeEditModal);
 document.getElementById("editModal").addEventListener("click", function(e) {
     if (e.target === this) closeEditModal();
+});
+
+// ===================== LOGIKA RIWAYAT TRANSAKSI =====================
+const historyModal     = document.getElementById("historyModal");
+const historyModalName = document.getElementById("historyModalName");
+const historyStats     = document.getElementById("historyStats");
+const historyList      = document.getElementById("historyList");
+
+function formatRupiah(amount) {
+    return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount || 0);
+}
+
+function methodBadge(method) {
+    const map = {
+        cash: { label: "Cash", color: "emerald" },
+        card: { label: "Kartu", color: "blue" },
+        e_wallet: { label: "E-Wallet", color: "purple" },
+        bank_transfer: { label: "Transfer", color: "amber" },
+        qris: { label: "QRIS", color: "cyan" },
+    };
+    const m = map[method] || { label: method, color: "slate" };
+    return `<span class="rounded-full bg-${m.color}-500/15 px-2 py-0.5 text-xs font-semibold text-${m.color}-300">${m.label}</span>`;
+}
+
+async function openHistoryModal(id, name) {
+    historyModalName.textContent = name;
+    historyList.innerHTML = `<p class="py-6 text-center text-sm text-slate-500">Memuat...</p>`;
+    historyStats.innerHTML = "";
+    
+    historyModal.classList.remove("hidden");
+    historyModal.classList.add("flex");
+    document.body.style.overflow = "hidden";
+    
+    try {
+        const res    = await fetch("/members/" + id + "/transactions");
+        const result = await res.json();
+        
+        if (!result.success) {
+            alert("Gagal memuat riwayat transaksi.");
+            return;
+        }
+        
+        const trx = result.data ?? [];
+        const totalBelanja  = trx.reduce((a, b) => a + Number(b.total), 0);
+        const totalItem     = trx.reduce((a, b) => a + Number(b.items), 0);
+        
+        historyStats.innerHTML = `
+            <div class="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-center">
+                <div class="text-xs text-slate-400">Transaksi</div>
+                <div class="mt-1 text-xl font-bold text-white">${trx.length}</div>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-center">
+                <div class="text-xs text-slate-400">Total Item</div>
+                <div class="mt-1 text-xl font-bold text-white">${totalItem}</div>
+            </div>
+            <div class="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-center">
+                <div class="text-xs text-slate-400">Total Belanja</div>
+                <div class="mt-1 text-lg font-bold text-emerald-300">${formatRupiah(totalBelanja)}</div>
+            </div>
+        `;
+        
+        if (trx.length === 0) {
+            historyList.innerHTML = `
+                <div class="rounded-2xl border border-dashed border-white/10 bg-slate-950/60 px-4 py-10 text-center text-sm text-slate-400">
+                    Member ini belum memiliki riwayat transaksi.
+                </div>
+            `;
+            return;
+        }
+        
+        historyList.innerHTML = trx.map(t => `
+            <div class="rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <div class="font-semibold text-white">${t.code}</div>
+                        <div class="mt-0.5 text-xs text-slate-400">${t.date ?? "-"}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-emerald-300">${formatRupiah(t.total)}</div>
+                        <div class="mt-0.5 flex items-center justify-end gap-2 text-xs text-slate-400">
+                            ${t.items} item &nbsp; ${methodBadge(t.method)}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join("");
+        
+    } catch (err) {
+        historyList.innerHTML = `<p class="py-6 text-center text-sm text-rose-400">Gagal memuat data.</p>`;
+        console.error(err);
+    }
+}
+
+function closeHistoryModal() {
+    historyModal.classList.add("hidden");
+    historyModal.classList.remove("flex");
+    document.body.style.overflow = "";
+}
+
+document.getElementById("closeHistoryModal").addEventListener("click", closeHistoryModal);
+historyModal.addEventListener("click", function(e) {
+    if (e.target === this) closeHistoryModal();
 });
 
 loadCustomers();
