@@ -12,17 +12,20 @@ use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\Customer;
 use App\Services\CustomerService;
+use App\Services\StockAdjustmentService;
 use App\Services\SyncService;
 
 class TransactionController extends Controller
 {
     protected $customerService;
     protected $syncService;
+    protected $stockAdjustmentService;
 
-    public function __construct(CustomerService $customerService, SyncService $syncService)
+    public function __construct(CustomerService $customerService, SyncService $syncService, StockAdjustmentService $stockAdjustmentService)
     {
         $this->customerService = $customerService;
         $this->syncService = $syncService;
+        $this->stockAdjustmentService = $stockAdjustmentService;
     }
 
     public function getTransaction(Request $request)
@@ -91,6 +94,7 @@ class TransactionController extends Controller
 
             fputcsv($handle, [
                 'Kode Transaksi',
+                'Status',
                 'Tanggal',
                 'Jam',
                 'Metode Pembayaran',
@@ -127,6 +131,7 @@ class TransactionController extends Controller
 
                     fputcsv($handle, [
                         $transactionCode,
+                        $transaction->status === 'void' ? 'Dibatalkan' : 'Selesai',
                         $transaction->created_at?->format('d/m/Y'),
                         $transaction->created_at?->format('H:i'),
                         $payment?->payment_method ?? 'cash',
@@ -343,6 +348,178 @@ class TransactionController extends Controller
                 'data' => $transaction
             ], 201);
         }
+
+    public function update(Request $request, Transaction $transaction)
+    {
+        if ($transaction->isVoided()) {
+            throw ValidationException::withMessages([
+                'transaction' => 'Transaksi yang sudah dibatalkan tidak dapat diedit.',
+            ]);
+        }
+
+        if ($transaction->returns()->exists()) {
+            throw ValidationException::withMessages([
+                'transaction' => 'Transaksi yang sudah memiliki retur tidak dapat diedit.',
+            ]);
+        }
+
+        $validated = $request->validate([
+            'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.detail_id' => ['required', 'integer'],
+            'items.*.quantity' => ['required', 'integer', 'min:0'],
+        ]);
+
+        $transaction = DB::transaction(function () use ($request, $transaction, $validated) {
+            $details = TransactionDetail::query()
+                ->where('transaction_id', $transaction->id)
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            $remainingLines = collect($validated['items'])->filter(fn ($item) => (int) $item['quantity'] > 0);
+
+            if ($remainingLines->isEmpty()) {
+                throw ValidationException::withMessages([
+                    'items' => 'Transaksi harus memiliki minimal satu item. Gunakan void untuk membatalkan seluruh transaksi.',
+                ]);
+            }
+
+            $lockedProducts = Product::query()
+                ->whereIn('id', $details->pluck('product_id'))
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            foreach ($validated['items'] as $item) {
+                $detail = $details->get($item['detail_id']);
+
+                if (!$detail) {
+                    throw ValidationException::withMessages([
+                        'items' => 'Item transaksi tidak ditemukan.',
+                    ]);
+                }
+
+                $newQuantity = (int) $item['quantity'];
+                $delta = $newQuantity - (int) $detail->quantity;
+                $product = $lockedProducts->get((int) $detail->product_id);
+
+                if ($delta > 0 && (!$product || $product->stock_quantity < $delta)) {
+                    $remaining = $product?->stock_quantity ?? 0;
+                    throw ValidationException::withMessages([
+                        'items' => "Stok {$product?->name} tidak cukup untuk menambah qty. Sisa stok {$remaining}.",
+                    ]);
+                }
+
+                if ($product) {
+                    $product->stock_quantity -= $delta;
+                    $product->save();
+                }
+
+                if ($newQuantity === 0) {
+                    $detail->delete();
+                } else {
+                    $detail->update([
+                        'quantity' => $newQuantity,
+                        'amount' => $newQuantity * $detail->price,
+                    ]);
+                }
+            }
+
+            $subtotal = (int) TransactionDetail::where('transaction_id', $transaction->id)->sum('amount');
+            $payment = $transaction->payments()->first();
+            $discountAmount = (int) ($payment?->discount_amount ?? 0);
+            $parkingFee = (int) ($payment?->parking_fee ?? 0);
+            $newTotal = max(0, $subtotal - $discountAmount) + $parkingFee;
+
+            $transaction->update([
+                'customer_id' => array_key_exists('customer_id', $validated) ? $validated['customer_id'] : $transaction->customer_id,
+                'total' => $newTotal,
+            ]);
+
+            if ($payment) {
+                $cashTendered = (int) $payment->cash_tendered;
+                $changeAmount = $payment->payment_method === 'cash' ? max(0, $cashTendered - $newTotal) : 0;
+
+                $payment->update([
+                    'amount' => $newTotal,
+                    'change_amount' => $changeAmount,
+                ]);
+            }
+
+            return $transaction->fresh(['details.product', 'payments']);
+        });
+
+        $this->syncService->log(
+            'Transaction',
+            'Berhasil',
+            "UPDATE - Transaksi berhasil diperbarui. ID: {$transaction->id}"
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaksi berhasil diperbarui.',
+                'data' => $transaction,
+            ]);
+        }
+
+        return back()->with('success', "Transaksi #{$transaction->id} berhasil diperbarui.");
+    }
+
+    public function void(Request $request, Transaction $transaction)
+    {
+        if (!$transaction->canBeVoided()) {
+            throw ValidationException::withMessages([
+                'transaction' => $transaction->isVoided()
+                    ? 'Transaksi ini sudah dibatalkan sebelumnya.'
+                    : 'Transaksi yang sudah memiliki retur tidak dapat dibatalkan.',
+            ]);
+        }
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $transactionCode = 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT);
+
+        DB::transaction(function () use ($transaction, $validated, $transactionCode) {
+            foreach ($transaction->details as $detail) {
+                if ($detail->product) {
+                    $this->stockAdjustmentService->adjustStock(
+                        $detail->product,
+                        (int) $detail->quantity,
+                        'in',
+                        "Void transaksi {$transactionCode}",
+                    );
+                }
+            }
+
+            $transaction->update([
+                'status' => 'void',
+                'void_reason' => $validated['reason'] ?? null,
+                'voided_at' => now(),
+            ]);
+
+            $transaction->payments()->update(['payment_status' => 'void']);
+        });
+
+        $this->syncService->log(
+            'Transaction',
+            'Berhasil',
+            "VOID - Transaksi dibatalkan. ID: {$transaction->id}. Alasan: " . ($validated['reason'] ?? '-')
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Transaksi {$transactionCode} berhasil dibatalkan.",
+                'data' => $transaction->fresh(),
+            ]);
+        }
+
+        return back()->with('success', "Transaksi {$transactionCode} berhasil dibatalkan.");
+    }
 
     public function salesNotes(Request $request)
     {

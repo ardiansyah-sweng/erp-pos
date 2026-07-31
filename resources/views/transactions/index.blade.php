@@ -74,6 +74,10 @@
         'code' => 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT),
         'created_at' => $transaction->created_at?->translatedFormat('d M Y, H.i'),
         'total' => $transaction->total,
+        'status' => $transaction->status,
+        'void_reason' => $transaction->void_reason,
+        'can_void' => $transaction->canBeVoided(),
+        'customer_id' => $transaction->customer_id,
         'payments' => $transaction->payments->map(fn ($payment) => [
             'payment_method' => $payment->payment_method,
             'discount_amount' => $payment->discount_amount,
@@ -86,6 +90,7 @@
             $returnedQuantity = $detail->returnDetails->sum('quantity');
 
             return [
+                'detail_id' => $detail->id,
                 'name' => $detail->product?->name ?? 'Produk #' . $detail->product_id,
                 'quantity' => $detail->quantity,
                 'returned_quantity' => $returnedQuantity,
@@ -182,10 +187,15 @@
                 $transactionCode = 'TRX-' . str_pad((string) $transaction->id, 4, '0', STR_PAD_LEFT);
             @endphp
 
-            <article data-show-transaction="{{ $transaction->id }}" role="button" tabindex="0" class="cursor-pointer rounded-2xl border border-white/10 bg-white/5 p-4 shadow-xl shadow-black/20 backdrop-blur-xl transition hover:border-cyan-400/50 hover:bg-white/10">
+            <article data-show-transaction="{{ $transaction->id }}" role="button" tabindex="0" class="cursor-pointer rounded-2xl border border-white/10 bg-white/5 p-4 shadow-xl shadow-black/20 backdrop-blur-xl transition hover:border-cyan-400/50 hover:bg-white/10 {{ $transaction->isVoided() ? 'opacity-60' : '' }}">
                 <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h2 class="text-lg font-semibold text-white">{{ $transactionCode }}</h2>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-lg font-semibold text-white">{{ $transactionCode }}</h2>
+                            @if ($transaction->isVoided())
+                                <span class="inline-flex rounded-full border border-red-400/30 bg-red-400/10 px-3 py-1 text-xs font-semibold text-red-200">Dibatalkan</span>
+                            @endif
+                        </div>
                         <p class="mt-1 text-sm text-slate-400">{{ $transaction->created_at?->translatedFormat('d M Y, H.i') }}</p>
                         @if ($returnedItemCount > 0)
                             <span class="mt-2 inline-flex rounded-full border border-rose-400/30 bg-rose-400/10 px-3 py-1 text-xs font-semibold text-rose-200">Retur {{ $returnedItemCount }} item</span>
@@ -217,6 +227,7 @@
                 <p class="text-xs uppercase tracking-[0.3em] text-cyan-300/70">Detail Transaksi</p>
                 <h2 id="transactionModalTitle" class="mt-1 text-xl font-semibold text-white">TRX-0000</h2>
                 <p id="transactionModalDate" class="mt-1 text-sm text-slate-400">-</p>
+                <p id="transactionModalVoidNote" class="mt-1 hidden text-sm text-red-300"></p>
             </div>
             <div class="flex items-center gap-2">
                 <a id="printReceiptBtn" href="#" target="_blank" class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-sm font-medium text-emerald-200 transition hover:bg-emerald-400/20">Cetak Struk</a>
@@ -230,6 +241,11 @@
                 <span>Total Belanja</span>
                 <span id="transactionModalTotal" class="text-lg font-semibold text-emerald-300">Rp0</span>
             </div>
+        </div>
+        <div id="transactionModalActions" class="mt-4 flex items-center gap-2">
+            <button id="editTransactionBtn" type="button" class="flex-1 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-sm font-medium text-cyan-200 transition hover:bg-cyan-400/20">Edit Qty</button>
+            <button id="saveTransactionBtn" type="button" class="hidden flex-1 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-sm font-medium text-emerald-200 transition hover:bg-emerald-400/20">Simpan Perubahan</button>
+            <button id="voidTransactionBtn" type="button" class="flex-1 rounded-full border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm font-medium text-red-200 transition hover:bg-red-400/20">Batalkan Transaksi</button>
         </div>
     </div>
 </div>
@@ -260,23 +276,81 @@
         '"': '&quot;',
         "'": '&#039;',
     }[character]));
+    const csrfToken = "{{ csrf_token() }}";
     const modal = document.getElementById('transactionModal');
     const modalTitle = document.getElementById('transactionModalTitle');
     const modalDate = document.getElementById('transactionModalDate');
+    const modalVoidNote = document.getElementById('transactionModalVoidNote');
     const modalItems = document.getElementById('transactionModalItems');
     const modalPayment = document.getElementById('transactionModalPayment');
     const modalTotal = document.getElementById('transactionModalTotal');
     const closeModalButton = document.getElementById('closeTransactionModal');
+    const editBtn = document.getElementById('editTransactionBtn');
+    const saveBtn = document.getElementById('saveTransactionBtn');
+    const voidBtn = document.getElementById('voidTransactionBtn');
+
+    let currentTransaction = null;
+    let isEditing = false;
 
     const closeModal = () => {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+        isEditing = false;
+    };
+
+    const renderItems = (transaction, editing) => {
+        if (!transaction.details.length) {
+            modalItems.innerHTML = '<div class="px-4 py-4 text-sm text-slate-400">Detail item tidak tersedia.</div>';
+            return;
+        }
+
+        modalItems.innerHTML = transaction.details.map((detail) => `
+            <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm" data-detail-row="${detail.detail_id}">
+                <div>
+                    <div class="font-medium text-white">${escapeHtml(detail.name)}</div>
+                    <div class="text-xs text-slate-400 flex items-center gap-2">
+                        ${editing
+                            ? `<input type="number" min="0" value="${detail.quantity}" data-qty-input="${detail.detail_id}" data-price="${detail.price}" class="w-16 rounded border border-white/10 bg-slate-900 px-2 py-1 text-white">`
+                            : `${detail.quantity}`
+                        } x ${formatMoney(detail.price)}
+                    </div>
+                    ${Number(detail.returned_quantity || 0) > 0 ? `
+                        <div class="mt-1 text-xs text-rose-300">Retur ${detail.returned_quantity} item, sisa ${detail.available_quantity} item</div>
+                    ` : ''}
+                </div>
+                <div class="font-semibold text-emerald-300" data-line-amount="${detail.detail_id}">${formatMoney(detail.amount)}</div>
+            </div>
+        `).join('');
+
+        if (editing) {
+            modalItems.querySelectorAll('[data-qty-input]').forEach((input) => {
+                input.addEventListener('input', () => {
+                    const price = Number(input.dataset.price || 0);
+                    const qty = Number(input.value || 0);
+                    const lineAmount = modalItems.querySelector(`[data-line-amount="${input.dataset.qtyInput}"]`);
+                    if (lineAmount) {
+                        lineAmount.textContent = formatMoney(price * qty);
+                    }
+                });
+            });
+        }
     };
 
     const openModal = (transaction) => {
+        currentTransaction = transaction;
+        isEditing = false;
+
         modalTitle.textContent = transaction.code;
         modalDate.textContent = transaction.created_at || '-';
         modalTotal.textContent = formatMoney(transaction.total);
+
+        if (transaction.status === 'void') {
+            modalVoidNote.textContent = 'Transaksi ini sudah dibatalkan' + (transaction.void_reason ? `: ${transaction.void_reason}` : '.');
+            modalVoidNote.classList.remove('hidden');
+        } else {
+            modalVoidNote.classList.add('hidden');
+        }
+
         modalPayment.innerHTML = transaction.payments.length ? transaction.payments.map((payment) => `
             <div>Metode: <span class="font-semibold text-white">${escapeHtml(payment.payment_method || 'cash')}</span></div>
             <div>Cash: <span class="font-semibold text-white">${formatMoney(payment.cash_tendered)}</span></div>
@@ -289,25 +363,88 @@
             <div>Diskon: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
             <div>Kembalian: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
         `;
-        modalItems.innerHTML = transaction.details.length ? transaction.details.map((detail) => `
-            <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm">
-                <div>
-                    <div class="font-medium text-white">${escapeHtml(detail.name)}</div>
-                    <div class="text-xs text-slate-400">${detail.quantity} x ${formatMoney(detail.price)}</div>
-                    ${Number(detail.returned_quantity || 0) > 0 ? `
-                        <div class="mt-1 text-xs text-rose-300">Retur ${detail.returned_quantity} item, sisa ${detail.available_quantity} item</div>
-                    ` : ''}
-                </div>
-                <div class="font-semibold text-emerald-300">${formatMoney(detail.amount)}</div>
-            </div>
-        `).join('') : `
-            <div class="px-4 py-4 text-sm text-slate-400">Detail item tidak tersedia.</div>
-        `;
+
+        renderItems(transaction, false);
+
+        editBtn.classList.toggle('hidden', !transaction.can_void);
+        voidBtn.classList.toggle('hidden', !transaction.can_void);
+        saveBtn.classList.add('hidden');
 
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.getElementById('printReceiptBtn').href = '/transactions/' + transaction.id + '/receipt';
     };
+
+    editBtn.addEventListener('click', () => {
+        if (!currentTransaction) return;
+        isEditing = true;
+        renderItems(currentTransaction, true);
+        editBtn.classList.add('hidden');
+        saveBtn.classList.remove('hidden');
+    });
+
+    saveBtn.addEventListener('click', async () => {
+        if (!currentTransaction) return;
+
+        const items = Array.from(modalItems.querySelectorAll('[data-qty-input]')).map((input) => ({
+            detail_id: Number(input.dataset.qtyInput),
+            quantity: Number(input.value || 0),
+        }));
+
+        try {
+            const response = await fetch(`/transactions/${currentTransaction.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify({ items }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.message || Object.values(result.errors || {}).flat().join('\n') || 'Gagal memperbarui transaksi.');
+                return;
+            }
+
+            window.location.reload();
+        } catch (error) {
+            alert('Terjadi kesalahan jaringan saat menyimpan perubahan.');
+        }
+    });
+
+    voidBtn.addEventListener('click', async () => {
+        if (!currentTransaction) return;
+
+        const reason = window.prompt('Alasan pembatalan transaksi (opsional):', '');
+        if (reason === null) return;
+        if (!window.confirm(`Batalkan transaksi ${currentTransaction.code}? Stok produk akan dikembalikan.`)) return;
+
+        try {
+            const response = await fetch(`/transactions/${currentTransaction.id}/void`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify({ reason }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.message || Object.values(result.errors || {}).flat().join('\n') || 'Gagal membatalkan transaksi.');
+                return;
+            }
+
+            window.location.reload();
+        } catch (error) {
+            alert('Terjadi kesalahan jaringan saat membatalkan transaksi.');
+        }
+    });
 
     document.querySelectorAll('[data-show-transaction]').forEach((button) => {
         const showTransaction = () => {

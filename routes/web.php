@@ -87,6 +87,8 @@ Route::post('/members/store', [CustomerController::class, 'store'])->name('membe
 Route::get('/members/{id}/transactions', [CustomerController::class, 'memberTransactions'])->name('members.transactions');
 Route::post('/pos/checkout', [TransactionController::class, 'checkout'])->name('pos.checkout');
 Route::post('/transaction/store', [TransactionController::class, 'store']);
+Route::put('/transactions/{transaction}', [TransactionController::class, 'update'])->name('transactions.update');
+Route::post('/transactions/{transaction}/void', [TransactionController::class, 'void'])->name('transactions.void');
 Route::get('/transactions/{id}/receipt', [ReceiptController::class, 'generate'])->name('transactions.receipt');
 Route::get('/sales-notes', [TransactionController::class, 'salesNotes'])->name('sales-notes');
 Route::get('/sales-notes/pdf', [TransactionController::class, 'downloadSalesReportPdf'])->name('sales-notes.pdf');

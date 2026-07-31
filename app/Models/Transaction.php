@@ -8,7 +8,21 @@ use App\Models\Customer;
 class Transaction extends Model
 {
     protected $table = 'transaction';
-    protected $fillable = ['customer_id', 'total', 'transaction_date', 'created_at', 'updated_at'];
+    protected $fillable = ['customer_id', 'total', 'transaction_date', 'status', 'void_reason', 'voided_at', 'created_at', 'updated_at'];
+
+    protected $casts = [
+        'voided_at' => 'datetime',
+    ];
+
+    public function isVoided(): bool
+    {
+        return $this->status === 'void';
+    }
+
+    public function canBeVoided(): bool
+    {
+        return !$this->isVoided() && !$this->returns()->exists();
+    }
 
     public function details()
     {
