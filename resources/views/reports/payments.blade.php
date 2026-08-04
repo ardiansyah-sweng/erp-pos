@@ -9,6 +9,10 @@
         $currency = fn ($value) => 'Rp ' . number_format((int) $value, 0, ',', '.');
         $periodLabels = ['today' => 'Hari ini', 'yesterday' => 'Kemarin', 'this_week' => 'Minggu ini', 'this_month' => 'Bulan ini', 'custom' => 'Rentang khusus'];
         $methodLabels = ['cash' => 'Tunai', 'card' => 'Kartu', 'e_wallet' => 'E-Wallet', 'bank_transfer' => 'Transfer Bank', 'qris' => 'QRIS'];
+        $methodColors = ['cash' => '#3987e5', 'card' => '#d95926', 'e_wallet' => '#199e70', 'bank_transfer' => '#c98500', 'qris' => '#d55181'];
+        $methodChartLabels = $methodSummary->map(fn ($m) => $methodLabels[$m->payment_method] ?? ucfirst(str_replace('_', ' ', $m->payment_method)));
+        $methodChartColors = $methodSummary->map(fn ($m) => $methodColors[$m->payment_method] ?? '#64748b');
+        $methodChartData = $methodSummary->pluck('percentage');
     @endphp
 
     <section class="relative overflow-hidden rounded-3xl border border-cyan-500/30 bg-gradient-to-br from-[#0a1628] via-[#0c1a2e] to-[#08111f] p-6 shadow-[0_0_40px_-10px_rgba(34,211,238,.25)] sm:p-8">
@@ -28,6 +32,7 @@
     <section class="mt-6 rounded-2xl border border-white/10 bg-[#0d1b2a] p-5">
         <form method="GET" action="{{ route('reports.payments') }}" class="grid gap-4 lg:grid-cols-12 lg:items-end">
             <div class="lg:col-span-3"><label for="filter" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Periode</label><select id="filter" name="filter" class="w-full rounded-xl border border-white/10 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-cyan-400">@foreach ($periodLabels as $value => $label)<option value="{{ $value }}" @selected($filter === $value)>{{ $label }}</option>@endforeach</select></div>
+            <div class="lg:col-span-3"><label for="payment_method" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Metode Pembayaran</label><select id="payment_method" name="payment_method" class="w-full rounded-xl border border-white/10 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-cyan-400"><option value="" @selected(!$paymentMethod)>Semua metode</option>@foreach ($methodLabels as $value => $label)<option value="{{ $value }}" @selected($paymentMethod === $value)>{{ $label }}</option>@endforeach</select></div>
             <div class="custom-date lg:col-span-3 {{ $filter === 'custom' ? '' : 'hidden' }}"><label for="start_date" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Mulai</label><input id="start_date" name="start_date" type="date" value="{{ $startDate }}" class="w-full rounded-xl border border-white/10 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-cyan-400"></div>
             <div class="custom-date lg:col-span-3 {{ $filter === 'custom' ? '' : 'hidden' }}"><label for="end_date" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500">Selesai</label><input id="end_date" name="end_date" type="date" value="{{ $endDate }}" class="w-full rounded-xl border border-white/10 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-cyan-400"></div>
             <div class="flex gap-2 lg:col-span-3 lg:justify-end"><a href="{{ route('reports.payments') }}" class="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-white/5">Reset</a><button type="submit" class="rounded-xl bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400">Terapkan</button></div>
@@ -47,13 +52,47 @@
             @if ($recentPayments->hasPages())<div class="border-t border-white/10 px-5 py-4">{{ $recentPayments->links() }}</div>@endif
         </section>
         <aside class="space-y-6">
-            <section class="rounded-2xl border border-white/10 bg-[#0d1b2a] p-5"><h2 class="font-bold text-white">Ringkasan Metode</h2><div class="mt-4 space-y-3">@forelse ($methodSummary as $method)<div class="rounded-xl border border-white/5 bg-slate-950/30 p-3"><div class="flex items-center justify-between gap-3"><p class="font-semibold text-white">{{ $methodLabels[$method->payment_method] ?? ucfirst(str_replace('_', ' ', $method->payment_method)) }}</p><span class="text-xs font-semibold text-cyan-300">{{ $currency($method->total_amount) }}</span></div><p class="mt-1 text-xs text-slate-500">{{ number_format($method->total_payments) }} pembayaran</p></div>@empty<p class="rounded-xl border border-dashed border-white/10 p-5 text-center text-sm text-slate-500">Belum ada data pembayaran.</p>@endforelse</div></section>
+            <section class="rounded-2xl border border-white/10 bg-[#0d1b2a] p-5">
+                <h2 class="font-bold text-white">Ringkasan Metode</h2>
+                @if ($methodSummary->isNotEmpty())<div class="mt-4"><canvas id="methodChart" height="200"></canvas></div>@endif
+                <div class="mt-4 space-y-3">@forelse ($methodSummary as $method)<div class="rounded-xl border border-white/5 bg-slate-950/30 p-3"><div class="flex items-center justify-between gap-3"><p class="flex items-center gap-2 font-semibold text-white"><span class="h-2.5 w-2.5 rounded-full" style="background-color: {{ $methodColors[$method->payment_method] ?? '#64748b' }}"></span>{{ $methodLabels[$method->payment_method] ?? ucfirst(str_replace('_', ' ', $method->payment_method)) }}</p><span class="text-xs font-semibold text-cyan-300">{{ $currency($method->total_amount) }}</span></div><p class="mt-1 text-xs text-slate-500">{{ number_format($method->total_payments) }} pembayaran &bull; {{ number_format($method->percentage, 2) }}%</p></div>@empty<p class="rounded-xl border border-dashed border-white/10 p-5 text-center text-sm text-slate-500">Belum ada data pembayaran.</p>@endforelse</div>
+            </section>
             <section class="rounded-2xl border border-white/10 bg-[#0d1b2a] p-5"><h2 class="font-bold text-white">Total Harian</h2><div class="mt-4 space-y-3">@forelse ($dailyPayments as $payment)<div class="flex items-center justify-between gap-3 border-b border-white/5 pb-3 last:border-0 last:pb-0"><span class="text-sm text-slate-400">{{ \Carbon\Carbon::parse($payment->payment_date)->format('d M Y') }}</span><span class="text-sm font-semibold text-emerald-300">{{ $currency($payment->total_amount) }}</span></div>@empty<p class="text-center text-sm text-slate-500">Belum ada total harian.</p>@endforelse</div></section>
         </aside>
     </div>
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @if ($methodSummary->isNotEmpty())
+        <script>
+            new Chart(document.getElementById('methodChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: @json($methodChartLabels),
+                    datasets: [{
+                        data: @json($methodChartData),
+                        backgroundColor: @json($methodChartColors),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', padding: 16, usePointStyle: true }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `${context.label}: ${context.parsed}%`
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+    @endif
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const filter = document.getElementById('filter');

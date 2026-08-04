@@ -16,11 +16,13 @@ class PaymentReportController extends Controller
             'filter' => ['nullable', Rule::in(['today', 'yesterday', 'this_week', 'this_month', 'custom'])],
             'start_date' => ['nullable', 'required_if:filter,custom', 'date'],
             'end_date' => ['nullable', 'required_if:filter,custom', 'date', 'after_or_equal:start_date'],
+            'payment_method' => ['nullable', Rule::in(['cash', 'card', 'e_wallet', 'bank_transfer', 'qris'])],
         ]);
 
         $filter = $validated['filter'] ?? 'this_month';
         $startDate = $validated['start_date'] ?? null;
         $endDate = $validated['end_date'] ?? null;
+        $paymentMethod = $validated['payment_method'] ?? null;
         [$start, $end] = $this->getDateRange($filter, $startDate, $endDate);
 
         $payments = DB::table('payment_details')
@@ -28,15 +30,26 @@ class PaymentReportController extends Controller
             ->whereBetween('transaction.created_at', [$start, $end])
             ->whereIn('payment_details.payment_status', ['paid', 'success']);
 
-        $summary = (clone $payments)
-            ->selectRaw('COUNT(*) as total_payments, COALESCE(SUM(payment_details.amount), 0) as total_amount, COALESCE(AVG(payment_details.amount), 0) as average_amount')
-            ->first();
-
         $methodSummary = (clone $payments)
             ->selectRaw('payment_details.payment_method, COUNT(*) as total_payments, COALESCE(SUM(payment_details.amount), 0) as total_amount')
             ->groupBy('payment_details.payment_method')
             ->orderByDesc('total_amount')
             ->get();
+
+        $methodTotalAmount = (float) $methodSummary->sum('total_amount');
+        foreach ($methodSummary as $method) {
+            $method->percentage = $methodTotalAmount > 0
+                ? round(($method->total_amount / $methodTotalAmount) * 100, 2)
+                : 0;
+        }
+
+        if ($paymentMethod) {
+            $payments->where('payment_details.payment_method', $paymentMethod);
+        }
+
+        $summary = (clone $payments)
+            ->selectRaw('COUNT(*) as total_payments, COALESCE(SUM(payment_details.amount), 0) as total_amount, COALESCE(AVG(payment_details.amount), 0) as average_amount')
+            ->first();
 
         $dailyPayments = (clone $payments)
             ->selectRaw('DATE(transaction.created_at) as payment_date, COALESCE(SUM(payment_details.amount), 0) as total_amount')
@@ -64,6 +77,7 @@ class PaymentReportController extends Controller
             'filter',
             'startDate',
             'endDate',
+            'paymentMethod',
             'start',
             'end',
         ));
