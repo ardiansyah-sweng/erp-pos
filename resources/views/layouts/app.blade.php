@@ -368,6 +368,11 @@
                 <span class="nav-text">Laporan Member</span>
             </a>
 
+            <a href="{{ route('reports.payments') }}" class="nav-link {{ request()->routeIs('reports.payments') ? 'active' : '' }}">
+                <i data-lucide="wallet-cards" class="w-[18px] h-[18px]"></i>
+                <span class="nav-text">Laporan Pembayaran</span>
+            </a>
+
             <p class="nav-section nav-text">Pengaturan</p>
 
             <a href="{{ route('settings.index') }}" class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
