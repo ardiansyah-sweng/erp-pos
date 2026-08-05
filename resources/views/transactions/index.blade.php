@@ -298,21 +298,14 @@
         isEditing = false;
     };
 
-    const renderItems = (transaction, editing) => {
-        if (!transaction.details.length) {
-            modalItems.innerHTML = '<div class="px-4 py-4 text-sm text-slate-400">Detail item tidak tersedia.</div>';
-            return;
-        }
-
-        modalItems.innerHTML = transaction.details.map((detail) => `
-            <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm" data-detail-row="${detail.detail_id}">
+    const renderEditableItems = (transaction) => {
+        modalItems.innerHTML = transaction.details.length ? transaction.details.map((detail) => `
+            <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm">
                 <div>
                     <div class="font-medium text-white">${escapeHtml(detail.name)}</div>
-                    <div class="text-xs text-slate-400 flex items-center gap-2">
-                        ${editing
-                            ? `<input type="number" min="0" value="${detail.quantity}" data-qty-input="${detail.detail_id}" data-price="${detail.price}" class="w-16 rounded border border-white/10 bg-slate-900 px-2 py-1 text-white">`
-                            : `${detail.quantity}`
-                        } x ${formatMoney(detail.price)}
+                    <div class="text-xs text-slate-400">
+                        <input type="number" min="0" value="${detail.quantity}" data-qty-input="${detail.detail_id}" data-price="${detail.price}" class="w-16 rounded border border-white/10 bg-slate-900 px-2 py-1 text-white">
+                        x ${formatMoney(detail.price)}
                     </div>
                     ${Number(detail.returned_quantity || 0) > 0 ? `
                         <div class="mt-1 text-xs text-rose-300">Retur ${detail.returned_quantity} item, sisa ${detail.available_quantity} item</div>
@@ -320,20 +313,20 @@
                 </div>
                 <div class="font-semibold text-emerald-300" data-line-amount="${detail.detail_id}">${formatMoney(detail.amount)}</div>
             </div>
-        `).join('');
+        `).join('') : `
+            <div class="px-4 py-4 text-sm text-slate-400">Detail item tidak tersedia.</div>
+        `;
 
-        if (editing) {
-            modalItems.querySelectorAll('[data-qty-input]').forEach((input) => {
-                input.addEventListener('input', () => {
-                    const price = Number(input.dataset.price || 0);
-                    const qty = Number(input.value || 0);
-                    const lineAmount = modalItems.querySelector(`[data-line-amount="${input.dataset.qtyInput}"]`);
-                    if (lineAmount) {
-                        lineAmount.textContent = formatMoney(price * qty);
-                    }
-                });
+        modalItems.querySelectorAll('[data-qty-input]').forEach((input) => {
+            input.addEventListener('input', () => {
+                const price = Number(input.dataset.price || 0);
+                const qty = Number(input.value || 0);
+                const lineAmount = modalItems.querySelector(`[data-line-amount="${input.dataset.qtyInput}"]`);
+                if (lineAmount) {
+                    lineAmount.textContent = formatMoney(price * qty);
+                }
             });
-        }
+        });
     };
 
     const openModal = (transaction) => {
@@ -364,7 +357,20 @@
             <div>Kembalian: <span class="font-semibold text-white">${formatMoney(0)}</span></div>
         `;
 
-        renderItems(transaction, false);
+        modalItems.innerHTML = transaction.details.length ? transaction.details.map((detail) => `
+            <div class="flex items-center justify-between gap-4 px-4 py-3 text-sm">
+                <div>
+                    <div class="font-medium text-white">${escapeHtml(detail.name)}</div>
+                    <div class="text-xs text-slate-400">${detail.quantity} x ${formatMoney(detail.price)}</div>
+                    ${Number(detail.returned_quantity || 0) > 0 ? `
+                        <div class="mt-1 text-xs text-rose-300">Retur ${detail.returned_quantity} item, sisa ${detail.available_quantity} item</div>
+                    ` : ''}
+                </div>
+                <div class="font-semibold text-emerald-300">${formatMoney(detail.amount)}</div>
+            </div>
+        `).join('') : `
+            <div class="px-4 py-4 text-sm text-slate-400">Detail item tidak tersedia.</div>
+        `;
 
         editBtn.classList.toggle('hidden', !transaction.can_void);
         voidBtn.classList.toggle('hidden', !transaction.can_void);
@@ -378,7 +384,7 @@
     editBtn.addEventListener('click', () => {
         if (!currentTransaction) return;
         isEditing = true;
-        renderItems(currentTransaction, true);
+        renderEditableItems(currentTransaction);
         editBtn.classList.add('hidden');
         saveBtn.classList.remove('hidden');
     });
