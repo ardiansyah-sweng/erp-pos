@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PosController;
+use App\Http\Controllers\PaymentReportController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingController;
@@ -96,6 +97,7 @@ Route::post('/returns/{transaction}', [ReturnTransactionController::class, 'stor
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('/reports/products', [ReportController::class, 'productReport'])->name('reports.products');
 Route::get('/reports/members', [ReportController::class, 'memberReport'])->name('reports.members');
+Route::get('/reports/payments', [PaymentReportController::class, 'index'])->name('reports.payments');
 Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
 Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
 Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
