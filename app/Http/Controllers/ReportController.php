@@ -64,6 +64,7 @@ class ReportController extends Controller
             ->count();
         $totalPoints = Customer::sum('points');
         $avgSpending = Customer::join('transaction', 'customers.id', '=', 'transaction.customer_id')
+            ->where('transaction.status', '!=', 'void')
             ->avg('transaction.total') ?? 0;
 
         // ── Distribusi Level (Pie) ──
@@ -151,6 +152,7 @@ class ReportController extends Controller
         $salesSubquery = DB::table('transaction_detail')
             ->join('transaction', 'transaction_detail.transaction_id', '=', 'transaction.id')
             ->whereBetween('transaction.created_at', [$start, $end])
+            ->where('transaction.status', '!=', 'void')
             ->selectRaw('transaction_detail.product_id')
             ->selectRaw('SUM(transaction_detail.quantity) as quantity_sold')
             ->selectRaw('SUM(transaction_detail.amount) as revenue')
@@ -269,6 +271,7 @@ class ReportController extends Controller
     private function getSummary($start, $end): array
     {
         $data = Transaction::whereBetween('created_at', [$start, $end])
+            ->where('status', '!=', 'void')
             ->selectRaw('
                 COUNT(*) as total_transaksi,
                 COALESCE(SUM(total), 0) as total_pendapatan,
@@ -289,6 +292,7 @@ class ReportController extends Controller
     private function getChartData($start, $end): array
     {
         $rows = Transaction::whereBetween('created_at', [$start, $end])
+            ->where('status', '!=', 'void')
             ->selectRaw('DATE(created_at) as tanggal, SUM(total) as jumlah')
             ->groupBy('tanggal')
             ->orderBy('tanggal')
@@ -310,6 +314,7 @@ class ReportController extends Controller
             ->join('transaction', 'transaction_detail.transaction_id', '=', 'transaction.id')
             ->join('products', 'transaction_detail.product_id', '=', 'products.id')
             ->whereBetween('transaction.created_at', [$start, $end])
+            ->where('transaction.status', '!=', 'void')
             ->selectRaw('
                 products.name as nama_produk,
                 SUM(transaction_detail.quantity) as total_qty,

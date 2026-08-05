@@ -22,13 +22,14 @@ class DashboardController extends Controller
 
         [$startDate, $endDate, $periodLabel] = $this->resolvePeriod($request, $period);
 
-        $transactionQuery = Transaction::whereBetween('created_at', [$startDate, $endDate]);
+        $transactionQuery = Transaction::whereBetween('created_at', [$startDate, $endDate])
+            ->where('status', '!=', 'void');
 
         $summary = [
             'revenue' => (clone $transactionQuery)->sum('total') ?: 0,
             'count' => (clone $transactionQuery)->count(),
             'items' => TransactionDetail::whereHas('transaction',
-                fn ($query) => $query->whereBetween('created_at', [$startDate, $endDate])
+                fn ($query) => $query->whereBetween('created_at', [$startDate, $endDate])->where('status', '!=', 'void')
             )->sum('quantity') ?: 0,
         ];
 
@@ -38,6 +39,7 @@ class DashboardController extends Controller
         ))->map(fn (Carbon $date) => $date->copy());
 
         $raw = Transaction::whereBetween('created_at', [$startDate, $endDate])
+            ->where('status', '!=', 'void')
             ->selectRaw('DATE(created_at) as tgl, SUM(total) as total')
             ->groupBy('tgl')
             ->orderBy('tgl')
@@ -57,6 +59,7 @@ class DashboardController extends Controller
                 SUM(transaction_detail.amount) as total_amount
             ')
             ->whereBetween('transaction.created_at', [$startDate, $endDate])
+            ->where('transaction.status', '!=', 'void')
             ->groupBy('products.id', 'products.name', 'products.sku')
             ->orderByDesc('total_qty')
             ->limit(5)
@@ -79,6 +82,7 @@ class DashboardController extends Controller
                 'date' => $transaction->created_at->format('d M'),
                 'items' => $transaction->details->sum('quantity'),
                 'total' => $transaction->total,
+                'status' => $transaction->status,
             ]);
 
         return view('dashboard.index', compact(
