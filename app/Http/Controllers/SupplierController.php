@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Supplier;
 use App\Services\SyncService;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SupplierController extends Controller
 {
@@ -97,5 +98,50 @@ class SupplierController extends Controller
 
         return redirect()->route('suppliers.index')
             ->with('success', 'Supplier berhasil dihapus.');
+    }
+
+    public function exportCsv(Request $request): StreamedResponse
+    {
+        $search = trim((string) $request->query('search', ''));
+
+        $suppliers = Supplier::query()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($innerQuery) use ($search) {
+                    $innerQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('contact_person', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('name')
+            ->get();
+
+        return response()->streamDownload(function () use ($suppliers): void {
+            $output = fopen('php://output', 'wb');
+            fwrite($output, "\xEF\xBB\xBF");
+            fputcsv($output, [
+                'Nama Supplier',
+                'Kontak Person',
+                'Telepon',
+                'Email',
+                'Alamat',
+                'Status',
+            ], ',', '"', '');
+
+            foreach ($suppliers as $supplier) {
+                fputcsv($output, [
+                    $supplier->name,
+                    $supplier->contact_person,
+                    $supplier->phone,
+                    $supplier->email,
+                    $supplier->address,
+                    $supplier->is_active ? 'Aktif' : 'Nonaktif',
+                ], ',', '"', '');
+            }
+
+            fclose($output);
+        }, 'supplier-'.now()->format('Y-m-d').'.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 }

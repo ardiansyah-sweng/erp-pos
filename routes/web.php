@@ -135,3 +135,4 @@ Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.
 Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
 Route::put('/suppliers/{id}', [SupplierController::class, 'update'])->name('suppliers.update');
 Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
+Route::get('/suppliers/export/csv', [SupplierController::class, 'exportCsv'])->name('suppliers.export');
