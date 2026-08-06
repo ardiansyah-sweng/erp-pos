@@ -96,6 +96,7 @@ Route::post('/returns/{transaction}', [ReturnTransactionController::class, 'stor
 
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('/reports/products', [ReportController::class, 'productReport'])->name('reports.products');
+Route::get('/reports/products/pdf', [ReportController::class, 'productReportPdf'])->name('reports.products.pdf');
 Route::get('/reports/members', [ReportController::class, 'memberReport'])->name('reports.members');
 Route::get('/reports/payments', [PaymentReportController::class, 'index'])->name('reports.payments');
 Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile.show');
