@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Transaction;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -219,6 +220,82 @@ class ReportController extends Controller
             'start',
             'end',
         ));
+    }
+
+    /**
+     * Export laporan stok produk ke PDF, memakai filter yang sama dengan productReport().
+     */
+    public function productReportPdf(Request $request)
+    {
+        $validated = $request->validate([
+            'filter' => ['nullable', Rule::in(['today', 'yesterday', 'this_week', 'this_month', 'custom'])],
+            'start_date' => ['nullable', 'required_if:filter,custom', 'date'],
+            'end_date' => ['nullable', 'required_if:filter,custom', 'date', 'after_or_equal:start_date'],
+            'category_id' => ['nullable', 'integer', 'exists:categories,id'],
+            'stock_status' => ['nullable', Rule::in(['aman', 'menipis', 'habis'])],
+            'search' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $filter = $validated['filter'] ?? 'this_month';
+        $startDate = $validated['start_date'] ?? null;
+        $endDate = $validated['end_date'] ?? null;
+        $categoryId = $validated['category_id'] ?? null;
+        $stockStatus = $validated['stock_status'] ?? null;
+        $search = trim($validated['search'] ?? '');
+
+        [$start, $end] = $this->getDateRange($filter, $startDate, $endDate);
+
+        $salesSubquery = DB::table('transaction_detail')
+            ->join('transaction', 'transaction_detail.transaction_id', '=', 'transaction.id')
+            ->whereBetween('transaction.created_at', [$start, $end])
+            ->where('transaction.status', '!=', 'void')
+            ->selectRaw('transaction_detail.product_id')
+            ->selectRaw('SUM(transaction_detail.quantity) as quantity_sold')
+            ->selectRaw('SUM(transaction_detail.amount) as revenue')
+            ->groupBy('transaction_detail.product_id');
+
+        $productsQuery = Product::query()
+            ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+            ->leftJoinSub($salesSubquery, 'sales', function ($join) {
+                $join->on('products.id', '=', 'sales.product_id');
+            })
+            ->select('products.*')
+            ->selectRaw('categories.name as category_name')
+            ->selectRaw('COALESCE(sales.quantity_sold, 0) as quantity_sold')
+            ->selectRaw('COALESCE(sales.revenue, 0) as revenue');
+
+        $this->applyProductFilters($productsQuery, $categoryId, $stockStatus, $search);
+
+        $products = $productsQuery
+            ->orderByDesc('quantity_sold')
+            ->orderBy('products.name')
+            ->get();
+
+        $summary = [
+            'total_products' => Product::count(),
+            'active_products' => Product::where('is_active', true)->count(),
+            'low_stock_products' => Product::where('stock_quantity', '>', 0)
+                ->whereColumn('stock_quantity', '<=', 'min_stock')
+                ->count(),
+            'out_of_stock_products' => Product::where('stock_quantity', '<=', 0)->count(),
+            'quantity_sold' => (int) DB::query()->fromSub($salesSubquery, 'sales_summary')->sum('quantity_sold'),
+            'revenue' => (int) DB::query()->fromSub($salesSubquery, 'sales_summary')->sum('revenue'),
+        ];
+
+        $fileName = 'laporan-stok-produk';
+        if ($startDate && $endDate) {
+            $fileName .= '-' . $startDate . '-to-' . $endDate;
+        }
+
+        $pdf = Pdf::loadView('reports.products-pdf', compact(
+            'products',
+            'summary',
+            'filter',
+            'start',
+            'end',
+        ))->setPaper('a4', 'landscape');
+
+        return $pdf->download($fileName . '.pdf');
     }
 
     /**
