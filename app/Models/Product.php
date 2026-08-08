@@ -27,6 +27,9 @@ class Product extends Model
         'min_stock' => 'integer',
     ];
 
+    public function transactionDetails()
+    {
+        return $this->hasMany(TransactionDetail::class, 'product_id', 'sku');
     public function category()
     {
         return $this->belongsTo(Category::class);
