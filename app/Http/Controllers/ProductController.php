@@ -201,4 +201,19 @@ class ProductController extends Controller
             "UPDATE - Produk berhasil {$status}: {$product->name}");
         return Redirect::route('products.manage')->with('success', "Produk berhasil {$status}.");
     }
+    
+    public function getLowStock()
+    {
+        $products = Product::where('is_active', true)
+            ->whereColumn('stock_quantity', '<=', 'min_stock')
+            ->orderBy('stock_quantity')
+            ->get(['id', 'name', 'sku', 'stock_quantity', 'min_stock', 'unit']);
+
+        return response()->json([
+            'success' => true,
+            'count'   => $products->count(),
+            'data'    => $products,
+        ]);
+    }
+}
 }
